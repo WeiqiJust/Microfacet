@@ -42,7 +42,7 @@ void batch_area_sampler::init(D3D_dev_handle *pdev,
 	float	z_near= 1e-5*radius, 
 			z_far = radius*5;
 	/*****************test code***********/
-	projection_orthogonal(matProj, radius, radius, z_near, z_far);//Weiqi: change orthognoal projection
+	projection_orthogonal(matProj, radius, radius, z_near, z_far);//Weiqi: change orthogonal projection
 	///projection_orthogonal(matProj, radius, radius, z_near, z_far);
 }
 

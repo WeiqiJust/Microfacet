@@ -24,10 +24,9 @@ float compute_BRDF_wo(float *result,
 	Vector3		center(block_x+0.5, block_y+0.5, 0), 
 				vwo(wo.x, wo.y, wo.z);
 	matrix_lookat(matView, center+vwo*3.0, center, Vector3(0, 1, 0));
-	double	z_near= 1e-5*GROUND_TRUTH_SCENE_R, 
+	float	z_near= 1e-5*GROUND_TRUTH_SCENE_R, 
 			z_far = 5.0;
-	projection_orthogonal(matProj, 
-		(double)GROUND_TRUTH_SCENE_R, (double)GROUND_TRUTH_SCENE_R, -z_near, -z_far);
+	projection_orthogonal(matProj, GROUND_TRUTH_SCENE_R, GROUND_TRUTH_SCENE_R, z_near, z_far);
 	matProjView = matProj*matView;
 
 	float clear_color[4] = {0, 0, 0, 0};

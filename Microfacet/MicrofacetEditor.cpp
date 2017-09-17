@@ -232,8 +232,8 @@ void MicrofacetEditor::init_dirs()
 	vismask_sampler.init(gpu_env.get_handle(), vis_dir.size());
 	vismask_sampler.set_views(vis_dir);
 
-	avis_sampler.init(mff_singleton::get()->get_handle(), //512, 2.5, 
-		256, 2.0,
+	avis_sampler.init(mff_singleton::get()->get_handle(), 512, 2.5, 
+		//256, 2.0,
 		(r_shader_area*)mff_singleton::get()->get_shader("area"));
 }
 
@@ -248,8 +248,7 @@ void MicrofacetEditor::load_scene()
 			p_background.push_back((base_obj*)v.ptr);
 	}
 	*/
-	//int attr = VERT_ATTR_POSITION;
-	//int attr = VERT_ATTR_POSITION | VERT_ATTR_NORMAL | VERT_ATTR_TANGENT | VERT_ATTR_UV1;
+
 	generate_mesh("T:/Microfacet/data/teapot.obj", Identity());
 	p_base->convert_to_instance(pi_base, M_ID_BASE_OBJ, gpu_env.get_handle());
 	cout << "position " << pi_base->get_geom()->get_mesh()->vertices.size() << " normal " << pi_base->get_geom()->get_mesh()->normals.size()
@@ -280,7 +279,7 @@ void MicrofacetEditor::load_scene()
 
 	//izrt.var_get("envmap", v);
 	//p_skybox = (r_skybox*)v.ptr;
-	generate_skybox("T:/Microfacet/data/cube_texture/white", 2, Vector3(1.0f), 2, Identity());
+	generate_skybox("T:/Microfacet/data/cube_texture/cube", 2, Vector3(1.0f), 2, Identity());
 	p_skybox->init(render_width, render_height, gpu_env.get_handle());
 	p_skybox->config_scene(scene_center, scene_radius);
 
@@ -350,20 +349,29 @@ void MicrofacetEditor::load_scene()
 
 	//final_details[details->compute_idx(0, 0)].BRDF_ref = BRDF_factory::produce("BlinnPhong", "10");
 
-
+	
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_0");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_1");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_2");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_3");
-	//generate_init_matr(Vector3(0.5f), "Lambert", "matr_distr_0");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_binder_0");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_binder_1");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_binder_2");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_binder_3");
 
+	/*
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_distr_0");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_distr_1");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_distr_2");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_distr_3");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_binder_0");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_binder_1");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_binder_2");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_binder_3");*/
+
 	set_num_shadows(32);
-	set_light_inten(50);
-	set_vis_light_inten(50);
+	set_light_inten(55);
+	set_vis_light_inten(65);
 	tball_distant.init(Vector3(0.0f, 0.0f, 2.0f), Vector3(0.0f));
 	set_vis_mode();
 
@@ -599,7 +607,7 @@ void MicrofacetEditor::render_buffer()
 	/*************test code******************/
 	/////matrix_lookat(t->matView, param.eye, param.lookat, Vector3(0, 1, 0));
 	/*************test code******************/
-	matrix_lookat(t->matView, Vector3(0, 0, -10), Vector3(0.0f, 0.0f, 0.0f), Vector3(0, 1, 0));
+	matrix_lookat(t->matView, Vector3(0, 0, 10), Vector3(0.0f, 0.0f, 0.0f), Vector3(0, 1, 0));
 	/*
 	for (int i = 0; i < 4; i++)
 	{ 
@@ -703,7 +711,7 @@ void MicrofacetEditor::compute_ground_truth_BRDF()
 
 void MicrofacetEditor::render_ground_truth()
 {
-	render_ground_truth_task(TASK_TYPE_RENDER_REF_BRDF);// TASK_TYPE_GROUND_TRUTH);
+	render_ground_truth_task(TASK_TYPE_GROUND_TRUTH);
 }
 
 void MicrofacetEditor::render_ground_truth_task(const int type, const int num_levels)

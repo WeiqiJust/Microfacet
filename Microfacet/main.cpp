@@ -10,7 +10,7 @@ int main()
 	cout << "Main::after compute mifrofacet" << endl;
 	
 
-	m_editor.render_buffer();
+	//m_editor.render_buffer();
 	cout << "Main::after render buffer" << endl;
 	//m_editor.render();
 	//m_editor.update_render();

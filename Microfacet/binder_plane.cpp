@@ -42,6 +42,7 @@ void binder_plane::generate_geom(const float density, const int num_area_hits_sc
 			plane.faces.push_back(triangle_face(v3, v2, v1));
 		}
 	g->load(&plane);
+	cout << "binder_plane geom attr = " << g->get_mesh()->get_attr() << endl;
 	mff_singleton::get()->assign_geom("bd_plane", shared_ptr<r_geometry>(g));
 
 	//prcessing geom_hierarchy

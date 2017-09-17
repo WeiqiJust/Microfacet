@@ -235,6 +235,9 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 	//---------  sphere  ---------
 	p_geom = new r_geometry(pdev);
 	p_geom->load("T:/Microfacet/data/sphere.obj");
+	p_geom->get_mesh()->uvs.clear();
+	p_geom->get_mesh()->tangents.clear();
+	p_geom->get_mesh()->set_attribute(VERT_ATTR_POSITION | VERT_ATTR_NORMAL);
 	//"D:/temp/Microfacet/axis.obj"
 	lib_geom.add("sphere_200", shared_ptr<r_geometry>(p_geom));
 
@@ -245,6 +248,9 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 		Matrix4 mat;
 		Translate(Vector3(0.0, 0.0, 0.5));
 		p_geom->load( "T:/Microfacet/data/rod.obj", &mat);
+		p_geom->get_mesh()->uvs.clear();
+		p_geom->get_mesh()->tangents.clear();
+		p_geom->get_mesh()->set_attribute(VERT_ATTR_POSITION | VERT_ATTR_NORMAL);
 		//p_geom->get_mesh()->compute_face_normal();
 		//std::vector<float> face_scalar;
 		//face_scalar.resize(p_geom->get_mesh()->num_faces(), 1.0f);

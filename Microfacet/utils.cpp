@@ -47,7 +47,7 @@ void projection_orthogonal(Matrix4& mat, float viewWidth, float viewHeight, floa
 				   0, 0, m22, m23,
 				   0, 0,  0,  1 );
 	*/
-	XMMATRIX g_ProjMatrix = XMMatrixOrthographicLH(viewWidth, viewHeight, znear, zfar);
+	XMMATRIX g_ProjMatrix = XMMatrixOrthographicRH(viewWidth, viewHeight, znear, zfar);
 	g_ProjMatrix = XMMatrixTranspose(g_ProjMatrix);
 	XMMATRIX_to_matrix(mat, g_ProjMatrix);
 }
@@ -64,7 +64,7 @@ void projection_perspective(Matrix4& mat, float FovAngleY, float height, float w
 		0, 0, m22, m23,
 		0, 0, -1, 0);
 	*/
-	XMMATRIX g_ProjMatrix = XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(FovAngleY), width/height, znear, zfar);
+	XMMATRIX g_ProjMatrix = XMMatrixPerspectiveFovRH(DirectX::XMConvertToRadians(FovAngleY), width/height, znear, zfar);
 	g_ProjMatrix = XMMatrixTranspose(g_ProjMatrix);
 	XMMATRIX_to_matrix(mat, g_ProjMatrix);
 }
@@ -101,7 +101,7 @@ void matrix_lookat(Matrix4 &m, const Vector3 &eye, const Vector3 &lookat, const 
 	XMVECTOR eyePosition = XMVectorSet(eye.x, eye.y, eye.z, 1);
 	XMVECTOR focusPoint = XMVectorSet(lookat.x, lookat.y, lookat.z, 1);
 	XMVECTOR upDirection = XMVectorSet(up.x, up.y, up.z, 0);
-	XMMATRIX g_ViewMatrix = XMMatrixLookAtLH(eyePosition, focusPoint, upDirection);
+	XMMATRIX g_ViewMatrix = XMMatrixLookAtRH(eyePosition, focusPoint, upDirection);
 	g_ViewMatrix = XMMatrixTranspose(g_ViewMatrix);
 	XMMATRIX_to_matrix(m, g_ViewMatrix);
 
