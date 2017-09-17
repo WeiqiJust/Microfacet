@@ -1,0 +1,2 @@
+#define VIS_SHADOW_MAP_SIZE 512
+#define NUM_VIS_SAMPLES 8

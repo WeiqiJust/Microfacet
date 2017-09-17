@@ -1,0 +1,17 @@
+lib_matr_id.add("matr_lambertian_0",	MATR_LAMBERTIAN_0);
+lib_matr_id.add("matr_sphere_0",		MATR_SPHERE_0);
+lib_matr_id.add("matr_rod_0",			MATR_ROD_0);
+lib_matr_id.add("matr_plane_0",			MATR_PLANE_0);
+
+lib_matr_id.add("matr_distr_0",			MATR_DISTR_0);
+lib_matr_id.add("matr_distr_1",			MATR_DISTR_1);
+lib_matr_id.add("matr_distr_2",			MATR_DISTR_2);
+lib_matr_id.add("matr_distr_3",			MATR_DISTR_3);
+
+lib_matr_id.add("matr_binder_0",		MATR_BINDER_0);
+lib_matr_id.add("matr_binder_1",		MATR_BINDER_1);
+lib_matr_id.add("matr_binder_2",		MATR_BINDER_2);
+lib_matr_id.add("matr_binder_3",		MATR_BINDER_3);
+
+lib_matr_id.add("ward_03",		BASIS_MATR_WARD_0_30);
+lib_matr_id.add("Lambert",		BASIS_MATR_LAMBERTIAN);
