@@ -259,6 +259,7 @@ void worker_microfacet::work_task_buffer(task_microfacet *t_org)
 	//tm.update();
 	//printf_s("#2 : %7.4f ", tm.elapsed_time());
 	printf_s("work_task_buffer #2 \n");
+	
 //**************************
 //#3 : Render background
 //**************************

@@ -279,7 +279,7 @@ void MicrofacetEditor::load_scene()
 
 	//izrt.var_get("envmap", v);
 	//p_skybox = (r_skybox*)v.ptr;
-	generate_skybox("T:/Microfacet/data/cube_texture/cube", 2, Vector3(1.0f), 2, Identity());
+	generate_skybox("T:/Microfacet/data/cube_texture/white", 2, Vector3(1.0f), 2, Identity());
 	p_skybox->init(render_width, render_height, gpu_env.get_handle());
 	p_skybox->config_scene(scene_center, scene_radius);
 
@@ -711,7 +711,7 @@ void MicrofacetEditor::compute_ground_truth_BRDF()
 
 void MicrofacetEditor::render_ground_truth()
 {
-	render_ground_truth_task(TASK_TYPE_GROUND_TRUTH);
+	render_ground_truth_task(TASK_TYPE_DEBUG_RAYTRACE);// TASK_TYPE_GROUND_TRUTH);
 }
 
 void MicrofacetEditor::render_ground_truth_task(const int type, const int num_levels)

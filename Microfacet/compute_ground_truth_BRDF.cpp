@@ -66,6 +66,7 @@ float compute_BRDF_wo(float *result,
 
 	p_screen->get_rt(0)->get_result((BYTE*)p_id, 4);
 	p_screen->get_rt(1)->get_result((BYTE*)p_normal, 8);
+
 	for (int i = 0; i < DIM_GROUND_TRUTH*DIM_GROUND_TRUTH; i++)
 		if (p_id[i] != 0.0f)
 			addr.push_back(i);
