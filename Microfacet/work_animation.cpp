@@ -1,7 +1,7 @@
 #include "worker.h"
 
 
-#define PREFIX	"T:/Microfacet/frames/"
+#define PREFIX	"T:/Microfacet/animation/"
 
 #include "Magick++.h"
 using namespace Magick;
@@ -102,9 +102,11 @@ void worker_microfacet::work_task_animation(task_microfacet *t_org)
 			b.x1 = t_org->width;
 			b.y1 = t_org->height;
 			work_task_render_block(&tm, &b);
-
+			
 			sprintf_s(filename, "%sours_%04d.png", PREFIX, frame);
+			
 			save_image(filename, t.result, t_org->width, t_org->height);
+
 		}
 
 		//Ground-truth

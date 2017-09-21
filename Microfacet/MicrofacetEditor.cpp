@@ -84,9 +84,6 @@ visual_x(0), visual_y(0)
 
 	init_dirs();
 	load_scene();
-	vector<sample_group> samples;
-	//vismask_sampler.compute_vis_masks(samples, 0*NUM_VIS_PER_BATCH, NUM_VIS_PER_BATCH);
-	//cout << "after constructe" << endl;
 
 	//timer = new QTimer(this);
 	//connect_actions();
@@ -141,7 +138,7 @@ void MicrofacetEditor::init_dirs()
 {
 	random rng;
 	Vector2 rv_offset;
-	rv_offset = Vector2(rng.get_random_float(), rng.get_random_float());
+	rv_offset = Vector2(rng.get_random_float_open(), rng.get_random_float_open());
 	//uniform_hemi_direction_3d<float> prob;
 
 	////vis_dir
@@ -216,12 +213,13 @@ void MicrofacetEditor::init_dirs()
 	//}
 
 	//init samplers
-	//std::vector<Vector3> previs_dir;
-	//previs_dir.resize(NUM_PREVIS_DIR);
-	//for (int i = 0; i < NUM_PREVIS_DIR; i++)
-	//	previs_dir[i] = vis_dir[i];
-	//vispt_sampler.init(gpu_env.get_handle(), previs_dir.size());
-	//vispt_sampler.set_views(previs_dir);
+	/*
+	std::vector<Vector3> previs_dir;
+	previs_dir.resize(NUM_PREVIS_DIR);
+	for (int i = 0; i < NUM_PREVIS_DIR; i++)
+		previs_dir[i] = vis_dir[i];
+	vispt_sampler.init(gpu_env.get_handle(), previs_dir.size());
+	vispt_sampler.set_views(previs_dir);*/
 
 	std::vector<Vector3> vis_dir;
 	for (int i = 0; i < fr_vis.get_n().size(); i++)
@@ -249,12 +247,13 @@ void MicrofacetEditor::load_scene()
 	}
 	*/
 
-	generate_mesh("T:/Microfacet/data/teapot.obj", Identity());
+	generate_mesh("T:/Microfacet/data/quad.obj", Identity());
 	p_base->convert_to_instance(pi_base, M_ID_BASE_OBJ, gpu_env.get_handle());
 	cout << "position " << pi_base->get_geom()->get_mesh()->vertices.size() << " normal " << pi_base->get_geom()->get_mesh()->normals.size()
 		<< " tangent " << pi_base->get_geom()->get_mesh()->tangents.size() << " uv " << pi_base->get_geom()->get_mesh()->uvs.size() << endl;
 	//for (int i = 0; i <pi_base->get_geom()->get_mesh()->get_uv_number(); i++)
-		//cout << "position " << pi_base->get_geom()->get_mesh()->vertices[i] << " normal " << pi_base->get_geom()->get_mesh()->normals[i] << " tangent " << pi_base->get_geom()->get_mesh()->tangents[i] << " uv " << pi_base->get_geom()->get_mesh()->uvs[i] << endl;
+		//cout << "position " << pi_base->get_geom()->get_mesh()->vertices[i] << " normal " << pi_base->get_geom()->get_mesh()->normals[i] 
+		//<< " tangent " << pi_base->get_geom()->get_mesh()->tangents[i] << " uv " << pi_base->get_geom()->get_mesh()->uvs[i] << endl;
 	p_base->convert_to_instance(pi_base_vis, M_ID_OBJ_VIS, gpu_env.get_handle());
 	//p_base->mesh.uvs.clear();
 	//p_base->mesh.normals.clear();
@@ -291,8 +290,9 @@ void MicrofacetEditor::load_scene()
 		param_grid.x_space = 0.25;// 0.25;//10;//*3;
 		param_grid.y_space = 0.25;
 		param_grid.z_space =  0.25;//10;//*3;
-		param_grid.scale = 0.1;// 0.1;//0.004;
-		param_grid.height = 0.1;
+		param_grid.scale = 0.01;// 0.1;//0.004;
+		param_grid.height = 0.01;
+		param_grid.name = "grid";
 		distr->set_param(param_grid);
 
 		/*
@@ -301,6 +301,7 @@ void MicrofacetEditor::load_scene()
 		param.scale		= 0.01;
 		param.density	= 10;
 		param.randomness= 0.1;
+		param_grid.name = "rod";
 		distr->set_param(param);*/
 
 		/*
@@ -310,6 +311,7 @@ void MicrofacetEditor::load_scene()
 		param.scale		= 0.3;
 		param.density	= 5;
 		param.relative_height_density  = 1;
+		param_grid.name = "ld3d";
 		distr->set_param(param);*/
 		
 
@@ -317,15 +319,19 @@ void MicrofacetEditor::load_scene()
 		binder_plane* binder = new binder_plane();
 		binder_plane_param param_plane;
 		param_plane.x_res = param_plane.y_res = 1;
+		param_plane.name = "plane";
 		binder->set_param(param_plane);
 		
-
 		/*
 		binder_groove_param param_binder = generate_binder_groove(0.1, 0.1);
+		param_binder.name = "groove";
 		binder_groove* binder = new binder_groove();
 		binder->set_param(param_binder);*/
 
+		string dis_name = "grid_" + to_string(param_grid.x_space) + "_" + to_string(param_grid.y_space) + "_" + to_string(param_grid.z_space) + "_" +
+			to_string(param_grid.scale) + "_" + to_string(param_grid.height);
 
+		string binder_name = "grid_" + to_string(param_plane.x_res) + "_" + to_string(param_plane.y_res);
 
 		details = new microfacet_details;
 		details->init(1, 1, 1.0, 50, 2, binder, distr);
@@ -336,19 +342,26 @@ void MicrofacetEditor::load_scene()
 		details->generate_blocks(selection, final_details);
 
 		printf_s("sampling points...");
-		/***********test code************/
 		details->sample_points(selection, final_details);
 		printf_s("done.\n");
+
+		/*
+		printf_s("getting samples...");
+		std::vector<sample_group> samples;
+		details->get_visible_samples(samples, details->compute_idx(0, 0), final_details[details->compute_idx(0, 0)], vispt_sampler);
+		printf_s("done.\n");
+
+		test_vis_area(8, samples[0].p, samples[0].n, final_details[details->compute_idx(0, 0)]);
+		test_batch_area_sampler(64, final_details[details->compute_idx(0, 0)]);*/
 
 		init_vars();
 
 		tri_mesh mesh;
-		//save_details_as_obj("T:/Microfacet/test_mesh/", mesh, final_details);
+		//save_details_as_obj("T:/Microfacet/output/", mesh, dis_name, binder_name,final_details);
 		printf_s("finish save obj.\n");
 	}
 
-	//final_details[details->compute_idx(0, 0)].BRDF_ref = BRDF_factory::produce("BlinnPhong", "10");
-
+	final_details[details->compute_idx(0, 0)].BRDF_ref = BRDF_factory::produce("Ward", "0.3");
 	
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_0");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_1");
@@ -370,25 +383,10 @@ void MicrofacetEditor::load_scene()
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_binder_3");*/
 
 	set_num_shadows(32);
-	set_light_inten(55);
-	set_vis_light_inten(65);
-	tball_distant.init(Vector3(0.0f, 0.0f, 2.0f), Vector3(0.0f));
+	set_light_inten(50);
+	set_vis_light_inten(50);
+	tball_distant.init(Vector3(0.0f, 0.0f, 3.0f), Vector3(0.0f));
 	set_vis_mode();
-
-
-	//izrt.var_get("details", v);
-	/*
-	details = new microfacet_details();
-	generate_microfacet_details();
-	details->init_blocks(final_details);
-
-	details->idx_all(selection);
-	details->update_with_distr(selection);
-	details->generate_blocks(selection, final_details);
-	printf_s("sampling points...");
-	details->sample_points(selection, final_details);
-	printf_s("done.\n");
-	*/
 }
 
 void MicrofacetEditor::init_vars()
@@ -403,7 +401,7 @@ void MicrofacetEditor::init_vars()
 }
 
 void MicrofacetEditor::save_details_as_obj(const char *filename,
-	tri_mesh &mesh,
+	tri_mesh &mesh, string dist_name, string binder_name,
 	const std::vector<microfacet_block> &result)
 {
 	for (int j = 0; j < result[0].insts.size(); j++)
@@ -419,24 +417,12 @@ void MicrofacetEditor::save_details_as_obj(const char *filename,
 			}
 			for (int k = 0; k < m->get_face_number(); k++)
 				temp.faces.push_back(m->faces[k]);
-			//temp.compute_normal();
 			mesh.merge_mesh(temp.vertices, temp.faces);
-			//string file = filename + string("_material_") + std::to_string(j) + string("_block_") + std::to_string(i) + string(".obj");
-			//temp.save_obj(file);
 		}
-	string file("T:/Microfacet/test_mesh/mesh.obj");
+	string file(filename);
+	file += dist_name + "_" + binder_name + ".obj";
+	//string file("T:/Microfacet/test_mesh/mesh.obj");
 	mesh.save_obj(file);
-	/*
-	std::vector<std::string> mtrl_names;
-	for (int j = 0; j < result[0].insts.size(); j++)
-	{
-		char s[256];
-		sprintf_s(s, "material_%d", j);
-		mtrl_names.push_back(s);
-	}
-	//mesh.invert_all_faces();
-	mesh.save_obj(filename, mtrl_names);
-	*/
 }
 
 void MicrofacetEditor::set_num_shadows(int num)
@@ -526,447 +512,3 @@ void MicrofacetEditor::set_vis_mode()
 	//	b_cam_changed_close = true;
 //	}
 }
-
-void MicrofacetEditor::render_image(task_microfacet *pt)
-{
-	shared_ptr<task> t(pt);
-
-	pt->b_async = true;
-	pt->per_thread_global_var
-		= NULL;
-	pt->p_worker = p_worker;
-	p_manager->start(t);
-}
-
-
-void MicrofacetEditor::compute_microfacet_change()
-{
-	task_microfacet *t = new task_microfacet;
-	t->type = TASK_TYPE_MICROFACET_CHANGED;
-
-	selection_compute = selection;
-	//cout << "compute microfacet change:: sube type = " << microfacet_ops << endl;
-	t->tmc.sub_type = microfacet_ops;
-	t->tmc.details = details;
-	t->tmc.idx = &selection_compute;
-	t->tmc.blocks = &final_details;
-	t->tmc.fr_Avis = &fr_Avis;
-	t->tmc.fr_vis = &fr_vis;
-	t->tmc.avis_sampler = &avis_sampler;
-	t->tmc.vismask_sampler
-		= &vismask_sampler;
-	t->tmc.rp = &rand_proj;
-	render_image(t);
-
-	microfacet_ops = 0;
-	b_microfacet_changed = false;
-}
-
-void MicrofacetEditor::render_buffer()
-{
-
-	task_microfacet *t = new task_microfacet;
-	shared_ptr<task> t_done;
-	/*************test code****************/
-	while (!p_manager->get_result(t_done))
-	{
-		Sleep(1);
-	}
-	t->type = TASK_TYPE_BUFFER;
-	t->id = 0;
-	t->width = render_width;
-	t->height = render_height;
-	t->tb.p_background = &pi_background;
-	t->tb.p_main = pi_base;
-	t->tb.p_background_vis = &pi_background_vis;
-	t->tb.p_main_vis = pi_base_vis;
-	t->tb.p_skybox = p_skybox;
-	t->tb.p_shadow = &shadow_maps;
-	t->tb.p_target = p_target;
-	t->tb.p_target_uv = p_target_uv;
-	t->tb.p_target_normal = p_target_normal;
-	t->tb.p_target_tangent = p_target_tangent;
-	t->tb.p_target_vis = p_target_vis;
-	t->tb.p_screen = p_screen;
-	t->tb.p_uv = p_uv;
-	t->tb.p_normal = p_normal;
-	t->tb.p_tangent = p_tangent;
-	t->tb.vis_pixel_size = vis_pixel_size;
-	t->tb.p_vis_buffer = p_vis_buffer;
-	t->tb.result = p_background_buffer;
-	t->tb.envlight_inten = envlight_inten;
-
-	t->tb.p_target_test = p_target_test;
-	t->tb.p_test = p_test;
-	t->tb.p_main_test = pi_test;
-
-	trackball_param param;
-	t->matProj = mat_proj;
-
-	param = tball_distant.get_params();
-	/*************test code******************/
-	/////matrix_lookat(t->matView, param.eye, param.lookat, Vector3(0, 1, 0));
-	/*************test code******************/
-	matrix_lookat(t->matView, Vector3(0, 0, 10), Vector3(0.0f, 0.0f, 0.0f), Vector3(0, 1, 0));
-	/*
-	for (int i = 0; i < 4; i++)
-	{ 
-		for (int j = 0; j < 4; j++)
-		{
-			cout << t->matView.m[i][j] << " ";
-		}
-		cout << endl;
-	}
-
-	const Vector3	vat = Normalize(Vector3(0, 0, -5) - Vector3(0.0f, 0.0f, 0.0f));
-	const Vector3	vup = Normalize(Vector3(0, 1, 0) - (Dot(Vector3(0, 1, 0), vat) * vat));
-	const Vector3	vright = Cross(vup, vat);
-
-	Matrix4 m = Matrix4(
-		vright.x, vright.y, vright.z, Dot(-Vector3(0, 0, -5), vright),
-		vup.x, vup.y, vup.z, Dot(-Vector3(0, 0, -5), vup),
-		vat.x, vat.y, vat.z, Dot(-Vector3(0, 0, -5), vat),
-		0, 0, 0, 1);
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			cout << m.m[i][j] << " ";
-		}
-		cout << endl;
-	}
-	*/
-
-	render_image(t);
-}
-
-void MicrofacetEditor::render()
-{
-	task_microfacet *t = new task_microfacet;
-	shared_ptr<task> t_done;
-	while (!p_manager->get_result(t_done))
-	{
-		Sleep(1);
-	}
-	t->type = TASK_TYPE_RENDER;
-	t->id = 0;
-	t->width = render_width;
-	t->height = render_height;
-	t->r.blocks = &final_details;
-	t->r.details = details;
-	t->r.result = p_background_buffer;
-	t->r.vis_pixel_size
-		= vis_pixel_size;
-	t->r.fr_Avis = &fr_Avis;
-	t->r.fr_vis = &fr_vis;
-
-	t->r.p_shadow = &shadow_maps;
-	t->r.p_normal = p_normal;
-	t->r.p_tangent = p_tangent;
-
-	t->r.p_uv = p_uv;
-	t->r.p_vis_buffer = p_vis_buffer;
-	t->r.p_wo = &p_wo;
-	t->r.dbg_pixel_x = -1;
-	t->r.dbg_pixel_y = -1;
-
-	trackball_param param;
-	param = tball_distant.get_params();
-	Vector3 v = param.eye - param.lookat;
-	v.normalize();
-	v_render_lookat.x = (float)v.x;
-	v_render_lookat.y = (float)v.y;
-	v_render_lookat.z = (float)v.z;
-	v_render_up = Vector3(0, 1, 0);
-	v_render_up -= (v_render_up*v_render_lookat)*v_render_lookat;
-	v_render_up.normalize();
-	v_render_right = v_render_up ^ v_render_lookat;
-	v_render_right.normalize();
-
-	t->r.v_lookat = &v_render_lookat;
-	t->r.v_up = &v_render_up;
-	t->r.v_right = &v_render_right;
-
-	render_image(t);
-}
-
-void MicrofacetEditor::compute_ground_truth_BRDF()
-{
-	task_microfacet *t = new task_microfacet;
-	t->type = TASK_TYPE_MICROFACET_CHANGED;
-
-	selection_compute = selection;
-	t->tmc.sub_type = TASK_SUBTYPE_BRDF_TRUTH;
-	t->tmc.details = details;
-	t->tmc.idx = &selection_compute;
-	t->tmc.blocks = &final_details;
-	t->tmc.fr_Avis = &fr_Avis;
-	t->tmc.fr_vis = &fr_vis;
-	t->tmc.avis_sampler = &avis_sampler;
-	t->tmc.vismask_sampler
-		= &vismask_sampler;
-	t->tmc.rp = &rand_proj;
-	render_image(t);
-}
-
-void MicrofacetEditor::render_ground_truth()
-{
-	render_ground_truth_task(TASK_TYPE_DEBUG_RAYTRACE);// TASK_TYPE_GROUND_TRUTH);
-}
-
-void MicrofacetEditor::render_ground_truth_task(const int type, const int num_levels)
-{
-	task_microfacet *t = new task_microfacet;
-	shared_ptr<task> t_done;
-	while (!p_manager->get_result(t_done))
-	{
-		Sleep(1);
-	}
-	if (b_scene_ready && p_manager->is_free())
-	{
-		printf_s("rendering ground truth...\n");
-
-		task_microfacet *t = new task_microfacet;
-
-		t->type = type;
-		t->id = 2;
-		t->width = render_width;
-		t->height = render_height;
-		t->trt.blocks = &final_details;
-		t->trt.details = details;
-		t->trt.result = p_background_buffer;
-		t->trt.vis_pixel_size
-			= vis_pixel_size;
-
-		t->trt.p_shadow = &shadow_maps;
-		t->trt.p_normal = p_normal;
-		t->trt.p_tangent = p_tangent;
-		t->trt.p_uv = p_uv;
-		t->trt.p_vis_buffer = p_vis_buffer;
-		t->trt.p_wo = &p_wo;
-		t->trt.dbg_pixel_x = -1;
-		t->trt.dbg_pixel_y = -1;
-		t->trt.num_raytrace_level = num_levels;
-		t->trt.num_rays = 16;// ui.spin_num_rays->value();
-		t->trt.dim_raytrace = 5;// ui.spin_dim_raytrace->value();
-
-		//trackball_param param;
-		//tball_distant.get_params(param);
-		Vector3 eye(0.0f, 5.0f, -5.0f);
-		Vector3 lookat(0.0f);
-		Vector3 v = eye -lookat;
-		v.normalize();
-		v_render_lookat.x = (float)v.x;
-		v_render_lookat.y = (float)v.y;
-		v_render_lookat.z = (float)v.z;
-		v_render_up = Vector3(0, 1, 0);
-		v_render_up -= (v_render_up*v_render_lookat)*v_render_lookat;
-		v_render_up.normalize();
-		t->trt.v_lookat = &v_render_lookat;
-		t->trt.v_up = &v_render_up;
-
-		render_image(t);
-	}
-}
-
-void MicrofacetEditor::compute_normal_mapped_BRDF()
-{
-	task_microfacet *t = new task_microfacet;
-	t->type = TASK_TYPE_MICROFACET_CHANGED;
-
-	selection_compute = selection;
-	t->tmc.sub_type = TASK_SUBTYPE_BRDF_NORMAL;
-	t->tmc.details = details;
-	t->tmc.idx = &selection_compute;
-	t->tmc.blocks = &final_details;
-	t->tmc.fr_Avis = &fr_Avis;
-	t->tmc.fr_vis = &fr_vis;
-	t->tmc.avis_sampler = &avis_sampler;
-	t->tmc.vismask_sampler
-		= &vismask_sampler;
-	t->tmc.rp = &rand_proj;
-	render_image(t);
-}
-
-
-void MicrofacetEditor::render_visualization()
-{
-	/*task_microfacet *t = new task_microfacet;
-	shared_ptr<task> t_done;
-	while (!p_manager->get_result(t_done))
-	{
-		Sleep(1);
-	}*/
-	if (p_manager->is_free())
-	{
-		int idx = visual_x + visual_y*render_width;
-		if (p_uv[idx * 2] >= 0)
-		{
-			printf_s("rendering visualization...\n");
-
-			dbg_pixel_x = visual_x;
-			dbg_pixel_y = visual_y;
-
-			Vector3 normal, tangent, binormal, global_wo;
-			normal.x = snorm2float(p_normal[idx * 4]);
-			normal.y = snorm2float(p_normal[idx * 4 + 1]);
-			normal.z = snorm2float(p_normal[idx * 4 + 2]);
-			tangent.x = snorm2float(p_tangent[idx * 4]);
-			tangent.y = snorm2float(p_tangent[idx * 4 + 1]);
-			tangent.z = snorm2float(p_tangent[idx * 4 + 2]);
-			binormal = normal ^ tangent;
-
-			task_microfacet *t = new task_microfacet;
-			t->type = TASK_TYPE_VISUALIZATION;
-			t->id = 1;
-			t->width = render_width;
-			t->height = render_height;
-
-			int block_x, block_y, block_idx;
-			block_idx = details->compute_idx(0, 0);
-			details->compute_back_idx(block_x, block_y, block_idx);
-
-			matrix_lookat(t->matView, Vector3(0, 0, -5), Vector3(0, 0, 0), Vector3(0, 1, 0));
-			t->matProj =  mat_proj_vis_illu;
-
-			t->trv.p_block = &final_details[block_idx];
-			t->trv.p_screen = p_screen;
-			t->trv.p_shadow = &shadow_visual;
-			t->trv.p_target = p_target;
-			t->trv.result = p_screen_buffer;
-			t->trv.b_vis_target = false;// true;// (ui.ck_vis_target->checkState() == Qt::Checked);
-			t->trv.b_show_neighbors = true;// (ui.ck_show_neighbor_tiles->checkState() == Qt::Checked);
-			t->trv.vis_light_inten = vis_light_inten;
-			t->trv.disc_r = -1;
-
-			std::vector<r_light_dir> lights;
-			lights = shadow_maps.lights;
-			for (int i = 0; i < lights.size(); i++)
-			{
-				lights[i].dir = Vector3(lights[i].dir*tangent, lights[i].dir*binormal, lights[i].dir*normal);
-				if (lights[i].dir.z <= 0)
-					lights[i].c = Vector3(0, 0, 0);
-			}
-			shadow_visual.set_lights(lights);
-			shadow_visual.compute_light_matrix(Vector3(0, 0, 0));
-
-			render_image(t);
-			//DEBUG
-		}
-		else {
-			printf_s("invalid pixel...\n");
-		}
-		//DEBUG
-	}
-	else {
-		printf_s("busy...\n");
-	}
-}
-
-
-void MicrofacetEditor::gen_anim(const int subtype)
-{
-	
-	v_global_eye = Vector3(0,0,-10.0f);
-	v_global_at = Vector3(0.0f);
-
-	task_microfacet *t = new task_microfacet;
-	shared_ptr<task> t_done;
-	/*************test code****************/
-	while (!p_manager->get_result(t_done))
-	{
-		Sleep(1);
-	}
-
-	t->type = TASK_TYPE_GEN_ANIMATION;
-	t->id = 0;
-	t->width = render_width;
-	t->height = render_height;
-	t->matProj = mat_proj;
-
-	t->ta.sub_type = subtype;
-	t->ta.angle_start = 0;// ui.spin_anim_start->value();
-	t->ta.angle_finish = 23360;// ui.spin_anim_finish->value();
-	t->ta.angle_num = 50;// ui.spin_anim_num->value();
-
-	t->ta.blocks = &final_details;
-	t->ta.details = details;
-	t->ta.result = p_background_buffer;
-	t->ta.vis_pixel_size
-		= vis_pixel_size;
-
-	t->ta.p_shadow = &shadow_maps;
-	t->ta.p_normal = p_normal;
-	t->ta.p_tangent = p_tangent;
-	t->ta.p_uv = p_uv;
-	t->ta.p_vis_buffer = p_vis_buffer;
-	t->ta.p_wo = &p_wo;
-	t->ta.fr_Avis = &fr_Avis;
-	t->ta.fr_vis = &fr_vis;
-	t->ta.eye = &v_global_eye;
-	t->ta.lookat = &v_global_at;
-
-	t->ta.p_background = &pi_background;
-	t->ta.p_main = pi_base;
-	t->ta.p_background_vis = &pi_background_vis;
-	t->ta.p_main_vis = pi_base_vis;
-	t->ta.p_skybox = p_skybox;
-	t->ta.p_target = p_target;
-	t->ta.p_target_uv = p_target_uv;
-	t->ta.p_target_normal = p_target_normal;
-	t->ta.p_target_tangent = p_target_tangent;
-	t->ta.p_target_vis = p_target_vis;
-	t->ta.p_screen = p_screen;
-
-	render_image(t);
-}
-
-void MicrofacetEditor::gen_anim_ours()
-{
-	gen_anim(TASK_SUBTYPE_ANIM_OURS);
-}
-
-
-void MicrofacetEditor::render_raytrace()
-{
-	render_ground_truth_task(TASK_TYPE_DEBUG_RAYTRACE);
-}
-
-void MicrofacetEditor::update_render()
-{
-	shared_ptr<task> t_done;
-	while (!p_manager->get_result(t_done))
-	{
-		Sleep(1);
-	}
-	task_microfacet* p = (task_microfacet*)(t_done.get());
-	cout << "Update_render:: type " << p->type << endl;
-	switch (p->type)
-	{
-	case TASK_TYPE_RENDER:
-	case TASK_TYPE_RENDER_BEFORE_SVD:
-	
-		//t_frame.update();
-		cout << "finish rendering." << endl;
-
-		save_image("T:/Microfacet/img_render.png", p->r.result, p->width, p->height);
-		break;
-	case TASK_TYPE_VISUALIZATION:
-		save_image("T:/Microfacet/img_detail.png", p->trv.result, p->width, p->height);
-		break;
-	case TASK_TYPE_BUFFER:
-		b_buffer_ready = true;
-		b_render_image = true;
-		break;
-	case TASK_TYPE_GROUND_TRUTH:
-		cout << "finish rendering." << endl;
-		save_image("T:/Microfacet/img_ours.png", p->trt.result, p->width, p->height);
-		break;
-	case TASK_TYPE_GROUND_TRUTH_DIRECT:
-	case TASK_TYPE_RENDER_REF_BRDF:
-	case TASK_TYPE_DEBUG_RAYTRACE:
-		save_image("T:/Microfacet/img_ours.png", p->trt.result, p->width, p->height);
-		break;
-	}
-}
-

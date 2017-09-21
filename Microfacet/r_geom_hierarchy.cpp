@@ -43,7 +43,7 @@ int r_geom_hierarchy::scale_idx(const float s) const
 
 void r_geom_hierarchy::get_samples(const int l, const std::vector<Vector3> *&p, const std::vector<normal_weight> *&n)
 {
-	int idx = rng.get_random_float()*points[l].size();
+	int idx = rng.get_random_float_open()*points[l].size();
 	p = &points[l][idx];
 	n = &normals[l][idx];
 }
@@ -77,7 +77,7 @@ void r_geom_hierarchy::sample_points(const float density,
 					points[i][j], normals[i][j], 
 					density*scales[i].s*scales[i].s, 
 					num_area_hits_scalar,
-					rng, Vector2(rng.get_random_float(), rng.get_random_float()));
+					rng, Vector2(rng.get_random_float_open(), rng.get_random_float_open()));
 		}
 	}
 }

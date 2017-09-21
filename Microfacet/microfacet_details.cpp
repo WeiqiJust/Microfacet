@@ -389,7 +389,7 @@ void microfacet_details::get_visible_samples(std::vector<sample_group> &samples,
 				}
 			}
 		}
-
 		sampler.sample_vis_points(samples[i].p, samples[i].n, ii, p_buffer, n_buffer);
+		
 	}
 }

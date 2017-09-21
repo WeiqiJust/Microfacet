@@ -61,7 +61,7 @@ void construct_matrix(la_matrix<float> &mat_vis_n,
 #ifdef DEBUG_RENDERING
 			//The code is for render before SVD, etc...
 			vis_normal.pos.push_back(sample.p[j]);// samples[i_samples].p[j]);
-			vis_normal.pts.push_back(sample.p[j]);// samples[i_samples].n[j]);
+			vis_normal.pts.push_back(sample.n[j]);// samples[i_samples].n[j]);
 			int offset = vis_normal.double_vis_matr.size();
 			vis_normal.double_vis_matr.resize(offset+len*3);
 
@@ -314,7 +314,6 @@ void compute_vis_area_and_normal(microfacet_details &details,
 			//printf_s("Avis %gsecs\n", t.elapsed_time());
 			printf_s("Avis generation\n");
 
-			
 			//Group samples that have the same basis materials
 			int last_basis_id = -1;
 			int num_vis_normal = 0;

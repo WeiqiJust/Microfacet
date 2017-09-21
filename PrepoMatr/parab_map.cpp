@@ -1,9 +1,10 @@
 #include "parab_map.h"
-#include "hammersley.h"
 
-int parab_map(const Vector3 &v, const int dim, const int actual_dim, const bool b_upper)
+using codex::math::utils::random_number_generator;
+
+int parab_map(const vector3f &v, const int dim, const int actual_dim, const bool b_upper)
 {
-	Vector3 n;
+	vector3f n;
 	n = v;
 	if (b_upper)
 		n.z += 1;
@@ -16,10 +17,10 @@ int parab_map(const Vector3 &v, const int dim, const int actual_dim, const bool 
 	return max(min(x, actual_dim-1), 0) + max(min(y, actual_dim-1), 0)*actual_dim;
 }
 
-void parab_map(Vector2 &result, const Vector3 &v, 
+void parab_map(vector2f &result, const vector3f &v, 
 						   const int dim, const int actual_dim, const bool b_upper)
 {
-	Vector3 n;
+	vector3f n;
 	n = v;
 	if (b_upper)
 		n.z += 1;
@@ -31,7 +32,7 @@ void parab_map(Vector2 &result, const Vector3 &v,
 	result.y = (n.y/n.z+1)/2*dim+offset;
 }
 
-void back_parab_map(Vector3 &n, const Vector2 &coord, 
+void back_parab_map(vector3f &n, const vector2f &coord, 
 								const int dim, const int actual_dim, const bool b_upper)
 {
 	int offset = (actual_dim-dim)/2;
@@ -135,23 +136,22 @@ void parab_frame::compute_spherical_area(const int num_samples)
 	std::vector<int> count;
 	count.resize(n.size(), 0);
 
-	random rng;
+	codex::math::prob::uniform_hemi_direction_3d<float> prob;
+	random_number_generator<float> rng;
 
-	Vector3 v;
+	vector3f v;
 	float pdf;
 	for (int i = 0; i < num_samples; i++)
 	{
-		uniform_hemisphere_sample(v, rng.get_random_float(), rng.get_random_float());
+		prob.sample(v, pdf, vector3f(rng.rand_real(), rng.rand_real(), 0));
 		int ii = parab_map(v, dim, dim, b_upper);
 		if (ii >= 0 && idx[ii] >= 0)
 			count[idx[ii]]++;
-		if (i%10000000 == 0)
-			cout << " i =  " << i << " total = " << num_samples << endl;
 	}
 
 	spherical_area.resize(count.size());
 	for (int i = 0; i < spherical_area.size(); i++)
-		spherical_area[i] = (float)PI * 2 * count[i] / num_samples;
+		spherical_area[i] = PI*2*count[i]/num_samples;
 }
 
 void parab_frame::init(const int d, const int samples_per_texel, const int area_samples_per_texel, const bool b_up)
@@ -159,41 +159,33 @@ void parab_frame::init(const int d, const int samples_per_texel, const int area_
 	dim		= d;
 	b_upper = b_up;
 
-	// initiate the vectors with random values for later sampling
-	hammersley seq(samples_per_texel, 2);
-	std::vector<Vector2> samples;
+	codex::math::utils::Hammersley_Zaremba_seq<float> seq(samples_per_texel);
+	std::vector<vector2f> samples;
 	samples.resize(samples_per_texel);
 	for (int i = 0; i < samples_per_texel; i++)
-	{ 
-		float* result = seq.get_sample();
-		samples[i] = Vector2(result[0], result[1]);
-	}
+		seq.get_sample(samples[i]);
 
-	hammersley seq_area(area_samples_per_texel, 2);
-	std::vector<Vector2> samples_area;
+	codex::math::utils::Hammersley_Zaremba_seq<float> seq_area(area_samples_per_texel);
+	std::vector<vector2f> samples_area;
 	samples_area.resize(area_samples_per_texel);
 	for (int i = 0; i < area_samples_per_texel; i++)
-	{ 
-		float* result = seq_area.get_sample();
-		samples_area[i] = Vector2(result[0], result[1]);
-	}
+		seq_area.get_sample(samples_area[i]);
 
 	n.clear();
 	idx.clear();
 	idx.resize(dim*dim, -1);
 	back_idx.clear();
 
-	// uniformly map each 2d grid (with randomness) back to 3d and save the mapping used for later lookup
 	int ii = 0;
 	for (int y = 0; y < dim; y++)
 		for (int x = 0; x < dim; x++)
 		{
-			Vector3 normal;
-			std::vector<Vector3> temp_n;
+			vector3f normal;
+			std::vector<vector3f> temp_n;
 
 			for (int i = 0; i < samples.size(); i++)
 			{
-				Vector2 s = samples[i];
+				vector2f s = samples[i];
 				s.x += x;
 				s.y += y;
 
@@ -205,7 +197,7 @@ void parab_frame::init(const int d, const int samples_per_texel, const int area_
 			int num_hit = 0;
 			for (int i = 0; i < samples_area.size(); i++)
 			{
-				Vector2 s = samples_area[i];
+				vector2f s = samples_area[i];
 				s.x += x;
 				s.y += y;
 
@@ -229,16 +221,16 @@ void parab_frame::normalize_n()
 {
 	for (int i = 0; i < n.size(); i++)
 	{
-		Vector3 sum;
+		vector3f sum;
 		for (int j = 0; j < n[i].size(); j++)
 			sum += n[i][j];
-		sum = Normalize(sum);
+		sum.normalize();
 		n[i].resize(1);
 		n[i][0] = sum;
 	}
 }
 
-int parab_frame::map(const Vector3 &n) const
+int parab_frame::map(const vector3f &n) const
 {
 	int i = parab_map(n, dim, dim, b_upper);
 
@@ -248,10 +240,10 @@ int parab_frame::map(const Vector3 &n) const
 		return -1;
 }
 
-void parab_frame::lerp(int &num, int *ridx, float *weight, const Vector3 &n,
+void parab_frame::lerp(int &num, int *ridx, float *weight, const vector3f &n,
 					   const bool area_weighted, const bool b_normalize) const
 {
-	Vector2 xy;
+	vector2f xy;
 	parab_map(xy, n, dim, dim, b_upper);
 
 	int x[2], y[2];
@@ -379,13 +371,15 @@ void double_parab_frame::compute_spherical_area(const int num_samples)
 
 	std::vector<int> count;
 	count.resize(n.size(), 0);
-	random rng;
 
-	Vector3 v;
+	codex::math::prob::uniform_direction_3d<float> prob;
+	random_number_generator<float> rng;
+
+	vector3f v;
 	float pdf;
 	for (int i = 0; i < num_samples; i++)
 	{
-		uniform_sphere_sample(v, rng.get_random_float(), rng.get_random_float());
+		prob.sample(v, pdf, vector3f(rng.rand_real(), rng.rand_real(), 0));
 		bool b_up = (v.z >= 0);
 		int ii = parab_map(v, dim, actual_dim, b_up);
 		if (!b_up)
@@ -396,7 +390,7 @@ void double_parab_frame::compute_spherical_area(const int num_samples)
 
 	spherical_area.resize(count.size());
 	for (int i = 0; i < spherical_area.size(); i++)
-		spherical_area[i] = (float)PI * 4 * count[i] / num_samples;
+		spherical_area[i] = PI*4*count[i]/num_samples;
 }
 
 void double_parab_frame::init(const int d, const int samples_per_texel)
@@ -404,14 +398,11 @@ void double_parab_frame::init(const int d, const int samples_per_texel)
 	dim	= d;
 	actual_dim = dim+2;
 
-	hammersley seq(samples_per_texel, 2);
-	std::vector<Vector2> samples;
+	codex::math::utils::Hammersley_Zaremba_seq<float> seq(samples_per_texel);
+	std::vector<vector2f> samples;
 	samples.resize(samples_per_texel);
 	for (int i = 0; i < samples_per_texel; i++)
-	{ 
-		float* result = seq.get_sample();
-		samples[i] = Vector2(result[0], result[1]);
-	}
+		seq.get_sample(samples[i]);
 
 	n.clear();
 	idx.clear();
@@ -425,12 +416,12 @@ void double_parab_frame::init(const int d, const int samples_per_texel)
 	for (int y = 0; y < actual_dim; y++)
 		for (int x = 0; x < actual_dim; x++)
 		{
-			Vector3 normal;
-			std::vector<Vector3> temp_n;
+			vector3f normal;
+			std::vector<vector3f> temp_n;
 
 			for (int i = 0; i < samples.size(); i++)
 			{
-				Vector2 s = samples[i];
+				vector2f s = samples[i];
 				s.x += x;
 				s.y += y;
 
@@ -454,12 +445,12 @@ void double_parab_frame::init(const int d, const int samples_per_texel)
 	for (int y = 0; y < actual_dim; y++)
 		for (int x = 0; x < actual_dim; x++)
 		{
-			Vector3 normal;
-			std::vector<Vector3> temp_n;
+			vector3f normal;
+			std::vector<vector3f> temp_n;
 
 			for (int i = 0; i < samples.size(); i++)
 			{
-				Vector2 s = samples[i];
+				vector2f s = samples[i];
 				s.x += x;
 				s.y += y;
 
@@ -504,11 +495,11 @@ void double_parab_frame::init(const int d, const int samples_per_texel)
 				if (b_compute)
 				{
 					int num = 0;
-					Vector2 avg_s;
-					Vector3 normal;
+					vector2f avg_s;
+					vector3f normal;
 					for (int i = 0; i < samples.size(); i++)
 					{
-						Vector2 s = samples[i];
+						vector2f s = samples[i];
 						s.x += x;
 						s.y += y;
 
@@ -555,11 +546,11 @@ void double_parab_frame::init(const int d, const int samples_per_texel)
 				if (b_compute)
 				{
 					int num = 0;
-					Vector2 avg_s;
-					Vector3 normal;
+					vector2f avg_s;
+					vector3f normal;
 					for (int i = 0; i < samples.size(); i++)
 					{
-						Vector2 s = samples[i];
+						vector2f s = samples[i];
 						s.x += x;
 						s.y += y;
 
@@ -585,10 +576,10 @@ void double_parab_frame::normalize_n()
 {
 	for (int i = 0; i < n.size(); i++)
 	{
-		Vector3 sum;
+		vector3f sum;
 		for (int j = 0; j < n[i].size(); j++)
 			sum += n[i][j];
-		sum = Normalize(sum);
+		sum.normalize();
 		n[i].resize(1);
 		n[i][0] = sum;
 	}
@@ -596,11 +587,11 @@ void double_parab_frame::normalize_n()
 
 void double_parab_frame::cluster_vec(const int num_clusters, 
 									 const int max_iter,
-									 const std::vector<Vector3> &input, 
-									 std::vector<Vector3> &output)
+									 const std::vector<vector3f> &input, 
+									 std::vector<vector3f> &output)
 {
-	random rng;
-	std::vector<Vector3> centers;
+	random_number_generator<float> rng;
+	std::vector<vector3f> centers;
 
 	//init centers by random sampling
 	std::vector<int> v_init_idx;
@@ -608,7 +599,7 @@ void double_parab_frame::cluster_vec(const int num_clusters,
 	{
 		while (true)
 		{
-			int idx = int(rng.get_random_float_open()*input.size());
+			int idx = int(rng.rand_real_open()*input.size());
 			bool b_found = false;
 			for (int j = 0; j < v_init_idx.size(); j++)
 				if (v_init_idx[j] == idx)
@@ -630,7 +621,7 @@ void double_parab_frame::cluster_vec(const int num_clusters,
 	bool b_changed = true;
 	int iter = 0;
 	std::vector<int> cluster;
-	std::vector<Vector3> new_centers;
+	std::vector<vector3f> new_centers;
 	cluster.resize(input.size(), -1);
 	
 	while (b_changed && iter < max_iter)
@@ -646,8 +637,8 @@ void double_parab_frame::cluster_vec(const int num_clusters,
 			int id = -1;
 			for (int j = 0; j < centers.size(); j++)
 			{
-				Vector3 delta = input[i]-centers[j];
-				float len = delta.LengthSquared();
+				vector3f delta = input[i]-centers[j];
+				float len = delta.length_sq();
 				if (len < dist)
 				{
 					dist = len;
@@ -663,7 +654,7 @@ void double_parab_frame::cluster_vec(const int num_clusters,
 
 		//compute new centers
 		for (int i = 0; i < new_centers.size(); i++)
-			new_centers[i] = Normalize(new_centers[i]);
+			new_centers[i].normalize();
 		centers = new_centers;
 
 		iter++;
@@ -677,14 +668,14 @@ void double_parab_frame::reduce_n(const int samples_per_texel)
 	for (int i = 0; i < n.size(); i++)
 		if (n[i].size() > samples_per_texel)
 		{
-			std::vector<Vector3> temp;
+			std::vector<vector3f> temp;
 			cluster_vec(samples_per_texel, 100, n[i], temp);
 			n[i] = temp;
 		}
 }
 
 
-int double_parab_frame::map(const Vector3 &n) const
+int double_parab_frame::map(const vector3f &n) const
 {
 	if (n.z >= 0)
 		return idx[parab_map(n, dim, actual_dim, true)];
@@ -692,11 +683,11 @@ int double_parab_frame::map(const Vector3 &n) const
 		return idx[actual_dim*actual_dim+parab_map(n, dim, actual_dim, false)];
 }
 
-void double_parab_frame::lerp(int &num, int *ridx, float *weight, const Vector3 &n,
+void double_parab_frame::lerp(int &num, int *ridx, float *weight, const vector3f &n,
 							  const bool b_normalize) const
 {
 	bool b_upper = (n.z >= 0);
-	Vector2 xy;
+	vector2f xy;
 	parab_map(xy, n, dim, actual_dim, b_upper);
 
 	int x[2], y[2];

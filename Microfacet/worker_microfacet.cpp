@@ -183,7 +183,7 @@ void worker_microfacet::work_task_buffer(task_microfacet *t_org)
 	t.p_screen->get_rt(1)->get_result((BYTE*)t.p_normal, 8);
 	for (int i = 0; i < 256 * 256; i++)
 	{
-		if (t.p_normal[i * 4] != 0.0f)
+		if (t.p_normal[i * 4] != 0.0f ||  t.p_normal[i * 4 + 1] != 0.0f || t.p_normal[i * 4+2] != 0.0f)
 			//cout << "render result test " << t.p_uv[i * 2] << " " << t.p_uv[i * 2 + 1] << endl;
 			count_normal++;
 	}
@@ -192,7 +192,7 @@ void worker_microfacet::work_task_buffer(task_microfacet *t_org)
 
 	for (int i = 0; i < 256 * 256; i++)
 	{
-		if (t.p_tangent[i * 4] != 0.0f)
+		if (t.p_tangent[i * 4] != 0.0f || t.p_tangent[i * 4+1] != 0.0f || t.p_tangent[i * 4+2] != 0.0f)
 			//cout << "render result test " << t.p_uv[i * 2] << " " << t.p_uv[i * 2 + 1] << endl;
 			count_tangent++;
 	}
@@ -583,6 +583,7 @@ void worker_microfacet::work_task_visual(task_microfacet *t_org)
 		t.p_shadow->unset(0, p_sh_shadow);
 	}
 	//cout << "before disk" << endl;
+	
 	if (t.disc_r > 0)
 	{
 		//disc visualization

@@ -37,6 +37,7 @@ distr_grid_param MicrofacetEditor::generate_distr_grid(const float x, const floa
 	param_grid.z_space = z;
 	param_grid.scale = scale;
 	param_grid.height = height;
+	param_grid.name = "grid";
 	return param_grid;
 }
 
@@ -47,6 +48,7 @@ distr_low_discrepancy_param MicrofacetEditor::generate_distr_low_discrp(const fl
 	param.density = density;
 	param.scale = scale;
 	param.height = height;
+	param.name = "ld";
 	return param;
 }
 
@@ -59,6 +61,7 @@ distr_low_discrepancy_3d_param MicrofacetEditor::generate_distr_low_discrp_3d(co
 	param.scale = scale;
 	param.height = height;
 	param.relative_height_density = relative_height_density;
+	param.name = "ld3d";
 	return param;
 }
 
@@ -70,6 +73,7 @@ distr_rod_param MicrofacetEditor::generate_distr_rod(const float density, const 
 	param.randomness = random;
 	param.pd_phi = .0f;
 	param.pd_theta = .0f;
+	param.name = "rod";
 	return param;
 }
 
@@ -77,6 +81,7 @@ binder_plane_param MicrofacetEditor::generate_binder_plane()
 {
 	binder_plane_param param;
 	param.x_res = param.y_res = 1;
+	param.name = "plane";
 	return param;
 }
 
@@ -85,6 +90,7 @@ binder_groove_param MicrofacetEditor::generate_binder_groove(const float precent
 	binder_groove_param param;
 	param.plane_percent = precent;
 	param.height = height;
+	param.name = "groove";
 	return param;
 }
 
@@ -101,6 +107,7 @@ binder_brick_param MicrofacetEditor::generate_binder_brick(const int x, const in
 	param.top_percent_x = top_x;
 	param.top_percent_y = top_y;
 	param.height = height;
+	param.name = "brick";
 	return param;
 }
 
@@ -112,6 +119,7 @@ binder_regpoly_param MicrofacetEditor::generate_binder_regpoly(const int edge, c
 	param.height = height;
 	param.radius_top = radius_top;
 	param.radius_bottom = radius_bottom;
+	param.name = "regpoly";
 	return param;
 }
 
@@ -121,6 +129,7 @@ binder_dispmap_param MicrofacetEditor::generate_binder_dispmap(const int x, cons
 	param.res_x = x;
 	param.res_y = y;
 	param.amp = amp_;
+	param.name = "dispmap";
 	return param;
 }
 
@@ -130,6 +139,7 @@ binder_dispmap_param MicrofacetEditor::generate_binder_random_surface(const int 
 	param.res_x = x;
 	param.res_y = y;
 	param.amp = amp_;
+	param.name = "randsurface";
 	return param;
 }
 
@@ -150,6 +160,7 @@ binder_woven_param MicrofacetEditor::generate_binder_woven(const int x, const in
 	param.bisect_w_y = w_y;
 	param.bisect_h_y = h_y;
 	param.height_y = height_y;
+	param.name = "woven";
 	return param;
 }
 
@@ -170,6 +181,7 @@ binder_woven_param MicrofacetEditor::generate_binder_woven2(const int x, const i
 	param.bisect_w_y = w_y;
 	param.bisect_h_y = h_y;
 	param.height_y = height_y;
+	param.name = "woven2";
 	return param;
 }
 
@@ -192,6 +204,7 @@ binder_woven_threads_param MicrofacetEditor::generate_binder_woven_threads(const
 	param.height = height;
 	param.thread_r_x = r_x;
 	param.thread_r_y = r_y;
+	param.name = "threads";
 	return param;
 }
 

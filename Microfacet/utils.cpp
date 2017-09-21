@@ -107,25 +107,52 @@ void matrix_lookat(Matrix4 &m, const Vector3 &eye, const Vector3 &lookat, const 
 
 }
 
-void uniform_disk_sampling(Vector2 & result, Vector2 rnd)
+void uniform_disk_sampling(Vector2 & result, Vector2 rnd, float radius)
 {
+	/*
 	result.x = sqrt(rnd.x)*cos(rnd.y);
-	result.y = sqrt(rnd.x)*sin(rnd.y);
+	result.y = sqrt(rnd.x)*sin(rnd.y);*/
+
+	float r = sqrt(rnd.x) * radius;
+	float theta = rnd.y * 2 * PI;
+
+	result.x = r * cos(theta);
+	result.y = r * sin(theta);
 }
 
 void uniform_hemisphere_sample(Vector3& result, float u1, float u2)
 {
+	/*
 	const float r = sqrt(1.0f - u1 * u1);
 	const float phi = 2 * PI * u2;
-	result = Vector3(cos(phi) * r, sin(phi) * r, u1);
+	result = Vector3(cos(phi) * r, sin(phi) * r, u1);*/
+
+	float	z, r, theta;
+
+	z = u1;
+	r = sqrt(1 - z*z);
+	theta = u2 * 2 * PI;
+	result.x = r * cos(theta);
+	result.y = r * sin(theta);
+	result.z = z;
 
 }
 
 void uniform_sphere_sample(Vector3& result, float u1, float u2)
 {
+	/*
 	float theta = 2 * PI*u1;
 	float phi = acosf(2 * u2 - 1);
-	result = Vector3(cos(theta)*sin(phi), sin(theta)*sin(phi), cos(phi));
+	result = Vector3(cos(theta)*sin(phi), sin(theta)*sin(phi), cos(phi));*/
+
+	float	z, r, theta;
+
+	z = 1 - u1 * 2;
+	r = sqrt(1 - z*z);
+	theta = u2 * 2 * PI;
+	result.x = r * cos(theta);
+	result.y = r * sin(theta);
+	result.z = z;
 }
 
 void decompose_file_name(const char *str, char *path, char *filename, char *ext)
@@ -252,6 +279,63 @@ float snorm2float(short a)
 }
 
 
+step_1D_prob::step_1D_prob(const std::vector<float> &func)
+{
+	float total = 0;
+
+	//FIX ME: check for 0-length and negative values
+	CDF.resize(func.size() + 1);
+	CDF[0] = 0;
+	for (int i = 1; i<(int)CDF.size(); i++)
+	{
+		CDF[i] = func[i - 1];
+		total += CDF[i];
+		CDF[i] += CDF[i - 1];
+	}
+
+	//Normalize
+	for (int i = 0; i<(int)CDF.size(); i++)
+	{
+		CDF[i] /= total;
+	}
+}
+
+void step_1D_prob::sample(int &v, float rv) const
+{
+	if (CDF.size() == 0)
+	{
+		v = -1;
+		return;
+	}
+
+	if (rv == 0)
+	{
+		v = 0;
+		return;
+	}
+
+	int l = 0, r = (int)CDF.size() - 1, m;
+
+	while (l <= r)
+	{
+		m = (l + r) / 2;
+
+		if (rv <= CDF[m])
+		{
+			r = m - 1;
+		}
+		else if (rv > CDF[m + 1])
+		{
+			l = m + 1;
+		}
+		else {
+			v = m;
+			return;
+		}
+	}
+}
+
+/*
 step_1D_prob::step_1D_prob(std::vector<float> samples)
 {
 	float sum_of_elemens = std::accumulate(samples.begin(), samples.end(), 0.0f);
@@ -273,14 +357,15 @@ void step_1D_prob::sample(int& index, float rnd) const
 			index = i;
 		}
 	}
-}
+}*/
 
+/*
 random::random()
 {
 	srand(static_cast <unsigned> (time(0)));
 	std::mt19937_64 rng;
 	// initialize the random number generator with time-dependent seed
-	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+	uint64_t timeSeed = 100;// std::chrono::high_resolution_clock::now().time_since_epoch().count();
 	std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
 	rng.seed(ss);
 	// initialize a uniform distribution between 0 and 1
@@ -305,3 +390,4 @@ double random::get_random_double()
 	// ready to generate random numbers
 	return unif(rng);
 }
+*/

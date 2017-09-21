@@ -24,8 +24,8 @@ r_shader_vis_point::~r_shader_vis_point()
 
 void r_shader_vis_point::setup_render()
 {
-	set_shaders();
 	pdev->get_context()->PSSetConstantBuffers(1, 1, &p_cb_lights);
+	set_shaders();
 }
 
 void r_shader_vis_point::setup_cb_lights(const int size, const Vector3 *light, const Matrix4 &matProj, const Matrix4 *matView)

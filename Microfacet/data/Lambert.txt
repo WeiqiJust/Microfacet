@@ -1,4 +1,4 @@
 Lambert
 0
-T:/ProMaterial/material/Lambert_log_16_12_99.preconv_material
+T:/ProMaterial/material/Lambert_16_12_99.preconv_material
 Lambertian

@@ -178,7 +178,7 @@ void vis_point_sampler::compute_vis_masks(const std::vector<sample_group> &sampl
 				vec.push_back(tempt);
 			}
 			p_pos->append((BYTE*)&vec[0], vec.size(), 4 * 4);
-			//p_pos->append((BYTE*)&samples[i].p[0], samples[i].p.size(), 4 *4);
+			//p_pos->append((BYTE*)&samples[i].p[0], samples[i].p.size(), 4 *3);
 		}
 	p_pos->unmap();
 

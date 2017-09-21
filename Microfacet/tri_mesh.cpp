@@ -2,6 +2,25 @@
 #include <fstream>
 #include <iostream>
 
+int main_axis_(const Vector3 &p)
+{
+	float	absx, absy, absz;
+	int		axis;
+
+	absx = abs(p.x);
+	absy = abs(p.y);
+	absz = abs(p.z);
+
+	if (absx >= absy && absx >= absz)
+		axis = 0;
+	else if (absy >= absx && absy >= absz)
+		axis = 1;
+	else
+		axis = 2;
+
+	return axis;
+}
+
 tri_mesh::tri_mesh(const char * path)
 {
 	attr = 0;
@@ -207,6 +226,7 @@ void tri_mesh::calculate_tangent()
 		//cout << "tri_mesh::calculate_tangent() Error: uv size does not match vertices size!" << endl;
 		return;
 	}
+	/*
 	tangents.resize(vertices.size(), Vector3(0.0f));
 	std::vector<Vector3> bitangent = tangents;
 	
@@ -257,6 +277,21 @@ void tri_mesh::calculate_tangent()
 		// Gram-Schmidt orthogonalize
 		tangents[a] = Normalize(t - n * Dot(n, t));
 		tangents[a] *= (Dot(Cross(n, t), bitangent[a]) < 0.0F) ? -1.0F : 1.0F;
+	}*/
+	
+	for (int i = 0; i < normals.size(); i++)
+	{
+		//Vector3 tangent, binormal;
+		/*
+		build_frame(tangent, binormal, normals[i]);
+		tangent *= (Dot(Cross(normals[i], tangent), binormal) < 0.0F) ? -1.0F : 1.0F;*/
+
+		Vector3 n = normals[i], t, b;
+
+		t[(main_axis_(n) + 1) % 3] = 1;
+		t = t ^ n;
+		t.normalize();
+		tangents.push_back(t);
 	}
 
 }

@@ -69,7 +69,7 @@ public:
 
 	void generate_init_matr(const Vector3 albedo, const string lib_matr_id, const string lib_matr);
 
-	void save_details_as_obj(const char *filename, tri_mesh &mesh,
+	void save_details_as_obj(const char *filename, tri_mesh &mesh, string dist_name, string binder_name,
 		const std::vector<microfacet_block> &result);
 
 	void set_num_shadows(int num);
@@ -90,6 +90,8 @@ public:
 
 	void render();
 
+	void debug_our_pixel();
+
 	void compute_ground_truth_BRDF();
 
 	void compute_normal_mapped_BRDF();
@@ -98,11 +100,15 @@ public:
 
 	void render_ground_truth();
 
+	void render_ref_BRDF();
+
 	void render_ground_truth_task(const int type, const int num_levels = 4);
 
 	void gen_anim(const int subtype);
 
 	void gen_anim_ours();
+
+	void gen_anim_truth();
 
 	void render_raytrace();
 
@@ -163,7 +169,7 @@ private:
 	//std::vector<vector3f>
 	//					vis_dir, area_dir;
 	//kd_tree_3d_vec		kd_vis_dir;
-	vis_point_sampler	/*vispt_sampler, */vismask_sampler;
+	vis_point_sampler	vispt_sampler, vismask_sampler;
 	batch_area_sampler	avis_sampler;
 	int					dbg_pixel_x, dbg_pixel_y;
 	std::vector<disc>	discs;

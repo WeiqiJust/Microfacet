@@ -166,7 +166,7 @@ void r_geometry::sample_points(std::vector<Vector3> &points,
 {
 	//cout << "in sample points total_area = " << total_area << endl;
 	int num_samples = int(total_area*density);
-	if (rng.get_random_float() < total_area*density - num_samples)
+	if (rng.get_random_float_open() < total_area*density - num_samples)
 		num_samples++;
 
 	points.resize(num_samples);
@@ -223,9 +223,16 @@ void r_geometry::sample_points(std::vector<Vector3> &points,
 			// sample a point in side the triangle by propotion
 			//prob_tri.sample(uv, pdf, rv2);
 
+			{
+				float rt_u = sqrt(rv2.x);
+
+				uv.x = 1 - rt_u;
+				uv.y = rv2.y * rt_u;
+			}
+
 			float tu, tv, tw;
-			tu = 1 - sqrt(rv2.x);
-			tv = sqrt(rv2.x) * (1 - rv2.y);
+			tu = uv.x;
+			tv = uv.y;
 			tw = 1 - tu - tv;
 
 			const triangle_face f = p_mesh->faces[face];

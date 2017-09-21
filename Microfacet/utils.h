@@ -178,7 +178,7 @@ void build_frame(Vector3 &t, Vector3 &b, const Vector3 &n);
 
 void matrix_lookat(Matrix4 &m, const Vector3 &eye, const Vector3 &lookat, const Vector3 &up);
 
-void uniform_disk_sampling(Vector2 & result, Vector2 rnd);
+void uniform_disk_sampling(Vector2 & result, Vector2 rnd, float radius = 1.0f);
 
 void uniform_hemisphere_sample(Vector3& result, float u1, float u2);
 
@@ -204,19 +204,22 @@ inline int brdf_idx(int wi, int wo)
 	return (wi <= wo) ? (wo + 1)*wo / 2 + wi : (wi + 1)*wi / 2 + wo;
 }
 
+
 class step_1D_prob
 {
 public:
 	step_1D_prob() {};
 
-	step_1D_prob(std::vector<float> samples);
+	step_1D_prob(const std::vector<float>& samples);
 
 	void sample(int& index, float rnd) const;
 
 private:
 	std::vector<float> data;
+	std::vector<float>	CDF;
 };
 
+/*
 class random
 {
 public:
@@ -229,6 +232,110 @@ public:
 	double get_random_double();
 private:
 	std::mt19937_64 rng;
+};*/
+
+class random_number_generator_state
+{
+public:
+	static const int N = 624;
+
+	unsigned long mt[N];	/* the array for the state vector  */
+	int mti;				/* mti==N+1 means mt[N] is not initialized */
+};
+
+class random
+{
+private:
+	static const int N = 624;
+	static const int M = 397;
+	static const unsigned long MATRIX_A = 0x9908b0dfUL;	/* constant vector a */
+	static const unsigned long UPPER_MASK = 0x80000000UL;	/* most significant w-r bits */
+	static const unsigned long LOWER_MASK = 0x7fffffffUL; /* least significant r bits */
+
+	unsigned long mt[N];	/* the array for the state vector  */
+	int mti;				/* mti==N+1 means mt[N] is not initialized */
+
+	unsigned long	rand_int()
+	{
+		unsigned long y;
+		static unsigned long mag01[2] = { 0x0UL, MATRIX_A };
+		/* mag01[x] = x * MATRIX_A  for x=0,1 */
+
+		if (mti >= N) { /* generate N words at one time */
+			int kk;
+
+			if (mti == N + 1)   /* if init_genrand() has not been called, */
+				rand_seed(5489UL); /* default initial seed */
+
+			for (kk = 0; kk<N - M; kk++) {
+				y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
+				mt[kk] = mt[kk + M] ^ (y >> 1) ^ mag01[y & 0x1UL];
+			}
+			for (; kk<N - 1; kk++) {
+				y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
+				mt[kk] = mt[kk + (M - N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
+			}
+			y = (mt[N - 1] & UPPER_MASK) | (mt[0] & LOWER_MASK);
+			mt[N - 1] = mt[M - 1] ^ (y >> 1) ^ mag01[y & 0x1UL];
+
+			mti = 0;
+		}
+
+		y = mt[mti++];
+
+		/* Tempering */
+		y ^= (y >> 11);
+		y ^= (y << 7) & 0x9d2c5680UL;
+		y ^= (y << 15) & 0xefc60000UL;
+		y ^= (y >> 18);
+
+		return y;
+	}
+
+public:
+	random(unsigned long seed = 0x0272408)
+		: mti(N + 1)
+	{
+		rand_seed(seed);
+	}
+
+	void rand_seed(unsigned long seed)
+	{
+		mt[0] = seed & 0xffffffffUL;
+		for (mti = 1; mti<N; mti++) {
+			mt[mti] =
+				(1812433253UL * (mt[mti - 1] ^ (mt[mti - 1] >> 30)) + mti);
+			/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
+			/* In the previous versions, MSBs of the seed affect   */
+			/* only MSBs of the array mt[].                        */
+			/* 2002/01/09 modified by Makoto Matsumoto             */
+			mt[mti] &= 0xffffffffUL;
+			/* for >32 bit machines */
+		}
+	}
+
+	inline float get_random_float_open() // [0, 1)
+	{
+		return (float)rand_int() / (float)4294967296.0;
+	}
+
+	inline float get_random_float() // [0, 1]
+	{
+		return (float)rand_int() / (float)4294967295.0;
+	}
+
+	//for debug purpose only
+	void load_state(const random_number_generator_state &state)
+	{
+		mti = state.mti;
+		memcpy(mt, state.mt, sizeof(mt));
+	}
+
+	void save_state(random_number_generator_state &state)
+	{
+		state.mti = mti;
+		memcpy(state.mt, mt, sizeof(mt));
+	}
 };
 
 class normal_weight

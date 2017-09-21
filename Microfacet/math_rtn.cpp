@@ -21,7 +21,7 @@ void SVD(la_matrix<number> &result_U, la_matrix<number> &result_Vt,
 
 	my_gesdd("S", &C.row, &C.column, C.m, &C.row, lamda.v, 
 		U.m, &U.row, Vt.m, &Vt.row, work.v, &work.length, iwork, &info);
-	SAFE_DELETE(iwork);
+	SAFE_DELETE_ARR(iwork);
 	if (info != 0)
 	{
 		printf_s("\nwarning : gesdd failed\n");
@@ -87,7 +87,7 @@ void inverse_matrix(la_matrix<number> &A,
 
 	my_gesdd("S", &C.row, &C.column, C.m, &C.row, lamda.v, 
 		U.m, &U.row, Vt.m, &Vt.row, work.v, &work.length, iwork, &info);
-	SAFE_DELETE(iwork);
+	SAFE_DELETE_ARR(iwork);
 	if (info != 0)
 	{
 		printf_s("\nwarning : gesdd failed\n");
@@ -137,7 +137,7 @@ void SVD_U_L1(la_matrix<number> &result_U,
 
 	my_gesdd("S", &C.row, &C.column, C.m, &C.row, lamda.v, 
 		U.m, &U.row, Vt.m, &Vt.row, work.v, &work.length, iwork, &info);
-	SAFE_DELETE(iwork);
+	SAFE_DELETE_ARR(iwork);
 	if (info != 0)
 	{
 		printf_s("\nwarning : gesdd failed\n");
@@ -190,7 +190,7 @@ void SVD_Vt_L1(la_matrix<number> &result_Vt,
 
 	my_gesdd("S", &C.row, &C.column, C.m, &C.row, lamda.v, 
 		U.m, &U.row, Vt.m, &Vt.row, work.v, &work.length, iwork, &info);
-	SAFE_DELETE(iwork);
+	SAFE_DELETE_ARR(iwork);
 	if (info != 0)
 	{
 		printf_s("\nwarning : gesdd failed\n");
@@ -250,7 +250,7 @@ void SVD(la_matrix<number> &result_U,
 
 	my_gesdd("S", &C.row, &C.column, C.m, &C.row, lamda.v, 
 		U.m, &U.row, Vt.m, &Vt.row, work.v, &work.length, iwork, &info);
-	SAFE_DELETE(iwork);
+	SAFE_DELETE_ARR(iwork);
 	if (info != 0)
 	{
 		printf_s("\nwarning : gesdd failed\n");
@@ -287,7 +287,16 @@ void SVD(la_matrix<number> &result_U,
 
 void gen_random_element(number &result, random &rng)
 {
-	result = rng.get_random_float();
+	float w, x1, x2;
+
+	do {
+		x1 = 2 * rng.get_random_float() - 1,
+			x2 = 2 * rng.get_random_float() - 1;
+		w = x1 * x1 + x2 * x2;
+	} while (w >= 1 || w == 0);
+
+	w = sqrt((-2 * log(w)) / w);
+	result = x1 * w;
 }
 
 void gen_random_matrix(la_matrix<number> &M, const int r, const int c, const number &scalar)
@@ -298,9 +307,23 @@ void gen_random_matrix(la_matrix<number> &M, const int r, const int c, const num
 	M.m = new number[r*c];
 
 	random rng;
+	//std::random_device rd;
+	std::mt19937 e2(100);
+	std::normal_distribution<> dist(0, 1);
 	for (int i = 0; i < r*c; i++)
 	{
-		float x = rng.get_random_float();
+		//float x = rng.get_random_float();
+		float w, x1, x2;
+
+		do {
+			x1 = 2 * rng.get_random_float() - 1,
+				x2 = 2 * rng.get_random_float() - 1;
+			w = x1 * x1 + x2 * x2;
+		} while (w >= 1 || w == 0);
+
+		w = sqrt((-2 * log(w)) / w);
+		float x = x1 * w;
+		//b = x2 * w;
 		M.m[i] = x*scalar;
 	}
 }

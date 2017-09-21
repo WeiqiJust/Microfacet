@@ -44,7 +44,7 @@ float gen_pixel(Vector3 &result,
 	matrix_lookat(matView, center+vwo*3.0, center, Vector3(0, 1, 0));
 	float	z_near= 1e-5*GROUND_TRUTH_SCENE_R, 
 			z_far = 5.0;
-	projection_orthogonal(matProj,  GROUND_TRUTH_SCENE_R, GROUND_TRUTH_SCENE_R, -z_near, -z_far);
+	projection_orthogonal(matProj,  GROUND_TRUTH_SCENE_R, GROUND_TRUTH_SCENE_R, z_near, z_far);
 	matProjView = matProj*matView;
 
 	float clear_color[4] = {0, 0, 0, 0};
@@ -503,9 +503,9 @@ void worker_microfacet::work_task_render_debug(task_microfacet *t_org)
 							(*t.p_wo)[idx].y*(*t.v_up) +
 							(*t.p_wo)[idx].z*(*t.v_lookat);
 			////DEBUG
-			//printf_s("normal (%g %g %g)\n", normal.x, normal.y, normal.z);
-			//printf_s("tangent(%g %g %g)\n", tangent.x, tangent.y, tangent.z);
-			//printf_s("gwo    (%g %g %g)\n", global_wo.x, global_wo.y, global_wo.z);
+			printf_s("normal (%g %g %g)\n", normal.x, normal.y, normal.z);
+			printf_s("tangent(%g %g %g)\n", tangent.x, tangent.y, tangent.z);
+			printf_s("gwo    (%g %g %g)\n", global_wo.x, global_wo.y, global_wo.z);
 
 			Vector3 wo(global_wo*tangent, global_wo*binormal, global_wo*normal);
 			if (wo.z < 0.02)
@@ -534,17 +534,17 @@ void worker_microfacet::work_task_render_debug(task_microfacet *t_org)
 										dot);
 
 							Vector3 temp;
-							//(*t.blocks)[idx_block].get_reflectance_debug(temp, wi, wo, *t.fr_vis, true);
-							//(*t.blocks)[idx_block].get_reflectance_assembler(temp, wi, wo, *t.fr_vis, true);
+							(*t.blocks)[idx_block].get_reflectance_debug(temp, wi, wo, *t.fr_vis, true);
+							(*t.blocks)[idx_block].get_reflectance_assembler(temp, wi, wo, *t.fr_vis, true);
 							(*t.blocks)[idx_block].get_reflectance_BRDF(temp, wi, wo);
 							c.x += temp.x*t.p_shadow->lights[l+batch*NUM_BITS_VIS].c.x;
 							c.y += temp.y*t.p_shadow->lights[l+batch*NUM_BITS_VIS].c.y;
 							c.z += temp.z*t.p_shadow->lights[l+batch*NUM_BITS_VIS].c.z;
 							printf_s("resultBRDF: %g %g %g\n", temp.x, temp.y, temp.z);
-							//printf_s("light     : %g %g %g\n", 
-							//	t.p_shadow->lights[l+batch*NUM_BITS_VIS].c.x,
-							//	t.p_shadow->lights[l+batch*NUM_BITS_VIS].c.y,
-							//	t.p_shadow->lights[l+batch*NUM_BITS_VIS].c.z);
+							printf_s("light     : %g %g %g\n", 
+								t.p_shadow->lights[l+batch*NUM_BITS_VIS].c.x,
+								t.p_shadow->lights[l+batch*NUM_BITS_VIS].c.y,
+								t.p_shadow->lights[l+batch*NUM_BITS_VIS].c.z);
 
 							//DEBUG
 							{

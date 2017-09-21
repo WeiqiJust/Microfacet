@@ -121,7 +121,7 @@ void binder_random_surface::generate_geom(const float density, const int num_are
 	}
 
 	for (int i = 0; i < dispmap.size(); i++)
-		dispmap[i] = rng.get_random_float();
+		dispmap[i] = rng.get_random_float_open();
 
 	generate_geom_from_dispmap(density, num_area_hits_scalar);
 }

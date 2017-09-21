@@ -331,6 +331,7 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 	mesh.set_vertex_attr(VERT_ATTR_POSITION|VERT_ATTR_UV1);
 	//for (int i = 0; i < 4; i++)
 		//mesh.add_vertex();
+	
 	mesh.vertices.push_back(Vector3(-1, 1, 0));
 	mesh.vertices.push_back(Vector3(1, 1, 0));
 	mesh.vertices.push_back(Vector3(-1, -1, 0));
@@ -343,6 +344,20 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 	mesh.faces.push_back(triangle_face(2,1,0));
 	//face.i0 = 2; face.i1 = 3; face.i2 = 1;
 	mesh.faces.push_back(triangle_face(2,3,1));
+
+	/*
+	mesh.vertices.push_back(Vector3(-1, -1, 0));
+	mesh.vertices.push_back(Vector3(-1, 1, 0));
+	mesh.vertices.push_back(Vector3(1, -1, 0));
+	mesh.vertices.push_back(Vector3(1, 1, 0));
+	mesh.uvs.push_back(Vector2(0, 0));
+	mesh.uvs.push_back(Vector2(0, 1));
+	mesh.uvs.push_back(Vector2(1, 0));
+	mesh.uvs.push_back(Vector2(1, 1));
+	//face.i0 = 2; face.i1 = 1; face.i2 = 0;
+	mesh.faces.push_back(triangle_face(0, 2, 1));
+	//face.i0 = 2; face.i1 = 3; face.i2 = 1;
+	mesh.faces.push_back(triangle_face(1, 2, 3));*/
 
 	p_geom = new r_geometry(pdev);
 	p_geom->load(&mesh, true);
