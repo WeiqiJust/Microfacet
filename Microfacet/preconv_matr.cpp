@@ -191,7 +191,7 @@ void preconv_matr::load(const char *file_prefix)
 	fopen_s(&fp, frame_name, "rb");
 	if (fp == NULL)
 	{
-		fr_n.init(dim_fr_n, 1000);
+		fr_n.init(dim_fr_n, 256);
 		fr_n.reduce_n(samples_per_texel_fr_n);
 		fr_brdf.init(dim_fr_brdf, samples_per_texel_fr_brdf, area_samples_fr_brdf);
 		fr_brdf.normalize_n();

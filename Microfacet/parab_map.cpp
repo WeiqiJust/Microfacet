@@ -160,21 +160,21 @@ void parab_frame::init(const int d, const int samples_per_texel, const int area_
 	b_upper = b_up;
 
 	// initiate the vectors with random values for later sampling
-	hammersley seq(samples_per_texel, 2);
+	hammersley seq(samples_per_texel);
 	std::vector<Vector2> samples;
 	samples.resize(samples_per_texel);
 	for (int i = 0; i < samples_per_texel; i++)
 	{ 
-		float* result = seq.get_sample();
+		float* result = seq.get_sample(2);
 		samples[i] = Vector2(result[0], result[1]);
 	}
 
-	hammersley seq_area(area_samples_per_texel, 2);
+	hammersley seq_area(area_samples_per_texel);
 	std::vector<Vector2> samples_area;
 	samples_area.resize(area_samples_per_texel);
 	for (int i = 0; i < area_samples_per_texel; i++)
 	{ 
-		float* result = seq_area.get_sample();
+		float* result = seq_area.get_sample(2);
 		samples_area[i] = Vector2(result[0], result[1]);
 	}
 
@@ -404,12 +404,12 @@ void double_parab_frame::init(const int d, const int samples_per_texel)
 	dim	= d;
 	actual_dim = dim+2;
 
-	hammersley seq(samples_per_texel, 2);
+	hammersley seq(samples_per_texel);
 	std::vector<Vector2> samples;
 	samples.resize(samples_per_texel);
 	for (int i = 0; i < samples_per_texel; i++)
 	{ 
-		float* result = seq.get_sample();
+		float* result = seq.get_sample(2);
 		samples[i] = Vector2(result[0], result[1]);
 	}
 

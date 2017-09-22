@@ -75,7 +75,7 @@ void GPGPU_env_D3D::init_window(HINSTANCE hInstance)
 
 	// Create window
 	g_hInst = hInstance;
-	RECT rc = { 0, 0, RENDER_WIDTH, RENDER_HEIGHT };
+	RECT rc = { 0, 0, 16, 16 };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 	g_hWnd = CreateWindow(L"GPGPU_env_D3D", L"window for D3D11", WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,
@@ -130,7 +130,6 @@ void GPGPU_env_D3D::init_d3d()
 		g_driverType = driverTypes[driverTypeIndex];
 		hr = D3D11CreateDeviceAndSwapChain(NULL, g_driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
 			D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &g_featureLevel, &g_pcontext);
-		// need to install DirectX to fix it
 		if( SUCCEEDED( hr ) )
 			break;
 	}
@@ -139,34 +138,6 @@ void GPGPU_env_D3D::init_d3d()
 	//cout << "device level = " << g_pd3dDevice->GetFeatureLevel() << endl;
 	dev_handle.set(g_pd3dDevice, g_pcontext);
 
-
-
-	ID3D11Debug *d3dDebug = nullptr;
-	if (SUCCEEDED(g_pd3dDevice->QueryInterface(__uuidof(ID3D11Debug), (void**)&d3dDebug)))
-		{
-			ID3D11InfoQueue *d3dInfoQueue = nullptr;
-			if (SUCCEEDED(d3dDebug->QueryInterface(__uuidof(ID3D11InfoQueue), (void**)&d3dInfoQueue)))
-			{
-#ifdef _DEBUG
-				d3dInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
-				d3dInfoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
-#endif
-
-				D3D11_MESSAGE_ID hide[] =
-				{
-					D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS,
-					// Add more message IDs here as needed
-				};
-
-				D3D11_INFO_QUEUE_FILTER filter;
-				memset(&filter, 0, sizeof(filter));
-				filter.DenyList.NumIDs = _countof(hide);
-				filter.DenyList.pIDList = hide;
-				d3dInfoQueue->AddStorageFilterEntries(&filter);
-				d3dInfoQueue->Release();
-			}
-			d3dDebug->Release();
-		}
 }
 
 D3D_dev_handle* GPGPU_env_D3D::get_handle()

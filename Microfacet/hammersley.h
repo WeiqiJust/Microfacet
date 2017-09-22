@@ -12,8 +12,8 @@ using namespace std;
 class hammersley
 {
 public:
-	hammersley(int base_value, int dimention_value);
-	float* get_sample();
+	hammersley(int dimention_value);
+	float* get_sample(int dim);
 	int hammersley_inverse(float r[], int m, int n);
 	float *hammersley_sequence(int i1, int i2, int m, int n);
 
@@ -28,5 +28,6 @@ private:
 	int iter;
 	int base;
 	int dimention;
+	int i;
 
 };

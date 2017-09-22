@@ -51,6 +51,10 @@ public:
 
 	size_t get_face_number() const { return faces.size(); }
 
+	void invert_face(const int fidx);
+
+	void invert_all_faces();
+
 	int get_attr() const { return attr; }
 
 	void save_obj(string filename);

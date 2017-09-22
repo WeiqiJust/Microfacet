@@ -75,7 +75,8 @@ void binder_brick::generate_geom(const float density, const int num_area_hits_sc
 		slope_face.push_back(triangle_face(idx + 1, idx + 3, idx + 2));
 	}
 	tri_mesh slope(slope_vertice, slope_face);
-
+	slope.calculate_face_normal();
+	slope.calculate_normal();
 	g = new r_geometry(mff_singleton::get()->get_handle());
 	g->load(&slope);
 	mff_singleton::get()->assign_geom("bd_brick_s", std::shared_ptr<r_geometry>(g));

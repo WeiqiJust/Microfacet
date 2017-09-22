@@ -396,6 +396,13 @@ void worker_microfacet::work_task_ground_truth(task_microfacet *t_org)
 						c.z += lights[l].c.z*refl.z;
 					}
 
+				if (x == 128 && y == 128)
+				{
+					//printf_s("area = %g\n", area);
+					printf_s("result(lighted)= (%g %g %g)\n", c.x, c.y, c.z);
+					printf_s("light= (%g %g %g)\n", lights[0].c.x, lights[0].c.y, lights[0].c.z);
+				}
+
 				BYTE r, g, b;
 				r = min(max(c.x, 0), 1)*255;
 				g = min(max(c.y, 0), 1)*255;

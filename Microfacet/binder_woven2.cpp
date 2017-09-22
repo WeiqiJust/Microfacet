@@ -36,6 +36,7 @@ void binder_woven2::generate_geom(const float density, const int num_area_hits_s
 
 	int path_verts_y = max(param.total_path_verts / param.y_num, 3);
 	tri_mesh y_woven;
+	y_woven.vertices.resize(param.bisect_verts*path_verts_y);
 	for (int i = 0; i < path_verts_y; i++)
 	{
 		float	global_t = (float)i/(path_verts_y-1)*2;
@@ -46,7 +47,7 @@ void binder_woven2::generate_geom(const float density, const int num_area_hits_s
 		CatmullRom(p, t, pts[i_t], pts[i_t+1], pts[i_t+2], pts[i_t+3]);
 		int idx = i*param.bisect_verts;
 		for (int j = 0; j < param.bisect_verts; j++)
-			y_woven.vertices.push_back(bisect[j]+Vector3(p.x, p.y, p.z));
+			y_woven.vertices[idx + j] = (bisect[j] + Vector3(p.x, p.y, p.z));
 	}
 
 	for (int i = 0; i < path_verts_y-1; i++)
@@ -88,6 +89,7 @@ void binder_woven2::generate_geom(const float density, const int num_area_hits_s
 
 	int path_verts_x = max(param.total_path_verts / param.x_num, 3);
 	tri_mesh x_woven;
+	x_woven.vertices.resize(param.bisect_verts*path_verts_x);
 	for (int i = 0; i < path_verts_x; i++)
 	{
 		float	global_t = (float)i/(path_verts_x-1)*2;
@@ -96,8 +98,9 @@ void binder_woven2::generate_geom(const float density, const int num_area_hits_s
 
 		Vector3 p;
 		CatmullRom(p, t, pts[i_t], pts[i_t+1], pts[i_t+2], pts[i_t+3]);
+		int idx = i*param.bisect_verts;
 		for (int j = 0; j < param.bisect_verts; j++)
-			x_woven.vertices.push_back(bisect[j]+Vector3(p.x, p.y, p.z));
+			x_woven.vertices[idx + j] = (bisect[j] + Vector3(p.x, p.y, p.z));
 	}
 
 	for (int i = 0; i < path_verts_x-1; i++)

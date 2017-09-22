@@ -23,12 +23,12 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 	//Ward
 	//add_basis_matr(BASIS_MATR_WARD_0_20, MATR_PATH "Ward_0.20.txt");
 
-	add_basis_matr(BASIS_MATR_WARD_0_30, MATR_PATH "Ward_0.30.txt");
+	//add_basis_matr(BASIS_MATR_WARD_0_30, MATR_PATH "Ward_0.30.txt");
 
 	//add_basis_matr(BASIS_MATR_WARD_0_40, MATR_PATH "Ward_0.40.txt");
 	//add_basis_matr(BASIS_MATR_WARD_0_50, MATR_PATH "Ward_0.50.txt");
 	////BlinnPhong
-	//add_basis_matr(BASIS_MATR_PHONG_2, MATR_PATH "Phong_2.txt");
+	add_basis_matr(BASIS_MATR_PHONG_2, MATR_PATH "Phong_2.txt");
 	//add_basis_matr(BASIS_MATR_PHONG_4, MATR_PATH "Phong_4.txt");
 	//add_basis_matr(BASIS_MATR_PHONG_8, MATR_PATH "Phong_8.txt");
 	//add_basis_matr(BASIS_MATR_PHONG_16, MATR_PATH "Phong_16.txt");

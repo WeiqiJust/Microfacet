@@ -432,7 +432,7 @@ void r_skybox::get_energy(Vector3 &c, const geometry_differential &ir) const
 
 void r_skybox::sample_lights(std::vector<r_light_dir> &samples, const int num) const
 {
-	hammersley seq(num, 3);
+	hammersley seq(num);
 
 	samples.clear();
 	for (int i = 0; i < num; i++)
@@ -440,7 +440,7 @@ void r_skybox::sample_lights(std::vector<r_light_dir> &samples, const int num) c
 		geometry_differential light_d_geom;
 		//rt_ray	shadow_ray;
 		
-		float* re = seq.get_sample();
+		float* re = seq.get_sample(3);
 		Vector3	rv = Vector3(re[0], re[1], re[2]);
 		rv += Vector3(1e-8f, 1e-8f, 1e-8f);
 		rv.x = min(rv.x, 1);

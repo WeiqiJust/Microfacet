@@ -1,17 +1,40 @@
 # include "hammersley.h"
 
-hammersley::hammersley(int base_value, int dimention_value) : base(base_value), dimention(dimention_value)
+const int	prime_quasi[10] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 };
+
+float folded_radical_inverse(int n, int base)
+{
+	float	val = 0;
+	float	inv_base = (float)1 / base, inv_bi = inv_base;
+	int		mod_offset = 0;
+
+	while (val + base * inv_bi != val)
+	{
+		int digit = (n + mod_offset) % base;
+
+		val += digit * inv_bi;
+		n /= base;
+		inv_bi *= inv_base;
+		mod_offset++;
+	}
+
+	return val;
+}
+
+hammersley::hammersley(int dimention_value) : dimention(dimention_value), base(256)
 {
 	std::mt19937 rng;
 	rng.seed(std::random_device()());
-	std::uniform_int_distribution<std::mt19937::result_type> dist(1, base_value);
+	std::uniform_int_distribution<std::mt19937::result_type> dist(1, base);
 	iter = dist(rng);
+	i = 0;
 }
 
 
 
-float*hammersley::get_sample()
+float*hammersley::get_sample(int dim)
 {
+	/*
 	int d;
 	int j;
 	float *prime_inv;
@@ -59,6 +82,24 @@ float*hammersley::get_sample()
 	delete[] t;
 	iter++;
 	return r;
+	*/
+	if (dim > 0 && dim <= 10)
+	{
+		float* v;
+		v = new float[dim];
+
+		v[0] = (float)i / dimention;
+		for (int j = 1; j < dim; j++)
+			v[j] = folded_radical_inverse(i, prime_quasi[j - 1]);
+
+		i++;
+		return v;
+	}
+	else {
+		//FIX ME : report error
+		cout << "hammesy return null" << endl;
+		return NULL;
+	}
 }
 
 int hammersley::i4vec_sum(int n, int a[])

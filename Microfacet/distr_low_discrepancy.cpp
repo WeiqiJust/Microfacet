@@ -17,12 +17,12 @@ void distr_low_discrepancy::generate(std::vector<instance_property*> &results,
 {
 	int sz = (v_max.x - v_min.x)*(v_max.y - v_min.y)*param.density;
 
-	hammersley seq(sz, 2);
+	hammersley seq(sz);
 	for (int i = 0; i < sz; i++)
 	{
 		instance_property *p = new instance_property;
 		
-		float* result = seq.get_sample();
+		float* result = seq.get_sample(2);
 		Vector2 rv(result[0], result[1]);
 		p->id = M_ID_TEST_PARTICLE;
 		p->setup_matrix(
@@ -52,14 +52,14 @@ void distr_low_discrepancy_3d::generate(std::vector<instance_property*> &results
 	int sz = ceil((v_max.x - v_min.x)*(v_max.y - v_min.y)*avg_dim*param.relative_height_density*param.density);
 	float height_den = (v_max.z - v_min.z - param.scale * 2 - param.height) / avg_dim*param.relative_height_density;
 
-	hammersley seq(sz, 3);
+	hammersley seq(sz);
 
 	for (int i = 0; i < sz; i++)
 	{
 		instance_property *p = new instance_property;
 
 		
-		float* result = seq.get_sample();
+		float* result = seq.get_sample(3);
 		Vector3 rv(result[0], result[1], result[2]);
 		p->id = M_ID_TEST_PARTICLE;
 		p->setup_matrix(

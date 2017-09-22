@@ -17,7 +17,7 @@ void distr_rod::generate(std::vector<instance_property*> &results,
 {
 	int sz = (v_max.x - v_min.x)*(v_max.y - v_min.y)*param.density;
 
-	hammersley seq(sz, 2);
+	hammersley seq(sz);
 	random rng;
 
 	double	phi = (param.pd_phi / 360) * 2 * PI,
@@ -33,7 +33,7 @@ void distr_rod::generate(std::vector<instance_property*> &results,
 		instance_property *p = new instance_property;
 
 		Vector2 rv, v;
-		float* samples = seq.get_sample();
+		float* samples = seq.get_sample(2);
 		rv = Vector2(samples[0], samples[1]);
 		uniform_disk_sampling(v, Vector2(rng.get_random_float(), rng.get_random_float()));
 		v = v*param.randomness;

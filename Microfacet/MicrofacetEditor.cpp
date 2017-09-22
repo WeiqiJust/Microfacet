@@ -4,6 +4,7 @@
 #include "binder_groove.h"
 #include "distr_rod.h"
 #include "distr_low_discrepancy.h"
+#include "binder_woven.h"
 
 #define MAX_BACKGROUND_OBJ	10
 
@@ -290,7 +291,7 @@ void MicrofacetEditor::load_scene()
 		param_grid.x_space = 0.25;// 0.25;//10;//*3;
 		param_grid.y_space = 0.25;
 		param_grid.z_space =  0.25;//10;//*3;
-		param_grid.scale = 0.01;// 0.1;//0.004;
+		param_grid.scale = 0.001;// 0.1;//0.004;
 		param_grid.height = 0.01;
 		param_grid.name = "grid";
 		distr->set_param(param_grid);
@@ -298,43 +299,47 @@ void MicrofacetEditor::load_scene()
 		/*
 		distr_rod* distr = new distr_rod();
 		distr_rod_param param;
-		param.scale		= 0.01;
+		param.scale		= 0.1;
 		param.density	= 10;
 		param.randomness= 0.1;
-		param_grid.name = "rod";
+		param.name = "rod";
 		distr->set_param(param);*/
 
 		/*
 		distr_low_discrepancy_3d* distr = new distr_low_discrepancy_3d();
 		distr_low_discrepancy_3d_param param;
-		param.height	= 0.5;
-		param.scale		= 0.3;
-		param.density	= 5;
-		param.relative_height_density  = 1;
-		param_grid.name = "ld3d";
+		param.height	= 0.05;
+		param.scale = 0.1;
+		param.density	= 50;
+		param.relative_height_density  = 0.001;
+		param.name = "ld3d";
 		distr->set_param(param);*/
 		
-
-		
+		/*
 		binder_plane* binder = new binder_plane();
 		binder_plane_param param_plane;
 		param_plane.x_res = param_plane.y_res = 1;
 		param_plane.name = "plane";
-		binder->set_param(param_plane);
+		binder->set_param(param_plane);*/
 		
-		/*
+		
 		binder_groove_param param_binder = generate_binder_groove(0.1, 0.1);
 		param_binder.name = "groove";
 		binder_groove* binder = new binder_groove();
-		binder->set_param(param_binder);*/
+		binder->set_param(param_binder);
 
-		string dis_name = "grid_" + to_string(param_grid.x_space) + "_" + to_string(param_grid.y_space) + "_" + to_string(param_grid.z_space) + "_" +
-			to_string(param_grid.scale) + "_" + to_string(param_grid.height);
+		/*
+		binder_woven_param binder_param = generate_binder_woven(2, 2, 2, 8, 0.5, 0.5, 0.5, 0.5, 0.5, 0.01);
+		binder_woven* binder = new binder_woven();
+		binder->set_param(binder_param);*/
 
-		string binder_name = "grid_" + to_string(param_plane.x_res) + "_" + to_string(param_plane.y_res);
+		string dis_name = "grid_";// +to_string(param_grid.x_space) + "_" + to_string(param_grid.y_space) + "_" + to_string(param_grid.z_space) + "_" +
+		// to_string(param_grid.scale) + "_" + to_string(param_grid.height);
+
+		string binder_name = "plane_";// +to_string(param_plane.x_res) + "_" + to_string(param_plane.y_res);
 
 		details = new microfacet_details;
-		details->init(1, 1, 1.0, 50, 2, binder, distr);
+		details->init(1, 1, 10.0, 500, 16, binder, distr);
 		details->init_blocks(final_details);
 
 		details->idx_all(selection);
@@ -363,6 +368,7 @@ void MicrofacetEditor::load_scene()
 
 	final_details[details->compute_idx(0, 0)].BRDF_ref = BRDF_factory::produce("Ward", "0.3");
 	
+	
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_0");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_1");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_2");
@@ -382,10 +388,50 @@ void MicrofacetEditor::load_scene()
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_binder_2");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_03", "matr_binder_3");*/
 
+	/*
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_04", "matr_distr_0");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_04", "matr_distr_1");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_04", "matr_distr_2");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_04", "matr_distr_3");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_04", "matr_binder_0");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_04", "matr_binder_1");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_04", "matr_binder_2");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_04", "matr_binder_3");*/
+
+	/*
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_05", "matr_distr_0");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_05", "matr_distr_1");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_05", "matr_distr_2");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_05", "matr_distr_3");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_05", "matr_binder_0");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_05", "matr_binder_1");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_05", "matr_binder_2");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "ward_05", "matr_binder_3");*/
+
+	/*
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "CT_05", "matr_distr_0");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "CT_05", "matr_distr_1");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "CT_05", "matr_distr_2");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "CT_05", "matr_distr_3");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "CT_05", "matr_binder_0");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "CT_05", "matr_binder_1");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "CT_05", "matr_binder_2");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "CT_05", "matr_binder_3");*/
+
+	/*
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Phong_2", "matr_distr_0");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Phong_2", "matr_distr_1");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Phong_2", "matr_distr_2");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Phong_2", "matr_distr_3");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Phong_2", "matr_binder_0");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Phong_2", "matr_binder_1");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Phong_2", "matr_binder_2");
+	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Phong_2", "matr_binder_3");*/
+
 	set_num_shadows(32);
 	set_light_inten(50);
 	set_vis_light_inten(50);
-	tball_distant.init(Vector3(0.0f, 0.0f, 3.0f), Vector3(0.0f));
+	tball_distant.init(Vector3(0.0f, 0.0f, 3.0f), Vector3(0));
 	set_vis_mode();
 }
 

@@ -1,7 +1,7 @@
 #include "worker.h"
 
 
-#define PREFIX	"T:/Microfacet/animation/"
+#define PREFIX	"T:/Microfacet/output/animation/"
 
 #include "Magick++.h"
 using namespace Magick;

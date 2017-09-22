@@ -100,7 +100,7 @@ void r_geometry::load(const char *filename, Matrix4 *mat)
 	p_mesh = new tri_mesh_d3dx11(pdev->get_device());
 
 	p_mesh->load_obj(filename);
-	//p_mesh->invert_all_faces(); //from original code, do not understand why
+	p_mesh->invert_all_faces(); //from original code, do not understand why
 	if (mat)
 	{
 		for (int i = 0; i < p_mesh->get_vertex_number(); i++)
@@ -178,12 +178,12 @@ void r_geometry::sample_points(std::vector<Vector3> &points,
 	if (face_scalar.size() == 0)
 		face_scalar.assign(p_mesh->get_face_number(), 1.0f);
 
-	hammersley seq_face(num_samples, 1);
+	hammersley seq_face(num_samples);
 	//codex::math::prob::uniform_triangle_barycentric<float> prob_tri;
 	int n_sample = 0, write_pos = 0, next_face, face;
 
 	float rv;
-	rv = seq_face.get_sample()[0];
+	rv = seq_face.get_sample(1)[0];
 	rv = add_random_offset(rv, random_offset.x);
 	//rv = rng.rand_real_open();
 	face_sampler.sample(face, rv);
@@ -196,7 +196,7 @@ void r_geometry::sample_points(std::vector<Vector3> &points,
 		do {
 			if (num_samples > 4)
 			{
-				rv = seq_face.get_sample()[0];
+				rv = seq_face.get_sample(1)[0];
 				rv = add_random_offset(rv, random_offset.x);
 			}
 			else
@@ -206,7 +206,7 @@ void r_geometry::sample_points(std::vector<Vector3> &points,
 			n_sample++;
 		} while (next_face == face && n_sample < num_samples);
 
-		hammersley seq_uv(count, 1);
+		hammersley seq_uv(count);
 		for (int i = 0; i < count; i++)
 		{
 			Vector2 uv, rv2;
@@ -216,7 +216,7 @@ void r_geometry::sample_points(std::vector<Vector3> &points,
 				rv2.y = rng.get_random_float();
 			}
 			else {
-				rv2 = seq_uv.get_sample()[0];
+				rv2 = seq_uv.get_sample(1)[0];
 				rv2.x = add_random_offset(rv2.x, random_offset.x);
 				rv2.y = add_random_offset(rv2.y, random_offset.y);
 			}
@@ -277,10 +277,16 @@ void r_geometry::sample_points(std::vector<Vector3> &points,
 
 		Vector2 uv = Vector2(rng.get_random_float(), rng.get_random_float());
 		//prob_tri.sample(uv, pdf, Vector2(rng.rand_real(), rng.rand_real()));
+		{
+			float rt_u = sqrt(uv.x);
+
+			uv.x = 1 - rt_u;
+			uv.y = uv.y * rt_u;
+		}
 
 		float tu, tv, tw;
-		tu = 1 - sqrt(uv.x);;
-		tv = sqrt(uv.x) * (1 - uv.y);
+		tu = uv.x;
+		tv = uv.y;
 		tw = 1 - tu - tv;
 
 		const triangle_face f = p_mesh->faces[face];

@@ -296,6 +296,20 @@ void tri_mesh::calculate_tangent()
 
 }
 
+void tri_mesh::invert_face(const int fidx)
+{
+	int temp = faces[fidx].v1;
+
+	faces[fidx].v1 = faces[fidx].v3;
+	faces[fidx].v3 = temp;
+}
+
+void tri_mesh::invert_all_faces()
+{
+	for (int i = 0; i< faces.size(); i++)
+		invert_face(i);
+}
+
 void tri_mesh::mark_attribute()
 {
 	if (get_vertex_number())

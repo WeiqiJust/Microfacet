@@ -132,7 +132,7 @@ void MicrofacetEditor::render()
 	v_render_up = Vector3(0, 1, 0);
 	v_render_up -= (v_render_up*v_render_lookat)*v_render_lookat;
 	v_render_up.normalize();
-	v_render_right = v_render_up ^ v_render_lookat;
+	v_render_right = Cross(v_render_up, v_render_lookat);
 	v_render_right.normalize();
 	t->r.v_lookat = &v_render_lookat;
 	t->r.v_up = &v_render_up;
@@ -185,10 +185,11 @@ void MicrofacetEditor::debug_our_pixel()
 		v_render_up = Vector3(0, 1, 0);
 		v_render_up -= (v_render_up*v_render_lookat)*v_render_lookat;
 		v_render_up.normalize();
-		v_render_right = v_render_up ^ v_render_lookat;
+		v_render_right = Cross(v_render_up ,v_render_lookat);
 		v_render_right.normalize();
 		t->r.v_lookat = &v_render_lookat;
 		t->r.v_up = &v_render_up;
+		t->r.v_right = &v_render_right;
 
 		render_image(t);
 	}
@@ -339,7 +340,7 @@ void MicrofacetEditor::render_visualization()
 
 			trackball_param param;
 			param = tball_distant.get_params();
-			matrix_lookat(t->matView, param.eye, param.lookat, Vector3(0, 1, 0));
+			matrix_lookat(t->matView, Vector3(0, 0, 3), Vector3(0.5, 0.5, 0.5), Vector3(0, 1, 0));
 			t->matProj = mat_proj_vis_illu;
 
 			t->trv.p_block = &final_details[block_idx];
@@ -381,8 +382,8 @@ void MicrofacetEditor::gen_anim(const int subtype)
 
 	trackball_param param;
 	param = tball_distant.get_params();
-	v_global_eye = param.eye;// Vector3(0, 0, -10.0f);
-	v_global_at = param.lookat;// Vector3(0.0f);
+	v_global_eye =  Vector3(0, 0, -10.0f);
+	v_global_at = Vector3(0.0f);
 
 	task_microfacet *t = new task_microfacet;
 	shared_ptr<task> t_done;

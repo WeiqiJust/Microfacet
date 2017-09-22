@@ -44,9 +44,9 @@ int main()
 {
 	MicrofacetEditor m_editor;
 	
-	render(m_editor);
+	//render(m_editor);
 
-	//render_ground_truth(m_editor);
+	render_ground_truth(m_editor);
 
 	//render_animation(m_editor);
 

@@ -79,7 +79,7 @@ void cubemap::save_obj(const char *filename, const tri_mesh &mesh) const
 
 	for (int i = 0; i < m.get_vertex_number(); i++)
 	{
-		hammersley seq(CUBEMAP_SUBSAMPLE, 2);
+		hammersley seq(CUBEMAP_SUBSAMPLE);
 		Vector3 dir = m.normals[i];
 		
 		Vector3 t, b;
@@ -89,7 +89,7 @@ void cubemap::save_obj(const char *filename, const tri_mesh &mesh) const
 		for (int j = 0; j < CUBEMAP_SUBSAMPLE; j++)
 		{
 			Vector2 temp, rv;
-			float *re = seq.get_sample();
+			float *re = seq.get_sample(2);
 			rv = Vector2(re[0], re[1]);
 			uniform_disk_sampling(temp, rv);
 
@@ -192,7 +192,7 @@ void hemi_cubemap::save_obj(const char *filename, const tri_mesh &mesh) const
 
 	for (int i = 0; i < m.get_vertex_number(); i++)
 	{
-		hammersley seq(CUBEMAP_SUBSAMPLE, 2);
+		hammersley seq(CUBEMAP_SUBSAMPLE);
 		Vector3 dir = m.normals[i];
 
 		Vector3 t, b;
@@ -202,7 +202,7 @@ void hemi_cubemap::save_obj(const char *filename, const tri_mesh &mesh) const
 		for (int j = 0; j < CUBEMAP_SUBSAMPLE; j++)
 		{
 			Vector2 temp, rv;
-			float *re = seq.get_sample();
+			float *re = seq.get_sample(2);
 			rv = Vector2(re[0], re[1]);
 			uniform_disk_sampling(temp, rv);
 

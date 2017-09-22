@@ -68,7 +68,7 @@ void binder_groove::generate_geom(const float density, const int num_area_hits_s
 	{
 		int offset = i*4;
 		hill.faces.push_back(triangle_face(2 + offset, 1 + offset, 0 + offset));
-		hill.faces.push_back(triangle_face(3 + offset, 1 + offset, 1 + offset));
+		hill.faces.push_back(triangle_face(3 + offset, 1 + offset, 2 + offset));
 	}
 
 	/* Original normals calculation
