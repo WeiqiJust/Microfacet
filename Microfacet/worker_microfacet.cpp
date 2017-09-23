@@ -453,7 +453,7 @@ void worker_microfacet::work_task_render_block(task_microfacet *t_org, qrender_b
 				{
 					wo.z = MIN_WO_Z;
 					wo = Normalize(wo);
-				}*/
+				*/
 
 				//FIX ME: huge bug here!
 				int idx_block = t.details->compute_idx(0, 0);

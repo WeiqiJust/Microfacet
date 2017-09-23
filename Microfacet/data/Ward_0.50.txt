@@ -1,0 +1,6 @@
+ward_05
+0.5
+T:/ProMaterial/material/Ward_0.50_30_15_99.preconv_material
+Ward
+0.5
+

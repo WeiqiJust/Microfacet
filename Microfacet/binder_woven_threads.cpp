@@ -123,7 +123,7 @@ void binder_woven_threads::generate_geom(const float density, const int num_area
 	g = new r_geometry(mff_singleton::get()->get_handle());
 	g->load(&y_woven_threads);
 	mff_singleton::get()->assign_geom("bd_thread_y", shared_ptr<r_geometry>(g));
-
+	y_woven_threads.save_obj("T:/Microfacet/output/y_woven.obj");
 	//x_woven_threads
 	//for (int i = 0; i < param.bisect_verts; i++)
 	//{
@@ -187,7 +187,7 @@ void binder_woven_threads::generate_geom(const float density, const int num_area
 
 		x_woven_threads.normals[i] = x_woven_threads.normals[idx+i] = n;
 	}
-
+	x_woven_threads.save_obj("T:/Microfacet/output/x_woven.obj");
 	g = new r_geometry(mff_singleton::get()->get_handle());
 	g->load(&x_woven_threads);
 	mff_singleton::get()->assign_geom("bd_thread_x", shared_ptr<r_geometry>(g));

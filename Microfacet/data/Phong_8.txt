@@ -1,0 +1,7 @@
+Phong_8
+0.5
+T:/ProMaterial/material/Phong_8_30_15_99.preconv_material
+BlinnPhong
+8
+
+

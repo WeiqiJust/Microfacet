@@ -60,7 +60,7 @@ void binder_brick::generate_geom(const float density, const int num_area_hits_sc
 	g = new r_geometry(mff_singleton::get()->get_handle());
 	g->load(&bottom);
 	mff_singleton::get()->assign_geom("bd_brick_b", std::shared_ptr<r_geometry>(g));
-
+	g->get_mesh()->save_obj("T:/Microfacet/output/brick_bottom.obj");
 	//slope
 	std::vector<Vector3> slope_vertice;
 	int slope_vert[] = {0, 4, 2, 6, 6, 7, 2, 3, 5, 1, 7, 3, 0, 1, 4, 5};
@@ -80,7 +80,7 @@ void binder_brick::generate_geom(const float density, const int num_area_hits_sc
 	g = new r_geometry(mff_singleton::get()->get_handle());
 	g->load(&slope);
 	mff_singleton::get()->assign_geom("bd_brick_s", std::shared_ptr<r_geometry>(g));
-
+	g->get_mesh()->save_obj("T:/Microfacet/output/brick_slope.obj");
 	//top
 	std::vector<Vector3> top_vertice, top_normals;
 	for (int i = 0; i < 4; i++)
@@ -92,12 +92,12 @@ void binder_brick::generate_geom(const float density, const int num_area_hits_sc
 	top_face.push_back(triangle_face(0, 1, 2));
 	top_face.push_back(triangle_face(3, 2, 1));
 
-	tri_mesh top(slope_vertice, top_normals, slope_face);
+	tri_mesh top(top_vertice, top_normals, top_face);
 
 	g = new r_geometry(mff_singleton::get()->get_handle());
 	g->load(&top);
 	mff_singleton::get()->assign_geom("bd_brick_t", std::shared_ptr<r_geometry>(g));
-
+	g->get_mesh()->save_obj("T:/Microfacet/output/brick_top.obj");
 	//prcessing geom_hierarchy
 	char name[3][32] = {"bd_brick_b", "bd_brick_s", "bd_brick_t"};
 

@@ -1,0 +1,5 @@
+Phong_4
+0.5
+T:/ProMaterial/material/Phong_4_26_12_99.preconv_material
+BlinnPhong
+4

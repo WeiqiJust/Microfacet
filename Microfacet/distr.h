@@ -19,14 +19,12 @@ class distr_grid_param
 public:
 	float	x_space, y_space, z_space,
 		scale, height;
-	string name;
 };
 
 class distr_low_discrepancy_param
 {
 public:
 	float	density, scale, height;
-	string name;
 };
 
 class distr_low_discrepancy_3d_param
@@ -34,7 +32,6 @@ class distr_low_discrepancy_3d_param
 public:
 	float	density, relative_height_density,
 		scale, height;
-	string name;
 };
 
 
@@ -43,5 +40,4 @@ class distr_rod_param
 public:
 	float	density, randomness, scale,
 		pd_phi, pd_theta;
-	string name;
 };

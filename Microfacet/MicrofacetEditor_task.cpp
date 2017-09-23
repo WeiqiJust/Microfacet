@@ -340,7 +340,7 @@ void MicrofacetEditor::render_visualization()
 
 			trackball_param param;
 			param = tball_distant.get_params();
-			matrix_lookat(t->matView, Vector3(0, 0, 3), Vector3(0.5, 0.5, 0.5), Vector3(0, 1, 0));
+			matrix_lookat(t->matView, Vector3(0, 0, 3), Vector3(0, 0, 0), Vector3(0, 1, 0));
 			t->matProj = mat_proj_vis_illu;
 
 			t->trv.p_block = &final_details[block_idx];

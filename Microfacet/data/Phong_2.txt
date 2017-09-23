@@ -1,0 +1,5 @@
+Phong_2
+0.5
+T:/ProMaterial/material/Phong_2_19_12_99.preconv_material
+BlinnPhong
+2

@@ -1,0 +1,6 @@
+CT_05
+0.5
+T:/ProMaterial/material/CT_0.5_30_19_99.preconv_material
+CookTorrance
+0.5 0.25
+
