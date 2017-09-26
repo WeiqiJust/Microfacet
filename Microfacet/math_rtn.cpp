@@ -217,7 +217,7 @@ void SVD_Vt_L1(la_matrix<number> &result_Vt,
 	}
 	num_eigen = min(num_eigen, lamda.length);
 	//num_eigen = 4;
-	printf_s("SVD : %d / %d\n", num_eigen, lamda.length);
+	//printf_s("SVD : %d / %d\n", num_eigen, lamda.length);
 
 	//////////////////
 	//for (int i = 0; i < lamda.length; i++)

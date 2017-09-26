@@ -220,10 +220,10 @@ void save_image_color(const char *filename, std::vector<float> &img, int w, int 
 
 void save_image(const char *filename, UINT *data, int w, int h)
 {
-	Magick::Image im(Magick::Geometry(w, h), Magick::Color(0, 0, 0));
+	Magick::Image im(Magick::Geometry(128, 128), Magick::Color(0, 0, 0));
 
-	for (int y = 0; y < h; y++)
-		for (int x = 0; x < w; x++)
+	for (int y = 64; y < 192; y++)
+		for (int x = 64; x < 192; x++)
 		{
 			UINT	c = data[x + y*w];
 			float	r = ((c >> 16) & 0xFF) / 255.0f,
@@ -231,7 +231,7 @@ void save_image(const char *filename, UINT *data, int w, int h)
 				b = ((c)& 0xFF) / 255.0f;
 			//cout << "r = " << r << " g = " << g << " b = " << b << endl;
 			//cout << data[x + y*w] << endl;
-			im.pixelColor(x, y, Magick::Color(r* (unsigned short)65535, g* (unsigned short)65535, b* (unsigned short)65535));
+			im.pixelColor(x-64, y-64, Magick::Color(r* (unsigned short)65535, g* (unsigned short)65535, b* (unsigned short)65535));
 		}
 	im.write(filename);
 }

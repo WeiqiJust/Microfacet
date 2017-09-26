@@ -68,6 +68,8 @@ public:
 	void generate_microfacet_details(microfacet_binder* binder, microfacet_distr* distr, int w, int h,
 		float d, float dens, int num_area, string binder_name, string distr_name, bool save_mesh);
 
+	void set_view_direction(const Vector3 eye) { tball_distant.init(eye, Vector3(0)); }
+
 	void compute_microfacet_change();
 
 	void render_buffer();
@@ -93,6 +95,8 @@ public:
 	void render_raytrace();
 
 	void update_render();
+
+	void update_render(const string filename);
 
 private:
 

@@ -16,6 +16,8 @@
 #include <windows.h>
 #include <D3Dcommon.h>
 #include <stdio.h>
+#include <sstream>
+#include <iomanip>
 #include "mathutils.h"
 
 #define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
@@ -193,6 +195,13 @@ void save_image(const char *filename, UINT *data, int w, int h);
 HRESULT CompileShaderFromFile(char* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 
 float snorm2float(short a);
+
+inline std::string precision(const float a_value, const int n = 3)
+{
+	std::ostringstream out;
+	out << std::setprecision(n) << a_value;
+	return out.str();
+}
 
 inline float add_random_offset(const float v, const float offset)
 {

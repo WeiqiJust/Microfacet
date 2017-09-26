@@ -247,7 +247,7 @@ void MicrofacetEditor::load_sky_box(const string texture_file, const int mip_lev
 	init_vars();
 	set_num_shadows(32);
 	set_light_inten(80);
-	set_vis_light_inten(50);
+	set_vis_light_inten(70);
 }
 
 void MicrofacetEditor::load_material(Vector3 albedo, const string basic_material, const string binder_id, const string dist_id)

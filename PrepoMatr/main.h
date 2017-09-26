@@ -7,8 +7,6 @@
 #define SPHERICAL_AREA_SAMPLES	16000000
 #define SVD_QUALITY				0.99
 
-
-
 using namespace std;
 
 using codex::math::utils::random_number_generator;

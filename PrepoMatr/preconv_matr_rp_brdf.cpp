@@ -125,6 +125,7 @@ void preconv_matr_rp_brdf(const char *filename_prefix,
 						brdf->sample(result, fr_brdf.get_n()[k0][0], wo, n);
 
 						//DEBUG
+						/*
 						if (i0 == 510 && brdf_idx(k0, j0) == 12873)
 						{
 							vector3f temp = result;
@@ -138,7 +139,7 @@ void preconv_matr_rp_brdf(const char *filename_prefix,
 							temp.y = exp(temp.y)-1.0f;
 							temp.z = exp(temp.z)-1.0f;
 							printf_s("r  : %g %g %g\n", temp.x, temp.y, temp.z);
-						}
+						}*/
 
 						if (result.x != 0 || result.y != 0 || result.z != 0)
 							num_non_zero_elements++;
@@ -152,6 +153,7 @@ void preconv_matr_rp_brdf(const char *filename_prefix,
 			dscal(&len, &weight, &A_columns.m[(i0-i_start)*A_columns.row], &inc_one);
 
 			//DEBUG
+			/*
 			if (i0 == 510)
 			{
 				printf_s("-------------------\n");
@@ -166,7 +168,7 @@ void preconv_matr_rp_brdf(const char *filename_prefix,
 				result.y = exp(result.y)-1.0f;
 				result.z = exp(result.z)-1.0f;
 				printf_s("avg: %g %g %g\n", result.x, result.y, result.z);
-			}
+			}*/
 
 			//compute average
 			double alpha = 1.0 / num_n;
@@ -404,6 +406,7 @@ void preconv_matr_rp_brdf(const char *filename_prefix,
 					brdf->sample(result, fr_brdf.get_n()[k0][0], wo, n);
 
 					//DEBUG
+					/*
 					if (i0 == 510 && brdf_idx(k0, j0) == 12873)
 					{
 						printf_s("-------------------\n");
@@ -417,7 +420,7 @@ void preconv_matr_rp_brdf(const char *filename_prefix,
 						temp.y = exp(temp.y)-1.0f;
 						temp.z = exp(temp.z)-1.0f;
 						printf_s("r  : %g %g %g\n", temp.x, temp.y, temp.z);
-					}
+					}*/
 
 					//result -= avgc;
 					A_column.v[brdf_idx(k0,j0)] += (result*Mc)*area[j0]*area[k0]*n_area[i0];
@@ -441,6 +444,7 @@ void preconv_matr_rp_brdf(const char *filename_prefix,
 		}
 
 		//DEBUG
+		/*
 		if (i0 == 510)
 		{
 			vector3f result;
@@ -466,11 +470,11 @@ void preconv_matr_rp_brdf(const char *filename_prefix,
 			result.y = exp(result.y)-1.0f;
 			result.z = exp(result.z)-1.0f;
 			printf_s("recon: %g %g %g\n", result.x, result.y, result.z);
-		}
+		}*/
 	}
 	printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
 	printf("done.                \n");
-	//printf_s("SNR = %gdb\n", double2db(power_s/power_e));
+	printf_s("SNR = %gdb\n", double2db(power_s/power_e));
 	printf_s("========================\n");
 }
 

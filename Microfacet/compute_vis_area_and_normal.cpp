@@ -260,16 +260,16 @@ void compute_vis_area_and_normal(microfacet_details &details,
 			}
 			//t.update();
 			//printf_s("depth %gsecs\n", t.elapsed_time());
-			printf_s("depth map generation finished\n");
+		//	printf_s("depth map generation finished\n");
 			//*****************************************************
 
 			//*****************************************************
 			// Sample object-space points
 			//*****************************************************
-			printf_s("getting samples...");
+			//printf_s("getting samples...");
 			details.get_samples(samples, samp_idx, block);
 			total_pts = samp_idx[samp_idx.size()-1];
-			printf_s("done.\n");
+			//printf_s("done.\n");
 			//t.update();
 			//printf_s("pts %gsecs\n", t.elapsed_time());
 			//*****************************************************
@@ -299,7 +299,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 				if (mat_vis[i] != 0)
 					count++;
 			}
-			printf_s("vis generation mat_vis non-zero size = %d\n", count);
+			//printf_s("vis generation mat_vis non-zero size = %d\n", count);
 			//*****************************************************
 
 			//*****************************************************
@@ -312,7 +312,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 				SVD_scalar, inv_SVD_scalar, area, samples, x, y, avis_sampler);
 			//t.update();
 			//printf_s("Avis %gsecs\n", t.elapsed_time());
-			printf_s("Avis generation\n");
+			//printf_s("Avis generation\n");
 
 			//Group samples that have the same basis materials
 			int last_basis_id = -1;
@@ -454,10 +454,10 @@ void compute_vis_area_and_normal(microfacet_details &details,
 					if (mat_vis_n.m[z] != 0.0f)
 						count_num++;
 				}
-				cout << "mat_vis_n non-zero number = " << count_num << endl;
+				//cout << "mat_vis_n non-zero number = " << count_num << endl;
 				//t.update();
 				//printf_s("mat_vis %d pts %gsecs\n", batch_pt_size, t.elapsed_time());
-				printf_s("mat_vis %d pts\n", batch_pt_size);
+				//printf_s("mat_vis %d pts\n", batch_pt_size);
 
 				////MnVm
 				//matrix_mul(vis_normal.MnVm, mat_vis_n, basis_matr->Vm);
@@ -478,7 +478,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 					);
 				//t.update();
 				//printf_s("SVD (%d, %d) %gsecs\n", mat_vis_n.row, mat_vis_n.column, t.elapsed_time());
-				printf_s("SVD (%d, %d) \n", mat_vis_n.row, mat_vis_n.column);
+				//printf_s("SVD (%d, %d) \n", mat_vis_n.row, mat_vis_n.column);
 
 				vis_normal.avgn.release();
 				vis_normal.avgn = avg_n_distr;
@@ -533,7 +533,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 #endif
 				//t.update();
 				//printf_s("after SVD %gsecs\n", t.elapsed_time());
-				printf_s("after SVD \n");
+				//printf_s("after SVD \n");
 				//bake BRDF
 				vis_normal.compute_BRDF(fr_vis, &inv_SVD_scalar[0]);
 				//vis_normal.compute_BRDF_direct(fr_vis);

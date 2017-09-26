@@ -29,12 +29,13 @@ void test_matr()
 	{
 		Lambert_interface brdf;
 		compute_color_matrix(M, 16, 256, 16, 256, &brdf);
-	//	//int dim_n, dim_brdf;
-	//	//test_sampling_rate(dim_n, dim_brdf, &brdf, M, 20, 17);
+		//int dim_n, dim_brdf;
+		//test_sampling_rate(dim_n, dim_brdf, &brdf, M, 17, 17);
 		preconv_matr_rp_brdf("T:/ProMaterial/material/Lambert.preconv_material", 
 			16, 64,
 			12, 64, DEFAULT_AREA_SAMPLES, &brdf, 
 			84,	SVD_QUALITY, M);
+
 	}
 
 	////For SNR = 17db, n: 15  BRDF: 12 Time = 31.91secs
@@ -719,7 +720,7 @@ void sample_BlinnPhong()
 		BlinnPhong_interface brdf(2.0);
 		compute_color_matrix(M, 16, 256, 16, 256, &brdf);
 
-		preconv_matr_rp_brdf("T:/ProMaterial/material/Phong_2_log", 
+		preconv_matr_rp_brdf("T:/ProMaterial/material/Phong_2", 
 			19, 32,
 			12, 64, DEFAULT_AREA_SAMPLES, &brdf, 
 			128, SVD_QUALITY, M);
@@ -729,7 +730,7 @@ void sample_BlinnPhong()
 		BlinnPhong_interface brdf(4.0);
 		compute_color_matrix(M, 16, 256, 16, 256, &brdf);
 
-		preconv_matr_rp_brdf("T:/ProMaterial/material/Phong_4_log", 
+		preconv_matr_rp_brdf("T:/ProMaterial/material/Phong_4", 
 			26, 32,
 			12, 64, DEFAULT_AREA_SAMPLES, &brdf, 
 			128, SVD_QUALITY, M);
@@ -739,7 +740,7 @@ void sample_BlinnPhong()
 		BlinnPhong_interface brdf(8.0);
 		compute_color_matrix(M, 16, 256, 16, 256, &brdf);
 
-		preconv_matr_rp_brdf("T:/ProMaterial/material/Phong_8_log", 
+		preconv_matr_rp_brdf("T:/ProMaterial/material/Phong_8", 
 			30, 16,
 			15, 64, DEFAULT_AREA_SAMPLES, &brdf, 
 			180, SVD_QUALITY, M);
@@ -751,7 +752,7 @@ void sample_BlinnPhong()
 
 		//int dim_n, dim_brdf;
 		//test_sampling_rate(dim_n, dim_brdf, &brdf, M, 20, 17);
-		preconv_matr_rp_brdf("T:/ProMaterial/material/Phong_16_log", 
+		preconv_matr_rp_brdf("T:/ProMaterial/material/Phong_16", 
 			41, 8,
 			19, 64, DEFAULT_AREA_SAMPLES, &brdf, 
 			300, SVD_QUALITY, M);
@@ -763,7 +764,7 @@ void sample_BlinnPhong()
 
 		//int dim_n, dim_brdf;
 		//test_sampling_rate(dim_n, dim_brdf, &brdf, M, 20, 17);
-		preconv_matr_rp_brdf("T:/ProMaterial/material/Phong_32_log", 
+		preconv_matr_rp_brdf("T:/ProMaterial/material/Phong_32", 
 			55, 4,
 			26, 64, DEFAULT_AREA_SAMPLES, &brdf, 
 			500, SVD_QUALITY, M);
@@ -790,15 +791,17 @@ void sample_Ward()
 		Ward_interface brdf(0.5);
 		compute_color_matrix(M, 16, 256, 16, 256, &brdf);
 
-	//	//int dim_n, dim_brdf;
-	//	//test_sampling_rate(dim_n, dim_brdf, &brdf, M, 20, 17);
+		int dim_n, dim_brdf;
+		test_sampling_rate(dim_n, dim_brdf, &brdf, M, 20, 17);
 	//	//preconv_matr_rp_brdf("d:/temp/Microfacet/material/HQ/Ward_0.50_34_15_98.preconv_material", 
 		preconv_matr_rp_brdf("T:/ProMaterial/material/Ward_0.50", 
-			30, 16,
+			34, 16,
 			15, 64, DEFAULT_AREA_SAMPLES, &brdf, 
 			200, SVD_QUALITY, M);
 	}
+	
 	cout << "finish ward 0.5" << endl;
+	/*
 	{
 		Ward_interface brdf(0.4);
 	//	//resample_brdf("d:/temp/Microfacet/material/Ward_0.4.brdf", 
@@ -821,10 +824,10 @@ void sample_Ward()
 		//test_sampling_rate(dim_n, dim_brdf, &brdf, M, 20, 17);
 		preconv_matr_rp_brdf("T:/ProMaterial/material/Ward_0.30", 
 			48, 4,
-			22, 64, DEFAULT_AREA_SAMPLES, &brdf, 
+			26, 64, DEFAULT_AREA_SAMPLES, &brdf, 
 			600, SVD_QUALITY, M);
 	}
-	cout << "finish ward 0.3" << endl;
+	cout << "finish ward 0.3" << endl;*/
 	{
 		Ward_interface brdf(0.2);
 		compute_color_matrix(M, 16, 256, 16, 256, &brdf);
@@ -841,6 +844,73 @@ void sample_Ward()
 
 	//	//compute_nonzero_elements(63, 4,	34, 16, DEFAULT_AREA_SAMPLES, &brdf);
 	}
+}
+
+
+void sample_Ward_extra()
+{
+	vector3f M;
+
+	{
+		Ward_interface brdf(0.6);
+		compute_color_matrix(M, 16, 256, 16, 256, &brdf);
+
+		//int dim_n, dim_brdf;
+		//test_sampling_rate(dim_n, dim_brdf, &brdf, M, 20, 17);
+		//	//preconv_matr_rp_brdf("d:/temp/Microfacet/material/HQ/Ward_0.50_34_15_98.preconv_material", 
+		
+		preconv_matr_rp_brdf("T:/ProMaterial/material/Ward_0.60",
+			30, 64,
+			15, 64, DEFAULT_AREA_SAMPLES, &brdf,
+			200, SVD_QUALITY, M);
+	}
+	cout << "finish ward 0.6" << endl;
+	
+	{
+		Ward_interface brdf(0.7);
+		compute_color_matrix(M, 16, 256, 16, 256, &brdf);
+
+		//int dim_n, dim_brdf;
+		//test_sampling_rate(dim_n, dim_brdf, &brdf, M, 20, 17);
+		//	//preconv_matr_rp_brdf("d:/temp/Microfacet/material/HQ/Ward_0.50_34_15_98.preconv_material", 
+
+		preconv_matr_rp_brdf("T:/ProMaterial/material/Ward_0.70",
+			26, 64,
+			12, 64, DEFAULT_AREA_SAMPLES, &brdf,
+			200, SVD_QUALITY, M);
+	}
+	cout << "finish ward 0.7" << endl;
+
+	{
+		Ward_interface brdf(0.8);
+		compute_color_matrix(M, 16, 256, 16, 256, &brdf);
+
+		//int dim_n, dim_brdf;
+		//test_sampling_rate(dim_n, dim_brdf, &brdf, M, 20, 17);
+		//	//preconv_matr_rp_brdf("d:/temp/Microfacet/material/HQ/Ward_0.50_34_15_98.preconv_material", 
+
+		preconv_matr_rp_brdf("T:/ProMaterial/material/Ward_0.80",
+			22, 64,
+			12, 64, DEFAULT_AREA_SAMPLES, &brdf,
+			160, SVD_QUALITY, M);
+	}
+	cout << "finish ward 0.8" << endl;
+
+	{
+		Ward_interface brdf(0.9);
+		compute_color_matrix(M, 16, 256, 16, 256, &brdf);
+
+		//int dim_n, dim_brdf;
+		//test_sampling_rate(dim_n, dim_brdf, &brdf, M, 20, 17);
+		//	//preconv_matr_rp_brdf("d:/temp/Microfacet/material/HQ/Ward_0.50_34_15_98.preconv_material", 
+
+		preconv_matr_rp_brdf("T:/ProMaterial/material/Ward_0.90",
+			22, 64,
+			12, 64, DEFAULT_AREA_SAMPLES, &brdf,
+			160, SVD_QUALITY, M);
+	}
+	cout << "finish ward 0.9" << endl;
+
 }
 
 void sample_CT()
@@ -900,15 +970,15 @@ void compute_scalar()
 
 void main()
 {
-	parab_frame fr;
-	fr.init(12, 400, 400);
-	printf_s("%d\n", fr.get_n().size());
+	//parab_frame fr;
+	//fr.init(12, 400, 400);
+	//printf_s("%d\n", fr.get_n().size());
 	//return;
 	//test_matr();
 	//compute_scalar();
 	//sample_BlinnPhong();
-	sample_CT();
-	cout << "finish CT" << endl;
-	sample_Ward();
+	//sample_CT();
+	//sample_Ward();
+	sample_Ward_extra();
 }
 

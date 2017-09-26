@@ -12,15 +12,8 @@
 #include "binder_woven_threads.h"
 #include "binder_woven2.h"
 
-#include <sstream>
-#include <iomanip>
 
-std::string precision(const float a_value, const int n = 3)
-{
-	std::ostringstream out;
-	out << std::setprecision(n) << a_value;
-	return out.str();
-}
+
 
 void MicrofacetEditor::generate_mesh(const string filename, const Matrix4 mat)
 {
@@ -58,7 +51,7 @@ microfacet_distr* MicrofacetEditor::generate_distr_grid(const float x, const flo
 	param_grid.z_space = z;
 	param_grid.scale = scale;
 	param_grid.height = height;
-	distr_name = "grid_" + precision(x) + "_" + precision(y) + "_" + precision(z) + "_" + precision(scale) + "_" + precision(height);
+	//distr_name = "grid_" + precision(x) + "_" + precision(y) + "_" + precision(z) + "_" + precision(scale) + "_" + precision(height);
 	dist->set_param(param_grid);
 	return dist;
 }
@@ -276,7 +269,7 @@ void MicrofacetEditor::generate_microfacet_details(microfacet_binder* binder, mi
 	{
 		tri_mesh mesh;
 		save_details_as_obj("T:/Microfacet/output/", mesh, distr_name, binder_name, final_details);
-		printf_s("finish save obj.\n");
+		//printf_s("finish save obj.\n");
 	}
 }
 

@@ -382,7 +382,7 @@ void MicrofacetEditor::gen_anim(const int subtype)
 
 	trackball_param param;
 	param = tball_distant.get_params();
-	v_global_eye =  Vector3(0, 0, -10.0f);
+	v_global_eye =  Vector3(0, 0, -3.0f);
 	v_global_at = Vector3(0.0f);
 
 	task_microfacet *t = new task_microfacet;
@@ -467,6 +467,40 @@ void MicrofacetEditor::update_render()
 		//t_frame.update();
 		cout << "finish rendering." << endl;
 		save_image("T:/Microfacet/output/img_render.png", p->r.result, p->width, p->height);
+		break;
+	case TASK_TYPE_VISUALIZATION:
+		save_image("T:/Microfacet/output/img_detail.png", p->trv.result, p->width, p->height);
+		break;
+	case TASK_TYPE_BUFFER:
+		b_buffer_ready = true;
+		b_render_image = true;
+		break;
+	case TASK_TYPE_GROUND_TRUTH:
+		cout << "finish rendering." << endl;
+		save_image("T:/Microfacet/output/img_ground_truth.png", p->trt.result, p->width, p->height);
+		break;
+	case TASK_TYPE_GROUND_TRUTH_DIRECT:
+	case TASK_TYPE_RENDER_REF_BRDF:
+	case TASK_TYPE_DEBUG_RAYTRACE:
+		save_image("T:/Microfacet/output/img_ref_brdf.png", p->trt.result, p->width, p->height);
+		break;
+	}
+}
+
+
+void MicrofacetEditor::update_render(const string filename)
+{
+	shared_ptr<task> t_done;
+	while (!p_manager->get_result(t_done))
+	{
+		Sleep(1);
+	}
+	task_microfacet* p = (task_microfacet*)(t_done.get());
+	switch (p->type)
+	{
+	case TASK_TYPE_RENDER:
+	case TASK_TYPE_RENDER_BEFORE_SVD:
+		save_image(filename.c_str(), p->r.result, p->width, p->height);
 		break;
 	case TASK_TYPE_VISUALIZATION:
 		save_image("T:/Microfacet/output/img_detail.png", p->trv.result, p->width, p->height);

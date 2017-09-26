@@ -73,7 +73,6 @@ void worker_microfacet::work_task_microfacet_changed(task_microfacet *t)
 	task_microfacet_changed &tmc = t->tmc;
 	if (tmc.sub_type & TASK_SUBTYPE_GEN_DISTR)
 	{
-		cout << "microfacet_changed::TASK_SUBTYPE_GEN_DISTR" << endl;
 		tmc.details->update_with_distr(*tmc.idx);
 		tmc.details->generate_blocks(*tmc.idx, *tmc.blocks);
 		tmc.details->sample_points(*tmc.idx, *tmc.blocks);
@@ -81,7 +80,6 @@ void worker_microfacet::work_task_microfacet_changed(task_microfacet *t)
 
 	if (tmc.sub_type & TASK_SUBTYPE_VIS_NORMAL)
 	{
-		cout << "microfacet_changed::TASK_SUBTYPE_VIS_NORMAL" << endl;
 		compute_vis_area_and_normal(
 			*tmc.details, *tmc.idx, *tmc.blocks,
 			*tmc.fr_Avis, *tmc.fr_vis,
@@ -169,6 +167,7 @@ void worker_microfacet::work_task_buffer(task_microfacet *t_org)
 	}*/
 	
 	t.p_screen->get_rt(0)->get_result((BYTE*)t.p_uv, 8);
+	/*
 	int count_uv = 0, count_normal = 0, count_tangent = 0;
 	for (int i = 0; i < 256 * 256; i++)
 	{
@@ -178,29 +177,30 @@ void worker_microfacet::work_task_buffer(task_microfacet *t_org)
 			count_uv++;
 		}
 	}
-	cout << "The numbe of non default pixel uv = " << count_uv << endl;
+	cout << "The numbe of non default pixel uv = " << count_uv << endl;*/
 	
 	t.p_screen->get_rt(1)->get_result((BYTE*)t.p_normal, 8);
+	/*
 	for (int i = 0; i < 256 * 256; i++)
 	{
 		if (t.p_normal[i * 4] != 0.0f ||  t.p_normal[i * 4 + 1] != 0.0f || t.p_normal[i * 4+2] != 0.0f)
 			//cout << "render result test " << t.p_uv[i * 2] << " " << t.p_uv[i * 2 + 1] << endl;
 			count_normal++;
 	}
-	cout << "The numbe of non default pixel normal = " << count_normal << endl;
+	cout << "The numbe of non default pixel normal = " << count_normal << endl;*/
 	t.p_screen->get_rt(2)->get_result((BYTE*)t.p_tangent, 8);
-
+	/*
 	for (int i = 0; i < 256 * 256; i++)
 	{
 		if (t.p_tangent[i * 4] != 0.0f || t.p_tangent[i * 4+1] != 0.0f || t.p_tangent[i * 4+2] != 0.0f)
 			//cout << "render result test " << t.p_uv[i * 2] << " " << t.p_uv[i * 2 + 1] << endl;
 			count_tangent++;
 	}
-	cout << "The numbe of non default pixel tangent = " << count_tangent << endl;
+	cout << "The numbe of non default pixel tangent = " << count_tangent << endl;*/
 	
 	//tm.update();
 	//printf_s("#1 : %7.4f ", tm.elapsed_time());
-	printf_s("work_task_buffer #1 \n");
+	//printf_s("work_task_buffer #1 \n");
 
 //**************************
 //#2 : Shadow pass
@@ -250,15 +250,10 @@ void worker_microfacet::work_task_buffer(task_microfacet *t_org)
 		//This read-in is causing a lot of delay. Try to avoid this.
 		t.p_screen->get_rt(0)->get_result((BYTE*)&t.p_vis_buffer[t_org->width*t_org->height*batch], 4);
 	}
-	int count = 0;
-	for (int i = 0; i < 256 * 256 * 2; i++)
-		if (t.p_vis_buffer[i] != 0.0f)
-			count++;
-	cout << "shadow pass non-zero item = " << count << endl;
 
 	//tm.update();
 	//printf_s("#2 : %7.4f ", tm.elapsed_time());
-	printf_s("work_task_buffer #2 \n");
+	//printf_s("work_task_buffer #2 \n");
 	
 //**************************
 //#3 : Render background
@@ -320,7 +315,7 @@ void worker_microfacet::work_task_buffer(task_microfacet *t_org)
 	
 	//tm.update();
 	//printf_s("#3 : %7.4f ", tm.elapsed_time());
-	printf_s("work_task_buffer #3 \n");
+	//printf_s("work_task_buffer #3 \n");
 }
 
 
@@ -486,12 +481,12 @@ void worker_microfacet::work_task_render_block(task_microfacet *t_org, qrender_b
 				c /= area;
 
 				//DEBUG
-				if (x == 128 && y == 128)
-				{
-					printf_s("area = %g\n", area);
-					printf_s("result(lighted)= (%g %g %g)\n", c.x, c.y, c.z);
-					printf_s("light= (%g %g %g)\n", t.p_shadow->lights[0].c.x, t.p_shadow->lights[0].c.y, t.p_shadow->lights[0].c.z);
-				}
+				//if (x == 128 && y == 128)
+				//{
+					//printf_s("area = %g\n", area);
+					//printf_s("result(lighted)= (%g %g %g)\n", c.x, c.y, c.z);
+					//printf_s("light= (%g %g %g)\n", t.p_shadow->lights[0].c.x, t.p_shadow->lights[0].c.y, t.p_shadow->lights[0].c.z);
+				//}
 				//c = t.p_shadow->lights[0].c/10;
 				//c = (wo+Vector3(1,1,1))/2;
 				//if (c.x == 0.0f && c.y == 0.0f && c.z == 0.0f)

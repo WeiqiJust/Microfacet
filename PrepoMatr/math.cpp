@@ -58,7 +58,7 @@ void SVD(la_matrix<double> &result_U, la_matrix<double> &result_Vt,
 		}
 	}
 	num_eigen = min(num_eigen, lamda.length);
-	//printf_s("SVD : %d / %d\n", num_eigen, lamda.length);
+	printf_s("SVD : %d / %d\n", num_eigen, lamda.length);
 
 	////DEBUG
 	//{
