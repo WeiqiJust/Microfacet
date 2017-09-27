@@ -35,4 +35,15 @@ private:
 	int dim;
 	vector<vector<Vector3> > data; // each face -> each pixel (1d) -> color channel
 	raw_texture_2d *faces[6]; // Save RGB texutre instead of XYZ in zrt!!!
+	
+};
+
+class cube_map
+{
+public:
+	shared_ptr<cube_texture> texture;
+	int mip_level;
+	Vector3 scale;
+	float dist;
+	Matrix4 mat;
 };

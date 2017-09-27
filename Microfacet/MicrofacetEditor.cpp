@@ -238,20 +238,45 @@ void MicrofacetEditor::init_dirs()
 		(r_shader_area*)mff_singleton::get()->get_shader("area"));
 }
 
-void MicrofacetEditor::load_sky_box(const string texture_file, const int mip_level, const Vector3 scale, const float dist, const Matrix4 mat)
+void MicrofacetEditor::load_cube_map(const string folder, const int num, const int mip_level, const Vector3 scale, const float dist, const Matrix4 mat)
 {
-	generate_skybox(texture_file, mip_level, scale, dist, mat);
-	//generate_skybox("T:/Microfacet/data/cube_texture/white", 2, Vector3(1.0f), 2, Identity());
-	p_skybox->init(render_width, render_height, gpu_env.get_handle());
-	p_skybox->config_scene(scene_center, scene_radius);
+	if (num == 0)
+	{
+		string texture_file = folder;
+		shared_ptr<cube_texture> texture = make_shared<cube_texture>();
+		texture->load_texture(texture_file, mip_level);
+		r_skybox* skybox = new r_skybox(scale, dist, texture, mat);
+		skybox->init(render_width, render_height, gpu_env.get_handle());
+		skybox->config_scene(scene_center, scene_radius);
+		skyboxes.push_back(skybox);
+		return;
+	}
+
+	for (int i = 0; i < num; i++)
+	{
+		string texture_file = folder + to_string(i) + "/cube";
+		shared_ptr<cube_texture> texture = make_shared<cube_texture>();
+		texture->load_texture(texture_file, mip_level);
+		r_skybox* skybox = new r_skybox(scale, dist, texture, mat);
+		skybox->init(render_width, render_height, gpu_env.get_handle());
+		skybox->config_scene(scene_center, scene_radius);
+		skyboxes.push_back(skybox);
+	}
+}
+
+void MicrofacetEditor::load_sky_box(int idx)
+{
+	p_skybox = skyboxes[idx];
 	init_vars();
 	set_num_shadows(32);
 	set_light_inten(80);
-	set_vis_light_inten(70);
+	set_vis_light_inten(50);
+	set_envlight_inten(50);
 }
 
 void MicrofacetEditor::load_material(Vector3 albedo, const string basic_material, const string binder_id, const string dist_id)
 {
+	//generate_init_matr(albedo, "Lambert", binder_id);
 	generate_init_matr(albedo, basic_material, binder_id);
 	generate_init_matr(albedo, basic_material, dist_id);
 	/*
@@ -277,7 +302,7 @@ void MicrofacetEditor::load_scene()
 	}
 	*/
 
-	generate_mesh("T:/Microfacet/data/sphere_high_res.obj", Identity());
+	generate_mesh("T:/Microfacet/data/teapot.obj", Identity());
 	p_base->convert_to_instance(pi_base, M_ID_BASE_OBJ, gpu_env.get_handle());
 	
 	p_base->convert_to_instance(pi_base_vis, M_ID_OBJ_VIS, gpu_env.get_handle());
@@ -357,7 +382,7 @@ void MicrofacetEditor::load_scene()
 
 	}
 	
-	tball_distant.init(Vector3(0.0f, 0.0f, -3.0f), Vector3(0));
+	tball_distant.init(Vector3(0.0f, 0.0f, -8.0f), Vector3(0));
 	set_vis_mode();
 }
 

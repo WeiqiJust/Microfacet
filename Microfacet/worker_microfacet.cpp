@@ -481,12 +481,12 @@ void worker_microfacet::work_task_render_block(task_microfacet *t_org, qrender_b
 				c /= area;
 
 				//DEBUG
-				//if (x == 128 && y == 128)
-				//{
+				if (x == 128 && y == 128)
+				{
 					//printf_s("area = %g\n", area);
-					//printf_s("result(lighted)= (%g %g %g)\n", c.x, c.y, c.z);
-					//printf_s("light= (%g %g %g)\n", t.p_shadow->lights[0].c.x, t.p_shadow->lights[0].c.y, t.p_shadow->lights[0].c.z);
-				//}
+					printf_s("result(lighted)= (%g %g %g)\n", c.x, c.y, c.z);
+					printf_s("light= (%g %g %g)\n", t.p_shadow->lights[0].c.x, t.p_shadow->lights[0].c.y, t.p_shadow->lights[0].c.z);
+				}
 				//c = t.p_shadow->lights[0].c/10;
 				//c = (wo+Vector3(1,1,1))/2;
 				//if (c.x == 0.0f && c.y == 0.0f && c.z == 0.0f)

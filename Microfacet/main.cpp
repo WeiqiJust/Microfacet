@@ -50,18 +50,17 @@ void render_ref_BRDF(MicrofacetEditor& m_editor)
 	m_editor.render_ref_BRDF();
 	m_editor.update_render();
 }
-using namespace Magick;
-int main()
+
+void generate_database(MicrofacetEditor& m_editor)
 {
-	
-	MicrofacetEditor m_editor;
 	random rng;
 	Vector3 v;
-	string skybox = "T:/cubemap/", skybox_name, file = "C:/Users/justin/Documents/Microfacet_data/", mtr_name, micro_name, file_name;
+	m_editor.load_cube_map("T:/cubemap/", 2, 2, Vector3(1.0f), 2, Identity()); //10
+	string file = "C:/Users/justin/Documents/Microfacet_data/", mtr_name, micro_name, file_name;
 	float scale, x, y;
-	for (int rough_cnt = 3; rough_cnt < 4; rough_cnt++) //2<10
+	for (int rough_cnt = 2; rough_cnt < 3; rough_cnt++) //2<10
 	{
-		string material = "Lambert";//"ward_0" + to_string(rough_cnt);
+		string material = "ward_0" + to_string(rough_cnt);
 		for (int albedo_cnt = 4; albedo_cnt < 5; albedo_cnt++) //0<5
 		{
 			float albedo = albedo_cnt*0.2;
@@ -77,10 +76,10 @@ int main()
 			microfacet_binder* binder = m_editor.generate_binder_plane(binder_name);
 			// for scale = 0.05, 0.1
 			for (int scale_cnt = 2; scale_cnt < 3; scale_cnt++) //1<3
-			{ 
+			{
 				scale = scale_cnt*0.05;
 				for (int x_cnt = 4; x_cnt < 5; x_cnt++) //0<5
-				{ 
+				{
 					x = x_cnt*0.2;
 					for (int y_cnt = 4; y_cnt < 5; y_cnt++)//0<5
 					{
@@ -92,11 +91,10 @@ int main()
 						std::wstring micro_name_wstring(micro_name.length(), L' ');
 						std::copy(micro_name.begin(), micro_name.end(), micro_name_wstring.begin());
 						CreateDirectory(micro_name_wstring.c_str(), NULL);
-						cout << micro_name << endl;
-						for (int cubemap = 0; cubemap <= 0; cubemap++) //0<10
+						cout << "start cube map" << endl;
+						for (int cubemap = 0; cubemap <= 1; cubemap++) //0<10
 						{
-							skybox_name = skybox + to_string(cubemap) + "/cube";
-							m_editor.load_sky_box(skybox_name, 2, Vector3(1.0f), 2, Identity());
+							m_editor.load_sky_box(cubemap);
 							for (int view = 0; view < 1; view++) //0<10
 							{
 								uniform_sphere_sample(v, rng.get_random_float(), rng.get_random_float());
@@ -106,6 +104,7 @@ int main()
 								render(m_editor, file_name);
 							}
 						}
+						cout << "end cube map" << endl;
 					}
 				}
 			}
@@ -117,10 +116,10 @@ int main()
 			std::wstring micro_name_wstring(micro_name.length(), L' ');
 			std::copy(micro_name.begin(), micro_name.end(), micro_name_wstring.begin());
 			CreateDirectory(micro_name_wstring.c_str(), NULL);
-			for (int cubemap = 0; cubemap <= 0; cubemap++) //0<10
+			cout << "start cube map" << endl;
+			for (int cubemap = 0; cubemap <= 1; cubemap++) //0<10
 			{
-				skybox_name = skybox + to_string(cubemap) + "/cube";
-				m_editor.load_sky_box(skybox_name, 2, Vector3(1.0f), 2, Identity());
+				m_editor.load_sky_box(cubemap);
 				for (int view = 0; view < 1; view++)//0<10
 				{
 					uniform_sphere_sample(v, rng.get_random_float(), rng.get_random_float());
@@ -130,28 +129,41 @@ int main()
 					render(m_editor, file_name);
 				}
 			}
+			cout << "end cube map" << endl;
 		}
 	}
-	
-	
-	/*
-	m_editor.load_material(Vector3(0.5), "Lambert", "matr_binder_0", "matr_distr_0");
+
+}
+
+void generate_image(MicrofacetEditor& m_editor)
+{
+	m_editor.load_material(Vector3(0.8), "ward_02", "matr_binder_0", "matr_distr_0");
 	string binder_name, distr_name;
 	microfacet_binder* binder = m_editor.generate_binder_plane(binder_name);
-	microfacet_distr* distr = m_editor.generate_distr_grid(0.8, 0.8, 1, 0.1, 0, distr_name);
+	microfacet_distr* distr = m_editor.generate_distr_grid(1, 1, 1, 0, 0, distr_name);
 	m_editor.generate_microfacet_details(binder, distr, 1, 1, 10.0, 500, 16, binder_name, distr_name, true);
-	
-	m_editor.load_sky_box("T:/Microfacet/data/cube_texture/white", 2, Vector3(1.0f), 2, Identity());
-	render(m_editor);
-	*/
+
+	m_editor.load_cube_map("T:/Microfacet/data/cube_texture/cube", 0, 2, Vector3(1.0f), 2, Identity());
+	m_editor.load_sky_box(0);
+
+	//render(m_editor);
 	//render_ground_truth(m_editor);
 
-	//render_animation(m_editor);
+	render_animation(m_editor);
 
 	//render_animation_truth(m_editor);
 
 	//render_ref_BRDF(m_editor);
+}
 
+int main()
+{
+	
+	MicrofacetEditor m_editor;
+
+	//generate_image(m_editor);
+	
+	generate_database(m_editor);
 
 	return 0;
 }

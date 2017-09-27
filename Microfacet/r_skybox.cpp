@@ -427,7 +427,7 @@ void r_skybox::get_energy(Vector3 &c, const geometry_differential &ir) const
 	lightprobe->get_sample(c, ir.face_index, ir.uv,
 		Vector2(RELATIVE_PRECISION, 0), Vector2(0, RELATIVE_PRECISION), lightprobe_sampler);
 
-	c = c*inten;
+	c = Vector3(c.x*inten.x, c.y*inten.y, c.z*inten.z);
 }
 
 void r_skybox::sample_lights(std::vector<r_light_dir> &samples, const int num) const

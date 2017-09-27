@@ -12,7 +12,9 @@ public:
 
 	void load_scene();
 
-	void load_sky_box(const string texture_file, const int mip_level, const Vector3 scale, const float dist, const Matrix4 mat);
+	void load_cube_map(const string folder, const int num, const int mip_level, const Vector3 scale, const float dist, const Matrix4 mat);
+
+	void load_sky_box(int idx);
 
 	void load_material(Vector3 albedo, const string basic_material, const string binder_id, const string dist_id);
 
@@ -104,8 +106,6 @@ private:
 
 	void generate_background_mesh(const string filename, const Matrix4 mat);
 
-	void generate_skybox(const string texture_file, const int mip_level, const Vector3 scale, const float dist, const Matrix4 mat);
-
 	void generate_init_matr(const Vector3 albedo, const string lib_matr_id, const string lib_matr);
 
 	void save_details_as_obj(const char *filename, tri_mesh &mesh, string dist_name, string binder_name,
@@ -159,6 +159,7 @@ private:
 
 	//core editing objects
 	r_skybox			*p_skybox;
+	vector<r_skybox*>	skyboxes;
 	microfacet_factory	*p_factory;
 	base_obj			*p_base;
 	r_instance			*pi_base, *pi_base_vis, *pi_test;
@@ -184,6 +185,8 @@ private:
 	batch_area_sampler	avis_sampler;
 	int					dbg_pixel_x, dbg_pixel_y;
 	std::vector<disc>	discs;
+
+	//cube_map* cubemap;
 
 
 	float	prev_light_inten, envlight_inten, vis_light_inten;

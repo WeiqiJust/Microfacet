@@ -33,14 +33,6 @@ void MicrofacetEditor::generate_background_mesh(const string filename, const Mat
 	}
 }
 
-void MicrofacetEditor::generate_skybox(const string texture_file, const int mip_level,
-	const Vector3 scale, const float dist, const Matrix4 mat)
-{
-	shared_ptr<cube_texture> cube = make_shared<cube_texture>();
-	cube->load_texture(texture_file, mip_level);
-	p_skybox = new r_skybox(scale, dist, cube, mat);
-}
-
 microfacet_distr* MicrofacetEditor::generate_distr_grid(const float x, const float y,
 	const float z, const float scale, const float height, string& distr_name)
 {

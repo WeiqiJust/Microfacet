@@ -382,7 +382,7 @@ void MicrofacetEditor::gen_anim(const int subtype)
 
 	trackball_param param;
 	param = tball_distant.get_params();
-	v_global_eye =  Vector3(0, 0, -3.0f);
+	v_global_eye =  Vector3(0, 0, -7.0f);
 	v_global_at = Vector3(0.0f);
 
 	task_microfacet *t = new task_microfacet;
