@@ -192,6 +192,8 @@ void save_image_color(const char *filename, std::vector<float> &img, int w, int 
 
 void save_image(const char *filename, UINT *data, int w, int h);
 
+void save_image_clip(const char *filename, UINT *data, int w, int h);
+
 HRESULT CompileShaderFromFile(char* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 
 float snorm2float(short a);

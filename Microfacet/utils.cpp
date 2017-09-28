@@ -236,6 +236,24 @@ void save_image(const char *filename, UINT *data, int w, int h)
 	im.write(filename);
 }
 
+void save_image_clip(const char *filename, UINT *data, int w, int h)
+{
+	Magick::Image im(Magick::Geometry(128, 128), Magick::Color(0, 0, 0));
+
+	for (int y = 64; y < 192; y++) //64<192
+		for (int x = 64; x < 192; x++)
+		{
+			UINT	c = data[x + y*w];
+			float	r = ((c >> 16) & 0xFF) / 255.0f,
+				g = ((c >> 8) & 0xFF) / 255.0f,
+				b = ((c)& 0xFF) / 255.0f;
+			//cout << "r = " << r << " g = " << g << " b = " << b << endl;
+			//cout << data[x + y*w] << endl;
+			im.pixelColor(x-64, y-64, Magick::Color(r* (unsigned short)65535, g* (unsigned short)65535, b* (unsigned short)65535));
+		}
+	im.write(filename);
+}
+
 HRESULT CompileShaderFromFile(char* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
 {
 	HRESULT hr = S_OK;

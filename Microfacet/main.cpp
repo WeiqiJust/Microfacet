@@ -55,35 +55,40 @@ void generate_database(MicrofacetEditor& m_editor)
 {
 	random rng;
 	Vector3 v;
-	m_editor.load_cube_map("T:/cubemap/", 2, 2, Vector3(1.0f), 2, Identity()); //10
+	m_editor.load_cube_map("T:/cubemap/", 10, 2, Vector3(1.0f), 2, Identity()); //10
 	string file = "C:/Users/justin/Documents/Microfacet_data/", mtr_name, micro_name, file_name;
 	float scale, x, y;
-	for (int rough_cnt = 2; rough_cnt < 3; rough_cnt++) //2<10
+	for (int rough_cnt = 3; rough_cnt < 4; rough_cnt++) //2<10
 	{
 		string material = "ward_0" + to_string(rough_cnt);
-		for (int albedo_cnt = 4; albedo_cnt < 5; albedo_cnt++) //0<5
+		for (int albedo_cnt = 0; albedo_cnt < 5; albedo_cnt++) //0<5
 		{
-			float albedo = albedo_cnt*0.2;
-
+			float albedo;
+			if (albedo_cnt == 0)
+				albedo = 0.05;
+			else
+				albedo = albedo_cnt*0.2;
+			std::cout << "Rendering material: " << material << " albedo: " << albedo<<endl;
 			mtr_name = file + material + "_" + precision(albedo);
 			std::wstring mtr_name_wstring(mtr_name.length(), L' ');
 			std::copy(mtr_name.begin(), mtr_name.end(), mtr_name_wstring.begin());
-			cout << mtr_name << endl;
+			
 			CreateDirectory(mtr_name_wstring.c_str(), NULL);
 
 			m_editor.load_material(Vector3(albedo), material, "matr_binder_0", "matr_distr_0");
 			string binder_name, distr_name;
 			microfacet_binder* binder = m_editor.generate_binder_plane(binder_name);
 			// for scale = 0.05, 0.1
-			for (int scale_cnt = 2; scale_cnt < 3; scale_cnt++) //1<3
+			for (int scale_cnt = 1; scale_cnt < 3; scale_cnt++) //1<3
 			{
 				scale = scale_cnt*0.05;
-				for (int x_cnt = 4; x_cnt < 5; x_cnt++) //0<5
+				for (int x_cnt = 0; x_cnt < 5; x_cnt++) //0<5
 				{
 					x = x_cnt*0.2;
-					for (int y_cnt = 4; y_cnt < 5; y_cnt++)//0<5
+					for (int y_cnt = 0; y_cnt < 5; y_cnt++)//0<5
 					{
 						y = y_cnt*0.2;
+						std::cout << "    Microstructure scale = " << scale << " x = " << x << " y = " << y << "....";
 						microfacet_distr* distr = m_editor.generate_distr_grid(x, y, 0, scale, 0, distr_name);
 						m_editor.generate_microfacet_details(binder, distr, 1, 1, 10.0, 500, 16, binder_name, distr_name, false);
 
@@ -91,11 +96,11 @@ void generate_database(MicrofacetEditor& m_editor)
 						std::wstring micro_name_wstring(micro_name.length(), L' ');
 						std::copy(micro_name.begin(), micro_name.end(), micro_name_wstring.begin());
 						CreateDirectory(micro_name_wstring.c_str(), NULL);
-						cout << "start cube map" << endl;
-						for (int cubemap = 0; cubemap <= 1; cubemap++) //0<10
+						
+						for (int cubemap = 0; cubemap < 10; cubemap++) //0<10
 						{
 							m_editor.load_sky_box(cubemap);
-							for (int view = 0; view < 1; view++) //0<10
+							for (int view = 0; view < 10; view++) //0<10
 							{
 								uniform_sphere_sample(v, rng.get_random_float(), rng.get_random_float());
 								v = v * 3;
@@ -104,11 +109,12 @@ void generate_database(MicrofacetEditor& m_editor)
 								render(m_editor, file_name);
 							}
 						}
-						cout << "end cube map" << endl;
+						std::cout << "done" << endl;
 					}
 				}
 			}
 			// for scale = 0
+			std::cout << "    Microstructure scale = " << 0 << "....";
 			microfacet_distr* distr = m_editor.generate_distr_grid(1, 1, 1, 0, 0, distr_name);
 			m_editor.generate_microfacet_details(binder, distr, 1, 1, 10.0, 500, 16, binder_name, distr_name, false);
 
@@ -116,11 +122,11 @@ void generate_database(MicrofacetEditor& m_editor)
 			std::wstring micro_name_wstring(micro_name.length(), L' ');
 			std::copy(micro_name.begin(), micro_name.end(), micro_name_wstring.begin());
 			CreateDirectory(micro_name_wstring.c_str(), NULL);
-			cout << "start cube map" << endl;
-			for (int cubemap = 0; cubemap <= 1; cubemap++) //0<10
+		
+			for (int cubemap = 0; cubemap < 10; cubemap++) //0<10
 			{
 				m_editor.load_sky_box(cubemap);
-				for (int view = 0; view < 1; view++)//0<10
+				for (int view = 0; view < 10; view++)//0<10
 				{
 					uniform_sphere_sample(v, rng.get_random_float(), rng.get_random_float());
 					v = v * 3;
@@ -129,7 +135,7 @@ void generate_database(MicrofacetEditor& m_editor)
 					render(m_editor, file_name);
 				}
 			}
-			cout << "end cube map" << endl;
+			std::cout << "done" << endl;
 		}
 	}
 
@@ -137,11 +143,11 @@ void generate_database(MicrofacetEditor& m_editor)
 
 void generate_image(MicrofacetEditor& m_editor)
 {
-	m_editor.load_material(Vector3(0.8), "ward_02", "matr_binder_0", "matr_distr_0");
+	m_editor.load_material(Vector3(0.2, 0.2, 0.2), "ward_03", "matr_binder_0", "matr_distr_0");
 	string binder_name, distr_name;
 	microfacet_binder* binder = m_editor.generate_binder_plane(binder_name);
-	microfacet_distr* distr = m_editor.generate_distr_grid(1, 1, 1, 0, 0, distr_name);
-	m_editor.generate_microfacet_details(binder, distr, 1, 1, 10.0, 500, 16, binder_name, distr_name, true);
+	microfacet_distr* distr = m_editor.generate_distr_grid(0.2, 0.2, 1, 0.1, 0, distr_name);
+	m_editor.generate_microfacet_details(binder, distr, 1, 1, 10.0, 500, 16, binder_name, distr_name, false);
 
 	m_editor.load_cube_map("T:/Microfacet/data/cube_texture/cube", 0, 2, Vector3(1.0f), 2, Identity());
 	m_editor.load_sky_box(0);
@@ -161,9 +167,9 @@ int main()
 	
 	MicrofacetEditor m_editor;
 
-	//generate_image(m_editor);
+	generate_image(m_editor);
 	
-	generate_database(m_editor);
+	//generate_database(m_editor);
 
 	return 0;
 }

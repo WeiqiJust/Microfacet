@@ -253,9 +253,9 @@ void MicrofacetEditor::generate_microfacet_details(microfacet_binder* binder, mi
 	details->update_with_distr(selection);
 	details->generate_blocks(selection, final_details);
 
-	printf_s("sampling points...");
+	//printf_s("sampling points...");
 	details->sample_points(selection, final_details);
-	printf_s("done.\n");
+	//printf_s("done.\n");
 
 	if (save_mesh)
 	{

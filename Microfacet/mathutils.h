@@ -230,9 +230,10 @@ public:
 
 	Vector3 normalize()
 	{
-		x = x / Length();
-		y = y / Length();
-		z = z / Length();
+		float len = Length();
+		x = x / len;
+		y = y / len;
+		z = z / len;
 		return *this;
 	}
 

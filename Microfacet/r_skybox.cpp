@@ -406,8 +406,8 @@ void r_skybox::sample(geometry_differential &d_geom, const Vector3 &rv) const
 	x = u * 2 - 1;
 	y = v * 2 - 1;
 
-	Vector3	pos;
-
+	Vector3	pos, dir, len;
+	/*
 	pos = (frame_o[fidx] + x * frame_x[fidx] + y * frame_y[fidx]) * dist + scene_center;
 
 	d_geom.normal = -frame_o[fidx];
@@ -419,7 +419,57 @@ void r_skybox::sample(geometry_differential &d_geom, const Vector3 &rv) const
 
 	d_geom.uv = Vector2(u, v);
 
+	d_geom.face_index = fidx;*/
+
+	pos = frame_o[fidx] + x * frame_x[fidx] + y * frame_y[fidx];
+	dir = -pos;
+	len = dir.Length();
+	dir = dir.normalize();
+	len *= dist;
+
+	//Number	cos_theta_max;
+	//cos_theta_max = dist / sqrt(dist*dist + scene_radius*scene_radius);
+
+	//vector3	sample_dir;
+
+	//uniform_cos_cone_direction_3d<Number> prob_cone(cos_theta_max);
+	//prob_cone.sample(sample_dir, pdf_cone, vector3(rand_real<Number>(), rand_real<Number>(), 0));
+	//transform_hemi_direction_3d(r.direction, dir, sample_dir);
+
+	Vector2	sample_disk;
+	random rng;
+	uniform_disk_sampling(sample_disk, Vector2(rng.get_random_float_open(), rng.get_random_float_open()), scene_radius);
+	float pdf_disk = 1 / (scene_radius*scene_radius*PI), pdf_cone;
+	pdf_cone = pdf_disk * len * len / abs(frame_o[fidx] * dir); // -frame_o is in fact the normal
+
+	Vector3 vx, vy, vz;
+
+	if (dir.x == 0 && dir.y == 0 && dir.z == 1)
+	{
+		vz = Vector3(1, 0, 0);
+	}
+	else {
+		vz = Vector3(0, 0, 1);
+	}
+
+	vx = vz ^ dir;
+	vx = vx.normalize();
+	vy = vx ^ dir;
+	vy = vy.normalize();
+
+	Vector3 point_at = vx * sample_disk.x + vy * sample_disk.y;
+
+	Vector3 direction = point_at - pos * dist;
+	direction = direction.normalize();
+
+	pos = pos * dist + scene_center;
+	Vector3 origin = pos;
+
+	d_geom.p = origin;
+	d_geom.normal = direction;
 	d_geom.face_index = fidx;
+	d_geom.uv.x = u;
+	d_geom.uv.y = v;
 }
 
 void r_skybox::get_energy(Vector3 &c, const geometry_differential &ir) const
@@ -462,7 +512,7 @@ void r_skybox::sample_lights(std::vector<r_light_dir> &samples, const int num) c
 		s.dir = Vector3(light_d_geom.p.x, light_d_geom.p.y, light_d_geom.p.z);
 		s.dir.x = -s.dir.x;
 		s.dir.z = -s.dir.z;
-		Vector3 c = light_energy / PI / num;
+		Vector3 c = light_energy / PI;// / num;
 		s.c = c;
 		samples.push_back(s);
 	}

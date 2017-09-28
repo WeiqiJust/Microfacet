@@ -222,6 +222,7 @@ void MicrofacetEditor::render_ground_truth()
 
 void MicrofacetEditor::render_ref_BRDF()
 {
+	final_details[details->compute_idx(0, 0)].BRDF_ref = BRDF_factory::produce("Ward", "0.2");
 	render_ground_truth_task(TASK_TYPE_RENDER_REF_BRDF);
 }
 
@@ -382,7 +383,7 @@ void MicrofacetEditor::gen_anim(const int subtype)
 
 	trackball_param param;
 	param = tball_distant.get_params();
-	v_global_eye =  Vector3(0, 0, -7.0f);
+	v_global_eye =  Vector3(0, 0, -8.0f);
 	v_global_at = Vector3(0.0f);
 
 	task_microfacet *t = new task_microfacet;
@@ -500,7 +501,7 @@ void MicrofacetEditor::update_render(const string filename)
 	{
 	case TASK_TYPE_RENDER:
 	case TASK_TYPE_RENDER_BEFORE_SVD:
-		save_image(filename.c_str(), p->r.result, p->width, p->height);
+		save_image_clip(filename.c_str(), p->r.result, p->width, p->height);
 		break;
 	case TASK_TYPE_VISUALIZATION:
 		save_image("T:/Microfacet/output/img_detail.png", p->trv.result, p->width, p->height);

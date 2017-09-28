@@ -268,8 +268,8 @@ void MicrofacetEditor::load_sky_box(int idx)
 {
 	p_skybox = skyboxes[idx];
 	init_vars();
-	set_num_shadows(32);
-	set_light_inten(80);
+	set_num_shadows(50);
+	set_light_inten(50);
 	set_vis_light_inten(50);
 	set_envlight_inten(50);
 }
@@ -302,7 +302,7 @@ void MicrofacetEditor::load_scene()
 	}
 	*/
 
-	generate_mesh("T:/Microfacet/data/teapot.obj", Identity());
+	generate_mesh("T:/Microfacet/data/sphere.obj", Identity());
 	p_base->convert_to_instance(pi_base, M_ID_BASE_OBJ, gpu_env.get_handle());
 	
 	p_base->convert_to_instance(pi_base_vis, M_ID_OBJ_VIS, gpu_env.get_handle());

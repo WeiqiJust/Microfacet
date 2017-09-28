@@ -443,13 +443,14 @@ void worker_microfacet::work_task_render_block(task_microfacet *t_org, qrender_b
 				Vector3 wo(Dot(global_wo, tangent), Dot(global_wo, binormal), Dot(global_wo, normal));
 
 				// Weiqi: from original code, this will generate a black strip in the middle of image
-				/*
+				
+				
 				if (wo.z < MIN_WO_Z)
 				{
 					wo.z = MIN_WO_Z;
 					wo = Normalize(wo);
-				*/
-
+				}
+				
 				//FIX ME: huge bug here!
 				int idx_block = t.details->compute_idx(0, 0);
 
@@ -484,8 +485,8 @@ void worker_microfacet::work_task_render_block(task_microfacet *t_org, qrender_b
 				if (x == 128 && y == 128)
 				{
 					//printf_s("area = %g\n", area);
-					printf_s("result(lighted)= (%g %g %g)\n", c.x, c.y, c.z);
-					printf_s("light= (%g %g %g)\n", t.p_shadow->lights[0].c.x, t.p_shadow->lights[0].c.y, t.p_shadow->lights[0].c.z);
+					//printf_s("result(lighted)= (%g %g %g)\n", c.x, c.y, c.z);
+					//printf_s("light= (%g %g %g)\n", t.p_shadow->lights[0].c.x, t.p_shadow->lights[0].c.y, t.p_shadow->lights[0].c.z);
 				}
 				//c = t.p_shadow->lights[0].c/10;
 				//c = (wo+Vector3(1,1,1))/2;

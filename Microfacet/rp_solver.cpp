@@ -78,7 +78,7 @@ void rp_solver::process(la_matrix<float> &U, la_matrix<float> &Vt, la_vector<flo
 	SVD_Vt_L1(Vt, RtC, percent);
 	//t.update();
 	//printf_s("SVD_L1 %gsecs\n", t.elapsed_time());
-	printf_s("SVD_L1 finished\n");
+	//printf_s("SVD_L1 finished\n");
 	U.init(Rt_inv.row, Vt.row);
 	
 	//U = center(C)*Vt

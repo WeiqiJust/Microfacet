@@ -21,9 +21,9 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 	//add_basis_matr(BASIS_MATR_CT_0_40_0_25, MATR_PATH "CT_0.40.txt");
 	//add_basis_matr(BASIS_MATR_CT_0_50_0_25, MATR_PATH "CT_0.50.txt");
 	//Ward
-	add_basis_matr(BASIS_MATR_WARD_0_20, MATR_PATH "Ward_0.20.txt");
+	//add_basis_matr(BASIS_MATR_WARD_0_20, MATR_PATH "Ward_0.20.txt");
 
-	//add_basis_matr(BASIS_MATR_WARD_0_30, MATR_PATH "Ward_0.30.txt");
+	add_basis_matr(BASIS_MATR_WARD_0_30, MATR_PATH "Ward_0.30.txt");
 
 	//add_basis_matr(BASIS_MATR_WARD_0_40, MATR_PATH "Ward_0.40.txt");
 	//add_basis_matr(BASIS_MATR_WARD_0_50, MATR_PATH "Ward_0.50.txt");

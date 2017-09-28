@@ -53,7 +53,7 @@ void construct_matrix(la_matrix<float> &mat_vis_n,
 				int nidx = n_idx[k];
 				for (int ch = 0; ch < 3; ch++)
 				{
-					float alpha = n_weight[k]*color[ch];
+					float alpha = n_weight[k] * color[ch];
 					saxpy(&len, &alpha, &double_vis_float[0], &inc_one, &mat_vis_n.m[nidx*len*3+ch], &inc_three);
 				}
 			}
@@ -539,7 +539,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 				//vis_normal.compute_BRDF_direct(fr_vis);
 				//t.update();
 				//printf_s("compute BRDF %gsecs\n", t.elapsed_time());
-				printf_s("compute BRDF \n");
+				//printf_s("compute BRDF \n");
 			}
 
 #ifdef OUTPUT_VISIBLE_POINTS
@@ -621,7 +621,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 
 	//tm.update();
 	//printf_s("total time = %gsecs\n", tm.elapsed_time());
-	printf_s("compute vis area normal finished\n");
+	//printf_s("compute vis area normal finished\n");
 }
 
 //Code Backup
