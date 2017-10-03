@@ -129,7 +129,7 @@ void MicrofacetEditor::render()
 	v_render_lookat.x = (float)v.x;
 	v_render_lookat.y = (float)v.y;
 	v_render_lookat.z = (float)v.z;
-	v_render_up = Vector3(0, 1, 0);
+	v_render_up = param.up;
 	v_render_up -= (v_render_up*v_render_lookat)*v_render_lookat;
 	v_render_up.normalize();
 	v_render_right = Cross(v_render_up, v_render_lookat);
@@ -501,7 +501,7 @@ void MicrofacetEditor::update_render(const string filename)
 	{
 	case TASK_TYPE_RENDER:
 	case TASK_TYPE_RENDER_BEFORE_SVD:
-		save_image_clip(filename.c_str(), p->r.result, p->width, p->height);
+		save_image(filename.c_str(), p->r.result, p->width, p->height);
 		break;
 	case TASK_TYPE_VISUALIZATION:
 		save_image("T:/Microfacet/output/img_detail.png", p->trv.result, p->width, p->height);

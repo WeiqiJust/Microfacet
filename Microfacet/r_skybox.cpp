@@ -513,7 +513,8 @@ void r_skybox::sample_lights(std::vector<r_light_dir> &samples, const int num) c
 		s.dir.x = -s.dir.x;
 		s.dir.z = -s.dir.z;
 		Vector3 c = light_energy / PI;// / num;
-		s.c = c;
+		float light_intensity = 0.2989 * c.x + 0.5870 * c.y + 0.1140 * c.z; // convert to gray scale for render database
+		s.c = light_intensity;
 		samples.push_back(s);
 	}
 

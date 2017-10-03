@@ -256,7 +256,6 @@ void MicrofacetEditor::generate_microfacet_details(microfacet_binder* binder, mi
 	//printf_s("sampling points...");
 	details->sample_points(selection, final_details);
 	//printf_s("done.\n");
-
 	if (save_mesh)
 	{
 		tri_mesh mesh;

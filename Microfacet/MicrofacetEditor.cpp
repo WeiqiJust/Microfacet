@@ -276,7 +276,7 @@ void MicrofacetEditor::load_sky_box(int idx)
 
 void MicrofacetEditor::load_material(Vector3 albedo, const string basic_material, const string binder_id, const string dist_id)
 {
-	//generate_init_matr(albedo, "Lambert", binder_id);
+	//generate_init_matr(Vector3(0.2, 0.2, 0.2), "Lambert", binder_id);
 	generate_init_matr(albedo, basic_material, binder_id);
 	generate_init_matr(albedo, basic_material, dist_id);
 	/*
@@ -302,7 +302,7 @@ void MicrofacetEditor::load_scene()
 	}
 	*/
 
-	generate_mesh("T:/Microfacet/data/sphere.obj", Identity());
+	generate_mesh("T:/Microfacet/data/quad.obj", Identity());
 	p_base->convert_to_instance(pi_base, M_ID_BASE_OBJ, gpu_env.get_handle());
 	
 	p_base->convert_to_instance(pi_base_vis, M_ID_OBJ_VIS, gpu_env.get_handle());
@@ -382,7 +382,7 @@ void MicrofacetEditor::load_scene()
 
 	}
 	
-	tball_distant.init(Vector3(0.0f, 0.0f, -8.0f), Vector3(0));
+	tball_distant.init(Vector3(0.0f, 0.0f, 3.0f), Vector3(0), Vector3(0,1,0));
 	set_vis_mode();
 }
 
@@ -503,7 +503,7 @@ void MicrofacetEditor::set_vis_mode()
 		Vector3 eye//(0.5, -0.318803, 1.02373);
 			//(0.5, -0.0766627, 1.01095);
 			(0.509798, 0.548086, 1.06437);
-		track.init(eye, center);
+		track.init(eye, center, Vector3(0,1,0));
 	//}
 	//else {
 	//	b_cam_changed_close = true;

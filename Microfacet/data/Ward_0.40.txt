@@ -1,4 +1,4 @@
-ward_04
+ward_0.4
 0.5
 T:/ProMaterial/material/Ward_0.40_37_19_99.preconv_material
 Ward
