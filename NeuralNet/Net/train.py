@@ -90,7 +90,7 @@ def buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_range
     return paramlist, dataList
 
 def DataLoadProcess(queue, datasetfolder, params, roughness_range, diffuse_range, scale_range, x_range, y_range, unlabel = 0):
-    paramlist, dataList = buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_rang, 10, 10)
+    paramlist, dataList = buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_range, 10, 10)
 
     batchSize = params['batchSize']
     dataset = DataLoaderSimple(datasetfolder, paramlist, 128, 128, 128, 128, False) #128,128,256,256,True
@@ -99,7 +99,7 @@ def DataLoadProcess(queue, datasetfolder, params, roughness_range, diffuse_range
 
     queue.put(dataset.dataSize)
     queue.put(paramlist)
-    queue.put((roughness, diffuse, scale, x_range, y_range))
+    queue.put((roughness_range, diffuse_range, scale_range, x_range, y_range))
 
     counter = 0
     posInDataSet = 0
@@ -280,10 +280,10 @@ if __name__ == '__main__':
     loader_train.start()
     #init test dataset
     roughness_range_test = [0.3]#[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    diffuse_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
-    scale_range_test = [0.025, 0.075, 0.125]
-    x_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
-    y_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
+    diffuse_range_test = [0.2, 0.4]#[0.1, 0.3, 0.5, 0.7, 0.9]
+    scale_range_test = [0, 0.05, 0.1]#[0.025, 0.075, 0.125]
+    x_range_test = [0.1, 0.2, 0.4]#[0.1, 0.3, 0.5, 0.7, 0.9]
+    y_range_test = [0.1, 0.2, 0.4]#[0.1, 0.3, 0.5, 0.7, 0.9]
 
     testParam, testDataList = buildParamList(roughness_range_test, diffuse_range_test, scale_range_test, x_range_test, y_range_test, 10, 1)
     testSet_Full = DataLoaderSimple(params['testDataset'], testParam, 128, 128, 128, 128, False)
@@ -428,11 +428,14 @@ if __name__ == '__main__':
                 displayTestLoss = testloss
 
                 logger.info('Full loss = {}'.format(displayTestLoss))                  
-                testlossFulllist[0].append(testloss_a)
-                testlossFulllist[1].append(testloss_s)
-                testlossFulllist[2].append(testloss_r)
-                testlossFulllist[3].append(testloss)                 
+                testlossFulllist[0].append(testloss_r)
+                testlossFulllist[1].append(testloss_d)
+                testlossFulllist[2].append(testloss_s)
+                testlossFulllist[3].append(testloss_x)
+                testlossFulllist[4].append(testloss_y)
+                testlossFulllist[5].append(testloss)                 
 
+                '''
                 namelist = ['albedo','spec','roughness','total']
                 for fid in range(3, 7):
                    plt.figure(fid)
@@ -447,18 +450,20 @@ if __name__ == '__main__':
                    plt.plot(testlosslist[fid-3][-5::], 'bs-', label = 'test')
                    plt.plot(testlossFulllist[fid-3][-5::], 'gs-', label = 'test_Full')                      
                    plt.savefig(outfolder + r'/test_last5_{}.png'.format(namelist[fid-3]))
+                '''
 
-                avgLossEveryCheckPoint_a = 0
-                avgLossEveryCheckPoint_s = 0
                 avgLossEveryCheckPoint_r = 0
+                avgLossEveryCheckPoint_d = 0
+                avgLossEveryCheckPoint_s = 0
+                avgLossEveryCheckPoint_x = 0
+                avgLossEveryCheckPoint_y = 0
                 avgLossEveryCheckPoint = 0               
                         
             if(iteration % params['checkPointStepEpochIteration'] == 0 and total_iter > 0 and iteration > 0 and params['checkPointStepEpoch'] != -1):
                statusDict = {'iteration': iteration, 'loopiteration': loopiteration, 'total_iter': total_iter, 'epoch': epoch, 'loopepoch': loopepoch,
                             'posInDataset': posInDataset, 'posInUnlabelDataset': posInUnlabelDataset, 'trainlosslist': trainlosslist, 'looplosslist':looplosslist,
-                            'traintestlosslist': traintestlosslist, 'testlosslist': testlosslist, 'testlossFulllist': testlossFulllist, 'cubeSample': cubeSample, 'brdfCubeSample':brdfCubeSample}
+                            'traintestlosslist': traintestlosslist, 'testlosslist': testlosslist, 'testlossFulllist': testlossFulllist}
                dumpNetwork(outfolder, solver, 'epoch_{}'.format(epoch), statusDict)
-
 
             iteration = iteration + 1
             total_iter = total_iter + 1
@@ -466,12 +471,14 @@ if __name__ == '__main__':
             epoch = iteration * params['batchSize'] / datasize
 
         if(total_iter == params['nMaxIter'] or epoch == params['nMaxEpoch']):
-           #write final net
-           statusDict = {'iteration': iteration, 'loopiteration': loopiteration, 'total_iter': total_iter, 'epoch': epoch, 'loopepoch': loopepoch,
+            #write final net
+            statusDict = {'iteration': iteration, 'loopiteration': loopiteration, 'total_iter': total_iter, 'epoch': epoch, 'loopepoch': loopepoch,
                          'posInDataset': posInDataset, 'posInUnlabelDataset': posInUnlabelDataset, 'trainlosslist': trainlosslist, 'looplosslist':looplosslist,
-                         'traintestlosslist': traintestlosslist, 'testlosslist': testlosslist, 'testlossFulllist': testlossFulllist, 'cubeSample': cubeSample, 'brdfCubeSample':brdfCubeSample}
-           dumpNetwork(outfolder, solver, 'final', statusDict)
-           if(autoTest):
-              logger.info('Visualizing...')
-              os.system(r'python TestBRDF.py {}/final.caffemodel {} {}'.format(outfolder, testparampath, gpuid))
-           break
+                         'traintestlosslist': traintestlosslist, 'testlosslist': testlosslist, 'testlossFulllist': testlossFulllist}
+            dumpNetwork(outfolder, solver, 'final', statusDict)
+            '''
+            if(autoTest):
+               logger.info('Visualizing...')
+               os.system(r'python TestBRDF.py {}/final.caffemodel {} {}'.format(outfolder, testparampath, gpuid))
+            break
+            '''

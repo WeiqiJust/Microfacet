@@ -228,7 +228,7 @@ class MyNetClass(object):
         self.testnet[name1], self.testnet[name2] = L.Slice(self.testnet[bottomName], slice_point = splitIndex, ntop = 2)
 
     def Split5(self, name1, name2, name3, name4, name5, bottomName, splitIndex):
-        param={'axis':1, 'slice_point':1, 'slice_point':1, 'slice_point':1, 'slice_point':1}
+        param={'axis':1}
         self.net[name1], self.net[name2], self.net[name3], self.net[name4], self.net[name5] = L.Slice(self.net[bottomName], slice_param = param, ntop = 5)    
         self.testnet[name1], self.testnet[name2], self.testnet[name3], self.testnet[name4], self.testnet[name5] = L.Slice(self.testnet[bottomName], slice_param=param, ntop = 5)
           
@@ -288,11 +288,11 @@ class BRDFNetClassLogLoss_Single_SplitChannal_New_Ratio(MyNetClass):
         #self.Split2('Out_Ratio', 'Out_Roughness_Fix', 'FC', 1)
         self.Split5('Out_Roughness', 'Out_Diffuse', 'Out_Scale', 'Out_X', 'Out_Y', 'FC', 1)
         
-        self.MSELoss('RoughnessLoss', 'Data_Roughness', 'Out_Roughness', lossweight_r + lossweight_t)
-        self.MSELoss('DiffuseLoss', 'Data_Diffuse', 'Out_Diffuse', lossweight_d + lossweight_t)
-        self.MSELoss('ScaleLoss', 'Data_Scale', 'Out_Scale', lossweight_s + lossweight_t)
-        self.MSELoss('XLoss', 'Data_X', 'Out_X', lossweight_x + lossweight_t)
-        self.MSELoss('YLoss', 'Data_Y', 'Out_Y', lossweight_y + lossweight_t)
+        self.MSELoss('RoughnessLoss', 'Data_Roughness', 'Out_Roughness', lossweight_r + lossweight_all)
+        self.MSELoss('DiffuseLoss', 'Data_Diffuse', 'Out_Diffuse', lossweight_d + lossweight_all)
+        self.MSELoss('ScaleLoss', 'Data_Scale', 'Out_Scale', lossweight_s + lossweight_all)
+        self.MSELoss('XLoss', 'Data_X', 'Out_X', lossweight_x + lossweight_all)
+        self.MSELoss('YLoss', 'Data_Y', 'Out_Y', lossweight_y + lossweight_all)
 
 class SVBRDFNetClass_Decompose_FC_SR_Sigmoid_AN(MyNetClass):
 
