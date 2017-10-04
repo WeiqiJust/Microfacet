@@ -226,6 +226,11 @@ class MyNetClass(object):
     def Split2(self, name1, name2, bottomName, splitIndex):
         self.net[name1], self.net[name2] = L.Slice(self.net[bottomName], slice_point = splitIndex, ntop = 2)    
         self.testnet[name1], self.testnet[name2] = L.Slice(self.testnet[bottomName], slice_point = splitIndex, ntop = 2)
+
+    def Split5(self, name1, name2, name3, name4, name5, bottomName, splitIndex):
+        param={'axis':1, 'slice_point':1, 'slice_point':1, 'slice_point':1, 'slice_point':1}
+        self.net[name1], self.net[name2], self.net[name3], self.net[name4], self.net[name5] = L.Slice(self.net[bottomName], slice_param = param, ntop = 5)    
+        self.testnet[name1], self.testnet[name2], self.testnet[name3], self.testnet[name4], self.testnet[name5] = L.Slice(self.testnet[bottomName], slice_param=param, ntop = 5)
           
 class BRDFNetClassLogLoss_Single_SplitChannal_New_Ratio(MyNetClass):
 
@@ -241,25 +246,27 @@ class BRDFNetClassLogLoss_Single_SplitChannal_New_Ratio(MyNetClass):
         with open(netFolderPath + 'net_test.prototxt', 'w') as f:
             f.write(str(self.testnet.to_proto()))	
 
-    def createNet(self, batchSize = 64, loss_channal = 3, BN = False, normalize = False):
+    def createNet(self, batchSize = 64, loss_channal = 0, BN = False, normalize = False):
         
-        lossweight_d = 1.0 if loss_channal == 0 else 0
-        lossweight_s = 1.0 if loss_channal == 1 else 0
-        lossweight_r = 1.0 if loss_channal == 2 else 0
-        lossweight_t = 1.0 if loss_channal == 3 else 0
-        lossweight_ratio = 1.0 if loss_channal == 4 else 0        
+        lossweight_all = 1.0 if loss_channal == 0 else 0
+        lossweight_r = 1.0 if loss_channal == 1 else 0
+        lossweight_d = 1.0 if loss_channal == 2 else 0
+        lossweight_s = 1.0 if loss_channal == 3 else 0
+        lossweight_x = 1.0 if loss_channal == 4 else 0
+        lossweight_y = 1.0 if loss_channal == 5 else 0      
 
         width = 128
         height = 128
         channal = 1
 
-        nBRDFChannal = 2
+        nBRDFChannal = 5
         nFirstFC = 2048
         nFilterFirstConv = 16
 
         self.Data(batchSize, channal, height, width, 'Data_Image')
         self.Data(batchSize, nBRDFChannal, 1, 1 , 'Data_BRDF')
-        self.Split2('Data_Ratio', 'Data_Roughness', 'Data_BRDF', 1)
+        #self.Split2('Data_Ratio', 'Data_Roughness', 'Data_BRDF', 1)
+        self.Split5('Data_Roughness', 'Data_Diffuse', 'Data_Scale', 'Data_X', 'Data_Y', 'Data_BRDF', 1)
 
         #Conv
         self.ConvSameResolution(nFilterFirstConv, 3, 3, 'Conv0', 'Data_Image', BN)            #128*128*16
@@ -277,11 +284,15 @@ class BRDFNetClassLogLoss_Single_SplitChannal_New_Ratio(MyNetClass):
         self.FCReLU(nFirstFC, 'FCReLU_0', 'MidConv2')
         self.FCReLU(nFirstFC / 2, 'FCReLU_1', 'FCReLU_0')
         self.FCReLU(nFirstFC / 4, 'FCReLU_2', 'FCReLU_1')
-        self.FC(2, 'FC', 'FCReLU_2')                        #out d/s ratio and roughness        
-        self.Split2('Out_Ratio', 'Out_Roughness_Fix', 'FC', 1)
+        self.FC(5, 'FC', 'FCReLU_2')                        #out d/s ratio and roughness        
+        #self.Split2('Out_Ratio', 'Out_Roughness_Fix', 'FC', 1)
+        self.Split5('Out_Roughness', 'Out_Diffuse', 'Out_Scale', 'Out_X', 'Out_Y', 'FC', 1)
         
-        self.MSELoss('RatioLoss', 'Data_Ratio', 'Out_Ratio', lossweight_ratio + lossweight_t)
-        self.MSELoss('RoughnessLoss', 'Data_Roughness', 'Out_Roughness_Fix', lossweight_r + lossweight_t)
+        self.MSELoss('RoughnessLoss', 'Data_Roughness', 'Out_Roughness', lossweight_r + lossweight_t)
+        self.MSELoss('DiffuseLoss', 'Data_Diffuse', 'Out_Diffuse', lossweight_d + lossweight_t)
+        self.MSELoss('ScaleLoss', 'Data_Scale', 'Out_Scale', lossweight_s + lossweight_t)
+        self.MSELoss('XLoss', 'Data_X', 'Out_X', lossweight_x + lossweight_t)
+        self.MSELoss('YLoss', 'Data_Y', 'Out_Y', lossweight_y + lossweight_t)
 
 class SVBRDFNetClass_Decompose_FC_SR_Sigmoid_AN(MyNetClass):
 

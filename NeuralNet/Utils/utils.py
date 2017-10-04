@@ -394,9 +394,9 @@ class DataLoaderSimple(object):
             self.dataSize = len(self.dataList)
     '''   
 
-    def buildSubDataset(self, roughness, diffues, scale, x_range, y_range, cubemap_cnt, view_cnt, inverse = 0):
+    def buildSubDataset(self, dataList):#roughness, diffues, scale, x_range, y_range, cubemap_cnt, view_cnt):
+        '''
         dataList = []
-
         for r in roughness:
             for d in diffues:
                 for s in scale:
@@ -409,9 +409,9 @@ class DataLoaderSimple(object):
                                         #dataList.append('ward_0{}_{}/{}_{}_{}/{}_{}.jpg'.format(r, d, s, x, y, c, v))
                     else:
                         for c in range(0, cubemap_cnt):
-                                    for v in range(0, view_cnt):
-                                        dataList.append('{}_{}_{}_{}_{}_{}_{}'.format(r, d, s, 0, 0, c, v))
-
+                            for v in range(0, view_cnt):
+                                dataList.append('{}_{}_{}_{}_{}_{}_{}'.format(r, d, s, 0, 0, c, v))
+        '''
         self.dataList = dataList
         print (len(dataList))
         self.dataSize = len(self.dataList)
@@ -431,11 +431,8 @@ class DataLoaderSimple(object):
 
     def GetItemByID(self, r, d, s, x, y, c, v, color = False):
         if(self.randomClip):
-            if(self.clipPosList != []):
-                clip_left, clip_top = clipPos['{}_{}_{}_{}'.format(mid,lid,vid,oid)]
-            else:
-                clip_left = np.random.randint(0, self.rawwidth - 1 - self.width)
-                clip_top = np.random.randint(0, self.rawheight - 1 - self.height)
+            clip_left = np.random.randint(0, self.rawwidth - 1 - self.width)
+            clip_top = np.random.randint(0, self.rawheight - 1 - self.height)
         else:
             clip_left = self.rawwidth / 2 - self.width / 2
             clip_top = self.rawheight / 2 - self.height / 2
@@ -452,39 +449,43 @@ class DataLoaderSimple(object):
     def GetItemWithName(self, idx, color = False):
         img = self.GetItem(idx, color)
         name = list(map(float, self.dataList[idx].split('_')))
+        param = name
+        param.pop(-1)
+        param.pop(-1) #delete cubemap and view
+        param = np.array(param).reshape((1, 5, 1, 1))
 
-        return img, name
+        return img, param, name
 
     def GetBatchWithName(self, start, n, color = False):
         if(color):
             dataBatch = np.zeros((n, 3, self.height, self.width)) 
         else:
             dataBatch = np.zeros((n, 1, self.height, self.width))
-        brdfBatch = np.zeros((n, 3, 1, 1))
+        paramBatch = np.zeros((n, 5, 1, 1))
         nameList = []
         tmpSize = self.dataSize
         for i in range(0, n):
             idx = (start + i) % tmpSize
-            dataBatch[i, :, :, :], name = self.GetItemWithName(idx, color)
+            dataBatch[i, :, :, :], paramBatch[i,:,:,:], name = self.GetItemWithName(idx, color)
             nameList.append(name)
 
-        return dataBatch, nameList
+        return dataBatch, paramBatch, nameList
 
     def GetBatch(self, start, n, color = False):
         if(color):
             dataBatch = np.zeros((n, 3, self.height, self.width)) 
         else:
             dataBatch = np.zeros((n, 1, self.height, self.width))
-        brdfBatch = np.zeros((n, 3, 1, 1))
+        paramBatch = np.zeros((n, 5, 1, 1))
         tmpSize = self.dataSize
         for i in range(0, n):
             idx = (start + i) % tmpSize
-            dataBatch[i, :, :, :], brdfBatch[i, :, :, :] = self.GetItem(idx, color)
+            dataBatch[i, :, :, :], paramBatch[i, :, :, :] = self.GetItem(idx, color)
 
-        return dataBatch, brdfBatch
+        return dataBatch, paramBatch
 
     def GetNextBatch(self, n, color = False):
-        dataBatch, brdfBatch = self.GetBatch(self.cursorPos, n, color)
+        dataBatch, paramBatch = self.GetBatch(self.cursorPos, n, color)
         self.cursorPos = (self.cursorPos + n) % self.dataSize
 
-        return dataBatch, brdfBatch
+        return dataBatch, paramBatch
