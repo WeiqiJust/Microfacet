@@ -444,16 +444,13 @@ class DataLoaderSimple(object):
             if(len(img.shape) == 3):
                 img = img[:,:,0]
             img = img[np.newaxis,:,:]
-        return img         
+        param = [r, d, s, x, y]
+        param = np.array(param).reshape((1,5,1,1))
+        return img, param
 
     def GetItemWithName(self, idx, color = False):
-        img = self.GetItem(idx, color)
+        img, param = self.GetItem(idx, color)
         name = list(map(float, self.dataList[idx].split('_')))
-        param = name
-        param.pop(-1)
-        param.pop(-1) #delete cubemap and view
-        param = np.array(param).reshape((1, 5, 1, 1))
-
         return img, param, name
 
     def GetBatchWithName(self, start, n, color = False):

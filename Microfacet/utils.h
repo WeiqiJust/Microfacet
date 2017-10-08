@@ -164,6 +164,8 @@
 #define SHADER_PATH "T:/Microfacet/shaders/"
 #define GEOM_PATH	"misc/"
 #define FRAME_PATH	"T:/Microfacet/frame/"
+#define DATA_PATH   "T:/Microfacet/data/"
+
 
 void matrix_to_XMMATRIX(DirectX::XMMATRIX &m, const Matrix4 &mat);
 

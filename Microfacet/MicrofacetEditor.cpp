@@ -75,7 +75,7 @@ visual_x(0), visual_y(0)
 	p_factory = new microfacet_factory(gpu_env.get_handle());
 	mff_singleton::set(p_factory);
 
-	p_manager = new task_manager(4, 1);
+	p_manager = new task_manager(1, 1);
 	p_worker = new worker_microfacet();
 
 	scene_center = Vector3(0, 0, 0);
@@ -278,7 +278,9 @@ void MicrofacetEditor::load_material(Vector3 albedo, const string basic_material
 {
 	//generate_init_matr(Vector3(0.2, 0.2, 0.2), "Lambert", binder_id);
 	generate_init_matr(albedo, basic_material, binder_id);
+	
 	generate_init_matr(albedo, basic_material, dist_id);
+	//generate_init_matr(Vector3(0.8, 0.4, 0.2), "Lambert", dist_id);
 	/*
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_0");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_1");
@@ -302,7 +304,7 @@ void MicrofacetEditor::load_scene()
 	}
 	*/
 
-	generate_mesh("T:/Microfacet/data/quad.obj", Identity());
+	generate_mesh(DATA_PATH"quad.obj", Identity());
 	p_base->convert_to_instance(pi_base, M_ID_BASE_OBJ, gpu_env.get_handle());
 	
 	p_base->convert_to_instance(pi_base_vis, M_ID_OBJ_VIS, gpu_env.get_handle());

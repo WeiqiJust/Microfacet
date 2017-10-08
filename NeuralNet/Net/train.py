@@ -56,6 +56,7 @@ def loadParams(filepath):
     params['NormalizeInput'] = config.getboolean('dataset', 'NormalizeInput')
     params['dataset'] = config.get('dataset', 'dataset')
     params['testDataset'] = config.get('dataset', 'testDataset')
+    params['predictDataset'] = config.get('dataset', 'predictDataset')
         
     params['testalbedoRange'] = list(map(int, config.get('dataset','testalbedoRange').split(',')))
     params['testspecRange'] = list(map(int, config.get('dataset','testspecRange').split(',')))
@@ -93,7 +94,7 @@ def DataLoadProcess(queue, datasetfolder, params, roughness_range, diffuse_range
     paramlist, dataList = buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_range, 10, 10)
 
     batchSize = params['batchSize']
-    dataset = DataLoaderSimple(datasetfolder, paramlist, 128, 128, 128, 128, False) #128,128,256,256,True
+    dataset = DataLoaderSimple(datasetfolder, paramlist, 128, 128, 256, 256, True) #128,128,256,256,True
     dataset.buildSubDataset(dataList)#roughness_range, diffuse_range, scale_range, x_range, y_range, 10, 10)
     dataset.shuffle(params['randomSeed'])
 
@@ -149,7 +150,28 @@ def dumpNetwork(outfolder, solver, filename, statusDict):
     np.savetxt(outfolder + r'/testloss.txt', statusDict['testlosslist'])
     np.savetxt(outfolder + r'/testlossfull.txt', statusDict['testlossFulllist'])
 
+def buildAutoTestScript(param_train, path, roughness_range_test, diffuse_range_test, scale_range_test, x_range_test, y_range_test):
+    if(len(path) <= 3):
+        filename = 'test_config.ini'
+    else:
+        filename = path + r'/test_config.ini'
+    config = ConfigParser()
 
+    config.add_section('dataset')
+    config.set('dataset', 'predictDataset', param_train['predictDataset'])
+    config.set('dataset', 'roughnessRange', ','.join(map(str,roughness_range_test)))
+    config.set('dataset', 'diffuseRange', ','.join(map(str,diffuse_range_test)))
+    config.set('dataset', 'scaleRange', ','.join(map(str,scale_range_test)))
+    config.set('dataset', 'xRange', ','.join(map(str,x_range_test)))
+    config.set('dataset', 'yRange', ','.join(map(str,y_range_test)))
+
+    config.add_section('output')
+    config.set('output', 'outtag', 'test')
+
+    with open(filename, 'w') as f:
+        config.write(f)
+
+    return filename
 
 
 def testFitting(testnet, testDataset, testCount):
@@ -280,13 +302,13 @@ if __name__ == '__main__':
     loader_train.start()
     #init test dataset
     roughness_range_test = [0.3]#[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    diffuse_range_test = [0.2, 0.4]#[0.1, 0.3, 0.5, 0.7, 0.9]
-    scale_range_test = [0, 0.05, 0.1]#[0.025, 0.075, 0.125]
-    x_range_test = [0.1, 0.2, 0.4]#[0.1, 0.3, 0.5, 0.7, 0.9]
-    y_range_test = [0.1, 0.2, 0.4]#[0.1, 0.3, 0.5, 0.7, 0.9]
+    diffuse_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
+    scale_range_test = [0.025, 0.075, 0.125]
+    x_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
+    y_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
 
     testParam, testDataList = buildParamList(roughness_range_test, diffuse_range_test, scale_range_test, x_range_test, y_range_test, 10, 1)
-    testSet_Full = DataLoaderSimple(params['testDataset'], testParam, 128, 128, 128, 128, False)
+    testSet_Full = DataLoaderSimple(params['testDataset'], testParam, 128, 128, 256, 256, True)
     testSet_Full.buildSubDataset(testDataList)
     testSet_Full.shuffle()        
 
@@ -342,6 +364,12 @@ if __name__ == '__main__':
     traintestlosslist = [[],[],[],[],[],[]]
     testlosslist = [[],[],[],[]]
     testlossFulllist = [[],[],[],[]]
+    looplosslist = []
+
+    #build test script
+    paramDir, tmp = os.path.split(configFilePath)
+    #testparampath = buildAutoTestScript(params, paramDir, roughness_range_test, diffuse_range_test, scale_range_test, x_range_test, y_range_test)
+    #logger.info('Test Param path: {}'.format(testparampath))
 
     while(True):
         #labeled training

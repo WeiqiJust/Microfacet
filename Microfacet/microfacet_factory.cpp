@@ -13,7 +13,7 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 	//codex::utils::timer t;
 
 	//Lambertian
-	add_basis_matr(BASIS_MATR_LAMBERTIAN, MATR_PATH "Lambert.txt");
+	add_basis_matr(BASIS_MATR_LAMBERTIAN, MATR_PATH"Lambert.txt");
 
 	//Cook-Torrance
 	//add_basis_matr(BASIS_MATR_CT_0_20_0_25, MATR_PATH "CT_0.20.txt");
@@ -23,9 +23,9 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 	//Ward
 	//add_basis_matr(BASIS_MATR_WARD_0_20, MATR_PATH "Ward_0.20.txt");
 
-	add_basis_matr(BASIS_MATR_WARD_0_30, MATR_PATH "Ward_0.30.txt");
+	//add_basis_matr(BASIS_MATR_WARD_0_30, MATR_PATH"Ward_0.30.txt");
 
-	//add_basis_matr(BASIS_MATR_WARD_0_40, MATR_PATH "Ward_0.40.txt");
+	add_basis_matr(BASIS_MATR_WARD_0_40, MATR_PATH "Ward_0.40.txt");
 	//add_basis_matr(BASIS_MATR_WARD_0_50, MATR_PATH "Ward_0.50.txt");
 	////BlinnPhong
 	//add_basis_matr(BASIS_MATR_PHONG_2, MATR_PATH "Phong_2.txt");
@@ -234,7 +234,7 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 
 	//---------  sphere  ---------
 	p_geom = new r_geometry(pdev);
-	p_geom->load("T:/Microfacet/data/sphere_low_res.obj");
+	p_geom->load(DATA_PATH"sphere_low_res.obj");
 	p_geom->get_mesh()->uvs.clear();
 	p_geom->get_mesh()->tangents.clear();
 	p_geom->get_mesh()->set_attribute(VERT_ATTR_POSITION | VERT_ATTR_NORMAL);
@@ -247,7 +247,7 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 	{
 		Matrix4 mat;
 		Translate(Vector3(0.0, 0.0, 0.5));
-		p_geom->load( "T:/Microfacet/data/rod.obj", &mat);
+		p_geom->load(DATA_PATH"rod.obj", &mat);
 		p_geom->get_mesh()->uvs.clear();
 		p_geom->get_mesh()->tangents.clear();
 		p_geom->get_mesh()->set_attribute(VERT_ATTR_POSITION | VERT_ATTR_NORMAL);
