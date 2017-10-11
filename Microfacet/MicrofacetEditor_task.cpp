@@ -18,7 +18,6 @@ void MicrofacetEditor::compute_microfacet_change()
 	t->type = TASK_TYPE_MICROFACET_CHANGED;
 
 	selection_compute = selection;
-	//cout << "compute microfacet change:: sube type = " << microfacet_ops << endl;
 	t->tmc.sub_type = microfacet_ops;
 	t->tmc.details = details;
 	t->tmc.idx = &selection_compute;
@@ -30,9 +29,6 @@ void MicrofacetEditor::compute_microfacet_change()
 		= &vismask_sampler;
 	t->tmc.rp = &rand_proj;
 	render_image(t);
-
-	microfacet_ops = 0;
-	b_microfacet_changed = false;
 }
 
 void MicrofacetEditor::render_buffer()

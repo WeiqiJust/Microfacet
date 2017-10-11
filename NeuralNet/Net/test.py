@@ -4,7 +4,7 @@ root_path = os.path.dirname(working_path)
 sys.path.append(root_path + r'/Utils')
 
 import caffe
-from utils import save_pfm, load_pfm, pfmFromBuffer, pfmToBuffer, DataLoaderSimple
+from utils import save_pfm, load_pfm, pfmFromBuffer, pfmToBuffer, DataLoader_grid_plane
 import numpy as np
 import logging
 import matplotlib
@@ -42,36 +42,19 @@ def test_single_channel(testnet, img):
     return roughness, diffuse, scale, x, y
 
 
-def loadParams(filepath):
-    config = ConfigParser()
-    config.read(filepath)
-
-    params = {}
-    #dataset
-    params['predictDataset'] = config.get('dataset', 'testSet')
-    params['albedoRange'] = list(map(int, config.get('dataset','albedoRange').split(',')))
-    params['specRange'] = list(map(int, config.get('dataset','specRange').split(',')))
-    params['roughnessRange'] = list(map(int, config.get('dataset','roughnessRange').split(',')))
-  
-    params['outtag'] = config.get('output', 'outtag')
-
-    return params
-
-
 if __name__ == '__main__':
 
     #renderContext = {}
     #jinjiaEnv = jinja2.Environment(loader = jinja2.FileSystemLoader('./')).get_template('template.html')
 
     savedNet = sys.argv[1]
-    testParamPath = sys.argv[2]
-    gpuid = int(sys.argv[3])
+    predictDataset = sys.argv[2]
+    outtag = sys.argv[3]
+    gpuid = int(sys.argv[4])
 
     resultfolder, modelfile = os.path.split(savedNet)
-    #Load test params
-    test_params = {}
-    test_params = loadParams(testParamPath)
-    outputFolder = resultfolder + r'/test_{}'.format(test_params['outtag'])
+    
+    outputFolder = resultfolder + r'/test_{}'.format(outtag)
     if(os.path.exists(outputFolder) == False):
         os.makedirs(outputFolder)
 
@@ -102,7 +85,7 @@ if __name__ == '__main__':
     r = []
     g = []
     b = []
-    testPath = test_params['predictDataset']
+    testPath = predictDataset
     for filename in glob.glob(os.path.join(testPath, '*.jpg')):
         fullpath = filename
         #print('Test {}\n'.format(filename.strip()))

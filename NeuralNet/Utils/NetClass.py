@@ -232,7 +232,7 @@ class MyNetClass(object):
         self.net[name1], self.net[name2], self.net[name3], self.net[name4], self.net[name5] = L.Slice(self.net[bottomName], slice_param = param, ntop = 5)    
         self.testnet[name1], self.testnet[name2], self.testnet[name3], self.testnet[name4], self.testnet[name5] = L.Slice(self.testnet[bottomName], slice_param=param, ntop = 5)
           
-class BRDFNetClassLogLoss_Single_SplitChannal_New_Ratio(MyNetClass):
+class grid_plane_network(MyNetClass):
 
     def __init__(self):
         MyNetClass.__init__(self)

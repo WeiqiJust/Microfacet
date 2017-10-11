@@ -323,7 +323,7 @@ class RealDataLoaderSVBRDF(object):
 
         return dataBatch    
 
-class DataLoaderSimple(object):
+class DataLoader_grid_plane(object):
     fulldataSize = 0
     dataSize = 0
 
@@ -426,10 +426,10 @@ class DataLoaderSimple(object):
 
 
     def GetItem(self, idx, color = False):
-        r, d, s, x, y, c, v = list(map(float, self.dataList[idx].split('_')))
-        return self.GetItemByID(r, d, s, x, y, c, v, color)#img, brdf
+        r, d, s, x, y = list(map(float, self.dataList[idx].split('_')))
+        return self.GetItemByID(r, d, s, x, y, color)#img, brdf
 
-    def GetItemByID(self, r, d, s, x, y, c, v, color = False):
+    def GetItemByID(self, r, d, s, x, y, color = False):
         if(self.randomClip):
             clip_left = np.random.randint(0, self.rawwidth - 1 - self.width)
             clip_top = np.random.randint(0, self.rawheight - 1 - self.height)
@@ -438,9 +438,9 @@ class DataLoaderSimple(object):
             clip_top = self.rawheight / 2 - self.height / 2
         self.clipPos = [clip_left, clip_top]
         if(color):
-            img = load_and_clip(self.rootPath + r'/ward_{}_{}/{}_{}_{}/{}_{}.jpg'.format(r, d, s, x, y, int(c), int(v)), int(clip_left), int(clip_top), self.width, self.height).transpose((2,0,1))
+            img = load_and_clip(self.rootPath + r'/ward_{}_{}/{}_{}_{}.jpg'.format(r, d, s, x, y), int(clip_left), int(clip_top), self.width, self.height).transpose((2,0,1))
         else:
-            img = load_and_clip(self.rootPath + r'/ward_{}_{}/{}_{}_{}/{}_{}.jpg'.format(r, d, s, x, y, int(c), int(v)), int(clip_left), int(clip_top), self.width, self.height)
+            img = load_and_clip(self.rootPath + r'/ward_{}_{}/{}_{}_{}.jpg'.format(r, d, s, x, y), int(clip_left), int(clip_top), self.width, self.height)
             if(len(img.shape) == 3):
                 img = img[:,:,0]
             img = img[np.newaxis,:,:]

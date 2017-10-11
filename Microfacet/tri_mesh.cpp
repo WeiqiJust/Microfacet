@@ -281,15 +281,15 @@ void tri_mesh::calculate_tangent()
 	
 	for (int i = 0; i < normals.size(); i++)
 	{
-		//Vector3 tangent, binormal;
-		/*
-		build_frame(tangent, binormal, normals[i]);
-		tangent *= (Dot(Cross(normals[i], tangent), binormal) < 0.0F) ? -1.0F : 1.0F;*/
+		Vector3 t, binormal;
+		
+		build_frame(t, binormal, normals[i]);
+		//tangent *= (Dot(Cross(normals[i], tangent), binormal) < 0.0F) ? -1.0F : 1.0F;
 
-		Vector3 n = normals[i], t, b;
+		//Vector3 n = normals[i], t, b;
 
-		t[(main_axis_(n) + 1) % 3] = 1;
-		t = t ^ n;
+		//t[(main_axis_(n) + 1) % 3] = 1;
+		//t = t ^ n;
 		t.normalize();
 		tangents.push_back(t);
 	}

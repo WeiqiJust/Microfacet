@@ -21,11 +21,11 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 	//add_basis_matr(BASIS_MATR_CT_0_40_0_25, MATR_PATH "CT_0.40.txt");
 	//add_basis_matr(BASIS_MATR_CT_0_50_0_25, MATR_PATH "CT_0.50.txt");
 	//Ward
-	//add_basis_matr(BASIS_MATR_WARD_0_20, MATR_PATH "Ward_0.20.txt");
+	add_basis_matr(BASIS_MATR_WARD_0_20, MATR_PATH "Ward_0.20.txt");
 
-	//add_basis_matr(BASIS_MATR_WARD_0_30, MATR_PATH"Ward_0.30.txt");
+	add_basis_matr(BASIS_MATR_WARD_0_30, MATR_PATH"Ward_0.30.txt");
 
-	add_basis_matr(BASIS_MATR_WARD_0_40, MATR_PATH "Ward_0.40.txt");
+	//add_basis_matr(BASIS_MATR_WARD_0_40, MATR_PATH "Ward_0.40.txt");
 	//add_basis_matr(BASIS_MATR_WARD_0_50, MATR_PATH "Ward_0.50.txt");
 	////BlinnPhong
 	//add_basis_matr(BASIS_MATR_PHONG_2, MATR_PATH "Phong_2.txt");
@@ -779,13 +779,10 @@ void mff_singleton::init()
 	fopen_s(&fp, FRAME_PATH "sample.frame", "rb");
 	if (fp == NULL)
 	{
-		
 		fr_sample.init(256, 32, 32);
 		fr_sample.normalize_n();
 		fr_sample.compute_spherical_area(256*1048576);
-		cout << "after compute spherical area" << endl;
 		fopen_s(&fp, FRAME_PATH "sample.frame", "wb");
-		cout << "after compute spherical area";
 		fr_sample.save(fp);
 		fclose(fp);
 	} else {

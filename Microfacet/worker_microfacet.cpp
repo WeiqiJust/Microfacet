@@ -267,7 +267,7 @@ void worker_microfacet::work_task_buffer(task_microfacet *t_org)
 
 	//float ClearColor[4] = {1, 1, 1, 1};
 	//t.p_screen->get_rt(0)->clear(ClearColor);
-	t.p_skybox->draw(matProjView);// matProjView;
+	//t.p_skybox->draw(matProjView);// matProjView;
 	
 	mff_singleton::get()->get_layer("basic")->set();
 	for (int l = 0; l < t.p_shadow->lights.size(); l++)
@@ -440,16 +440,21 @@ void worker_microfacet::work_task_render_block(task_microfacet *t_org, qrender_b
 				global_wo	=	(*t.p_wo)[idx].x*(*t.v_right) +
 								(*t.p_wo)[idx].y*(*t.v_up) +
 								(*t.p_wo)[idx].z*(*t.v_lookat);
-				Vector3 wo(Dot(global_wo, tangent), Dot(global_wo, binormal), Dot(global_wo, normal));
-
-				// Weiqi: from original code, this will generate a black strip in the middle of image
-				
+				Vector3 wo(Dot(global_wo, tangent), Dot(global_wo, binormal), Dot(global_wo, normal));				
 				
 				if (wo.z < MIN_WO_Z)
 				{
 					wo.z = MIN_WO_Z;
 					wo = Normalize(wo);
 				}
+
+
+				/*
+				if (wo.z > -MIN_WO_Z && wo.z <=0 )
+				{
+					wo.z = -MIN_WO_Z;
+					wo = Normalize(wo);
+				}*/
 				
 				//FIX ME: huge bug here!
 				int idx_block = t.details->compute_idx(0, 0);

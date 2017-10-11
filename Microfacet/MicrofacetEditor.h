@@ -10,11 +10,11 @@ public:
 	//void set_render_visualization(const int x, const int y);
 	//void render_visualization();
 
-	void load_scene();
+	void load_scene(const string object);
 
 	void load_cube_map(const string folder, const int num, const int mip_level, const Vector3 scale, const float dist, const Matrix4 mat);
 
-	void load_sky_box(int idx);
+	void load_sky_box(int idx, const string sample_file);
 
 	void load_material(Vector3 albedo, const string basic_material, const string binder_id, const string dist_id);
 
@@ -70,7 +70,7 @@ public:
 	void generate_microfacet_details(microfacet_binder* binder, microfacet_distr* distr, int w, int h,
 		float d, float dens, int num_area, string binder_name, string distr_name, bool save_mesh);
 
-	void set_view_direction(const Vector3 eye) { tball_distant.init(Vector3(0,0,2), Vector3(0), eye); }
+	void set_view_direction(const Vector3 eye, const Vector3 lookat, const Vector3 up) { tball_distant.init(eye, lookat, up); }
 
 	void compute_microfacet_change();
 
@@ -111,7 +111,9 @@ private:
 	void save_details_as_obj(const char *filename, tri_mesh &mesh, string dist_name, string binder_name,
 		const std::vector<microfacet_block> &result);
 
-	void set_num_shadows(int num);
+	// If sample_file not exist, sample lighting and save the sampled lights in sample file
+	// Otherwise, read lightings from sample file
+	void set_num_shadows(int num, const string sample_file); 
 
 	void set_light_inten(int v);
 

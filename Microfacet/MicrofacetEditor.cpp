@@ -7,6 +7,7 @@
 #include "binder_woven.h"
 #include "binder_woven_threads.h"
 #include "binder_brick.h"
+#include <fstream>
 
 #define MAX_BACKGROUND_OBJ	10
 
@@ -67,15 +68,15 @@ visual_x(0), visual_y(0)
 	mat_proj_vis_illu = mat_proj;
 	setup_p_wo(2.0, 2.0, z_near);
 
-	float r = 10.0f;
+	float r = 3.0f;
 	z_near = 1e-3*r;
 	z_far = 20 * r;
-	projection_orthogonal(mat_proj_vis_direct, r, r, z_near, z_far);
+	projection_orthogonal(mat_proj, r, r, z_near, z_far);
 
 	p_factory = new microfacet_factory(gpu_env.get_handle());
 	mff_singleton::set(p_factory);
 
-	p_manager = new task_manager(1, 1);
+	p_manager = new task_manager(4, 1);
 	p_worker = new worker_microfacet();
 
 	scene_center = Vector3(0, 0, 0);
@@ -86,8 +87,6 @@ visual_x(0), visual_y(0)
 		1, SHADOW_MAP_SIZE, DXGI_FORMAT_R32_FLOAT, scene_radius);
 
 	init_dirs();
-	load_scene();
-
 	//timer = new QTimer(this);
 	//connect_actions();
 	//timer->start(1);
@@ -264,11 +263,11 @@ void MicrofacetEditor::load_cube_map(const string folder, const int num, const i
 	}
 }
 
-void MicrofacetEditor::load_sky_box(int idx)
+void MicrofacetEditor::load_sky_box(int idx, const string sample_file)
 {
 	p_skybox = skyboxes[idx];
 	init_vars();
-	set_num_shadows(50);
+	set_num_shadows(100, sample_file);
 	set_light_inten(50);
 	set_vis_light_inten(50);
 	set_envlight_inten(50);
@@ -276,11 +275,8 @@ void MicrofacetEditor::load_sky_box(int idx)
 
 void MicrofacetEditor::load_material(Vector3 albedo, const string basic_material, const string binder_id, const string dist_id)
 {
-	//generate_init_matr(Vector3(0.2, 0.2, 0.2), "Lambert", binder_id);
 	generate_init_matr(albedo, basic_material, binder_id);
-	
 	generate_init_matr(albedo, basic_material, dist_id);
-	//generate_init_matr(Vector3(0.8, 0.4, 0.2), "Lambert", dist_id);
 	/*
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_0");
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_1");
@@ -292,19 +288,9 @@ void MicrofacetEditor::load_material(Vector3 albedo, const string basic_material
 	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_binder_3");*/
 }
 
-void MicrofacetEditor::load_scene()
+void MicrofacetEditor::load_scene(const string object)
 {
-	/*
-	for (int i = 0; i < MAX_BACKGROUND_OBJ; i++)
-	{
-		char str[64];
-		sprintf_s(str, "background%d", i);
-		if (izrt.var_get(str, v))
-			p_background.push_back((base_obj*)v.ptr);
-	}
-	*/
-
-	generate_mesh(DATA_PATH"quad.obj", Identity());
+	generate_mesh(object, Identity());
 	p_base->convert_to_instance(pi_base, M_ID_BASE_OBJ, gpu_env.get_handle());
 	
 	p_base->convert_to_instance(pi_base_vis, M_ID_OBJ_VIS, gpu_env.get_handle());
@@ -421,10 +407,11 @@ void MicrofacetEditor::save_details_as_obj(const char *filename,
 	string file(filename);
 	file += dist_name + "_" + binder_name + ".obj";
 	//string file("T:/Microfacet/test_mesh/mesh.obj");
+	cout << "saved file " << file << endl;
 	mesh.save_obj(file);
 }
 
-void MicrofacetEditor::set_num_shadows(int num)
+void MicrofacetEditor::set_num_shadows(int num, const string sample_file)
 {
 	while (p_manager->is_working())
 		Sleep(1);
@@ -432,16 +419,34 @@ void MicrofacetEditor::set_num_shadows(int num)
 	if (p_skybox)
 	{
 		std::vector<r_light_dir> lights;
-		p_skybox->sample_lights(lights, num);
+		FILE *fp_tempt;
+		fopen_s(&fp_tempt, sample_file.c_str(), "rt");
+		if (fp_tempt == NULL)
+		{
+			cout << "Sample cubemap lighting" << endl;;
+			p_skybox->sample_lights(lights, num);
+			ofstream fp(sample_file);
+			for (int i = 0; i < lights.size(); i++)
+				fp << lights[i].dir << lights[i].c;
+			fp.close();
+		}
+		else
+		{
+			cout << "Read cubemap lighting from file" << endl;;
+			fclose(fp_tempt);
+			ifstream fp(sample_file);
+			for (int i = 0; i < num; i++)
+			{
+				r_light_dir light;
+				fp >> light.dir.x >> light.dir.y >> light.dir.z >> light.c.x >> light.c.y >> light.c.z;
+				lights.push_back(light);
+			}
+			fp.close();
+		}
 		for (int i = 0; i < lights.size(); i++)	
-			//lights[i].c = Vector3(1);
+		{
 			lights[i].c /= envlight_inten;
-		/**********test code********/
-		////DEBUG
-		//lights.resize(1);
-		//lights[0].dir	= Vector3(2, 1, 1);
-		//lights[0].dir = lights[0].dir.normalize();
-		//lights[0].c		= Vector3(1, 1, 1);
+		}
 
 		shadow_maps.set_lights(lights);
 		shadow_maps.compute_light_matrix(scene_center);

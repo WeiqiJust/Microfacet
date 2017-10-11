@@ -292,13 +292,14 @@ void compute_vis_area_and_normal(microfacet_details &details,
 						b_pt_vis[j] = true;
 			}
 			//t.update();
+			// Debug
 			//printf_s("vis %gsecs\n", t.elapsed_time());
-			int count = 0;
-			for (int i = 0; i < mat_vis.size(); i++)
-			{
-				if (mat_vis[i] != 0)
-					count++;
-			}
+			//int count = 0;
+			//for (int i = 0; i < mat_vis.size(); i++)
+			//{
+			//	if (mat_vis[i] != 0)
+			//		count++;
+			//}
 			//printf_s("vis generation mat_vis non-zero size = %d\n", count);
 			//*****************************************************
 

@@ -12,8 +12,8 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-from NetClass import BRDFNetClassLogLoss_Single_SplitChannal_New_Ratio
-from utils import DataLoaderSimple
+from NetClass import grid_plane_network
+from utils import DataLoader_grid_plane
 
 params_global = {}
 params_global['outFolder'] = "T:/NeuralNet/Result"
@@ -57,10 +57,6 @@ def loadParams(filepath):
     params['dataset'] = config.get('dataset', 'dataset')
     params['testDataset'] = config.get('dataset', 'testDataset')
     params['predictDataset'] = config.get('dataset', 'predictDataset')
-        
-    params['testalbedoRange'] = list(map(int, config.get('dataset','testalbedoRange').split(',')))
-    params['testspecRange'] = list(map(int, config.get('dataset','testspecRange').split(',')))
-    params['testroughnessRange'] = list(map(int, config.get('dataset','testroughnessRange').split(',')))
      
     #display and testing
     params['displayStep'] = config.getint('display', 'displayStep')
@@ -70,7 +66,7 @@ def loadParams(filepath):
 
     return params
 
-def buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_range, cubemap_cnt, view_cnt):
+def buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_range):
     paramlist = []
     dataList = []
     for r in roughness_range:
@@ -80,21 +76,17 @@ def buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_range
                     for x in x_range:
                        for y in y_range:
                             paramlist.append([r,d,s,x,y])
-                            for c in range(0, cubemap_cnt):
-                                for v in range(0, view_cnt):
-                                    dataList.append('{}_{}_{}_{}_{}_{}_{}'.format(r, d, s, x, y, c, v))
+                            dataList.append('{}_{}_{}_{}_{}_{}_{}'.format(r, d, s, x, y))
                 else:
                     paramlist.append([r,d,s,0,0])
-                    for c in range(0, cubemap_cnt):
-                            for v in range(0, view_cnt):
-                                dataList.append('{}_{}_{}_{}_{}_{}_{}'.format(r, d, s, 0, 0, c, v))
+                    dataList.append('{}_{}_{}_{}_{}_{}_{}'.format(r, d, s, 0, 0))
     return paramlist, dataList
 
 def DataLoadProcess(queue, datasetfolder, params, roughness_range, diffuse_range, scale_range, x_range, y_range, unlabel = 0):
-    paramlist, dataList = buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_range, 10, 10)
+    paramlist, dataList = buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_range)
 
     batchSize = params['batchSize']
-    dataset = DataLoaderSimple(datasetfolder, paramlist, 128, 128, 256, 256, True) #128,128,256,256,True
+    dataset = DataLoader_grid_plane(datasetfolder, paramlist, 128, 128, 256, 256, True) #128,128,256,256,True
     dataset.buildSubDataset(dataList)#roughness_range, diffuse_range, scale_range, x_range, y_range, 10, 10)
     dataset.shuffle(params['randomSeed'])
 
@@ -149,29 +141,6 @@ def dumpNetwork(outfolder, solver, filename, statusDict):
     np.savetxt(outfolder + r'/traintestloss.txt', statusDict['traintestlosslist'])
     np.savetxt(outfolder + r'/testloss.txt', statusDict['testlosslist'])
     np.savetxt(outfolder + r'/testlossfull.txt', statusDict['testlossFulllist'])
-
-def buildAutoTestScript(param_train, path, roughness_range_test, diffuse_range_test, scale_range_test, x_range_test, y_range_test):
-    if(len(path) <= 3):
-        filename = 'test_config.ini'
-    else:
-        filename = path + r'/test_config.ini'
-    config = ConfigParser()
-
-    config.add_section('dataset')
-    config.set('dataset', 'predictDataset', param_train['predictDataset'])
-    config.set('dataset', 'roughnessRange', ','.join(map(str,roughness_range_test)))
-    config.set('dataset', 'diffuseRange', ','.join(map(str,diffuse_range_test)))
-    config.set('dataset', 'scaleRange', ','.join(map(str,scale_range_test)))
-    config.set('dataset', 'xRange', ','.join(map(str,x_range_test)))
-    config.set('dataset', 'yRange', ','.join(map(str,y_range_test)))
-
-    config.add_section('output')
-    config.set('output', 'outtag', 'test')
-
-    with open(filename, 'w') as f:
-        config.write(f)
-
-    return filename
 
 
 def testFitting(testnet, testDataset, testCount):
@@ -248,7 +217,7 @@ if __name__ == '__main__':
 
     logger.info('Loading network and solver settings...')
 
-    BRDFNet = BRDFNetClassLogLoss_Single_SplitChannal_New_Ratio()
+    BRDFNet = grid_plane_network()
 
     
     BRDFNet.createNet(params['batchSize'], 0, params['BN'], params['NormalizeInput'])
@@ -307,8 +276,8 @@ if __name__ == '__main__':
     x_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
     y_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
 
-    testParam, testDataList = buildParamList(roughness_range_test, diffuse_range_test, scale_range_test, x_range_test, y_range_test, 10, 1)
-    testSet_Full = DataLoaderSimple(params['testDataset'], testParam, 128, 128, 256, 256, True)
+    testParam, testDataList = buildParamList(roughness_range_test, diffuse_range_test, scale_range_test, x_range_test, y_range_test)
+    testSet_Full = DataLoader_grid_plane(params['testDataset'], testParam, 128, 128, 256, 256, True)
     testSet_Full.buildSubDataset(testDataList)
     testSet_Full.shuffle()        
 
@@ -365,11 +334,6 @@ if __name__ == '__main__':
     testlosslist = [[],[],[],[]]
     testlossFulllist = [[],[],[],[]]
     looplosslist = []
-
-    #build test script
-    paramDir, tmp = os.path.split(configFilePath)
-    #testparampath = buildAutoTestScript(params, paramDir, roughness_range_test, diffuse_range_test, scale_range_test, x_range_test, y_range_test)
-    #logger.info('Test Param path: {}'.format(testparampath))
 
     while(True):
         #labeled training
@@ -507,6 +471,6 @@ if __name__ == '__main__':
             '''
             if(autoTest):
                logger.info('Visualizing...')
-               os.system(r'python TestBRDF.py {}/final.caffemodel {} {}'.format(outfolder, testparampath, gpuid))
+               os.system(r'python TestBRDF.py {}/final.caffemodel {} {}'.format(outfolder, params['predictDataset'], outtag, gpuid))
             break
             '''
