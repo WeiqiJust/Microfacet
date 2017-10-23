@@ -8,7 +8,7 @@ void cube_texture::load_texture(const string filename, const int user_mip_level)
 	{
 		string file = filename + "_" + std::to_string(i) + ".jpg";
 		Magick::Image image(file);
-		//Magick::Image image("T:/test.png");
+		//Magick::Image image("T:/test.jpg");
 		if (image.columns() != image.rows())
 			cout << "Error: cube texture width and height are not same! : " << file << endl;
 		if (i == 0)

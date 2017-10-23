@@ -366,7 +366,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 				//			img[i*3] = img[i*3+1] = img[i*3+2] = v;
 				//		}
 				//	}
-				//	save_image_color("d:/temp/Microfacet/SVD_scalar.png", img, basis_matr->fr_n.get_actual_dim(), basis_matr->fr_n.get_actual_dim()*2);
+				//	save_image_color("d:/temp/Microfacet/SVD_scalar.jpg", img, basis_matr->fr_n.get_actual_dim(), basis_matr->fr_n.get_actual_dim()*2);
 
 				//	//basis_matr->fr_n.compute_spherical_area(4000000);
 				//	//float max_area = 0;
@@ -385,7 +385,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 				//	//		img[i*3] = img[i*3+1] = img[i*3+2] = v;
 				//	//	}
 				//	//}
-				//	//save_image_color("d:/temp/Microfacet/scalar.png", img, basis_matr->fr_n.get_actual_dim(), basis_matr->fr_n.get_actual_dim()*2);
+				//	//save_image_color("d:/temp/Microfacet/scalar.jpg", img, basis_matr->fr_n.get_actual_dim(), basis_matr->fr_n.get_actual_dim()*2);
 				//}		
 
 				la_matrix<float> mat_vis_n(num_vis_dir*(num_vis_dir+1)/2*3, n_size);
@@ -726,7 +726,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 //				img[i*3] = img[i*3+1] = img[i*3+2] = v;
 //			}
 //		}
-//		save_image_color("d:/temp/Microfacet/area_truth.png", img, fr_Avis.get_dim(), fr_Avis.get_dim());
+//		save_image_color("d:/temp/Microfacet/area_truth.jpg", img, fr_Avis.get_dim(), fr_Avis.get_dim());
 //	}
 //}
 //*****************************************************
@@ -754,7 +754,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 //			img[i*3] = img[i*3+1] = img[i*3+2] = v;
 //		}
 //	}
-//	save_image_color("d:/temp/Microfacet/area_zoom.png", img, fr.get_dim(), fr.get_dim());
+//	save_image_color("d:/temp/Microfacet/area_zoom.jpg", img, fr.get_dim(), fr.get_dim());
 //}
 
 ////Test
@@ -879,7 +879,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 //				img[i*3] = img[i*3+1] = img[i*3+2] = v;
 //			}
 //		}
-//		save_image_color("d:/temp/Microfacet/area_sum.png", img, fr.get_dim(), fr.get_dim());
+//		save_image_color("d:/temp/Microfacet/area_sum.jpg", img, fr.get_dim(), fr.get_dim());
 //	}
 
 //	return;
@@ -961,7 +961,7 @@ void compute_vis_area_and_normal(microfacet_details &details,
 //				img[i*3] = img[i*3+1] = img[i*3+2] = v;
 //			}
 //		}
-//		save_image_color("d:/temp/Microfacet/avg_n_recon.png", img, basis_matr->fr_n.get_dim(), basis_matr->fr_n.get_dim());
+//		save_image_color("d:/temp/Microfacet/avg_n_recon.jpg", img, basis_matr->fr_n.get_dim(), basis_matr->fr_n.get_dim());
 //	}
 
 //	Vector3 result;

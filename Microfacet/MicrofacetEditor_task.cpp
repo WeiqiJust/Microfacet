@@ -133,7 +133,27 @@ void MicrofacetEditor::render()
 	t->r.v_lookat = &v_render_lookat;
 	t->r.v_up = &v_render_up;
 	t->r.v_right = &v_render_right;
+	render_image(t);
+}
 
+void MicrofacetEditor::create_reflectance_table()
+{
+	task_microfacet *t = new task_microfacet;
+	shared_ptr<task> t_done;
+	while (!p_manager->get_result(t_done))
+	{
+		Sleep(1);
+	}
+	t->type = TASK_TYPE_CREATE_REFLECTANCE_TABLE;
+	t->id = 0;
+	t->tc.sample_phi = sample_phi;
+	t->tc.sample_theta = sample_theta;
+	t->tc.blocks = &final_details;
+	t->tc.details = details;
+	t->tc.result = p_reflectance_table;
+
+	t->tc.fr_Avis = &fr_Avis;
+	t->tc.fr_vis = &fr_vis;
 	render_image(t);
 }
 
@@ -216,9 +236,16 @@ void MicrofacetEditor::render_ground_truth()
 }
 
 
-void MicrofacetEditor::render_ref_BRDF()
+void MicrofacetEditor::render_ref_BRDF(string roughness, Vector3 albedo)
 {
-	final_details[details->compute_idx(0, 0)].BRDF_ref = BRDF_factory::produce("Ward", "0.2");
+	//final_details[details->compute_idx(0, 0)].BRDF_ref = BRDF_factory::produce("MERL", "T:/MeasuredBRDF/brdfs/silver-metallic-paint.binary");
+	final_details[details->compute_idx(0, 0)].BRDF_ref = BRDF_factory::produce("Ward", roughness.c_str(), albedo);
+	render_ground_truth_task(TASK_TYPE_RENDER_REF_BRDF);
+}
+
+void MicrofacetEditor::render_measured_BRDF(string filename)
+{
+	final_details[details->compute_idx(0, 0)].BRDF_ref = BRDF_factory::produce("MERL", filename.c_str());
 	render_ground_truth_task(TASK_TYPE_RENDER_REF_BRDF);
 }
 
@@ -463,23 +490,25 @@ void MicrofacetEditor::update_render()
 
 		//t_frame.update();
 		cout << "finish rendering." << endl;
-		save_image("T:/Microfacet/output/img_render.png", p->r.result, p->width, p->height);
+		save_image("T:/Microfacet/output/img_render.jpg", p->r.result, p->width, p->height);
 		break;
 	case TASK_TYPE_VISUALIZATION:
-		save_image("T:/Microfacet/output/img_detail.png", p->trv.result, p->width, p->height);
+		save_image("T:/Microfacet/output/img_detail.jpg", p->trv.result, p->width, p->height);
 		break;
+	case TASK_TYPE_CREATE_REFLECTANCE_TABLE:
+		save_image("T:/Microfacet/output/reflectance_table.jpg", p->tc.result, p->tc.sample_phi*p->tc.sample_theta, p->tc.sample_phi*p->tc.sample_theta);
 	case TASK_TYPE_BUFFER:
 		b_buffer_ready = true;
 		b_render_image = true;
 		break;
 	case TASK_TYPE_GROUND_TRUTH:
 		cout << "finish rendering." << endl;
-		save_image("T:/Microfacet/output/img_ground_truth.png", p->trt.result, p->width, p->height);
+		save_image("T:/Microfacet/output/img_ground_truth.jpg", p->trt.result, p->width, p->height);
 		break;
 	case TASK_TYPE_GROUND_TRUTH_DIRECT:
 	case TASK_TYPE_RENDER_REF_BRDF:
 	case TASK_TYPE_DEBUG_RAYTRACE:
-		save_image("T:/Microfacet/output/img_ref_brdf.png", p->trt.result, p->width, p->height);
+		save_image("T:/Microfacet/output/img_ref_brdf.jpg", p->trt.result, p->width, p->height);
 		break;
 	}
 }
@@ -499,21 +528,23 @@ void MicrofacetEditor::update_render(const string filename)
 	case TASK_TYPE_RENDER_BEFORE_SVD:
 		save_image(filename.c_str(), p->r.result, p->width, p->height);
 		break;
+	case TASK_TYPE_CREATE_REFLECTANCE_TABLE:
+		save_image(filename.c_str(), p->tc.result, p->tc.sample_phi*p->tc.sample_theta, p->tc.sample_phi*p->tc.sample_theta);
+		break;
 	case TASK_TYPE_VISUALIZATION:
-		save_image("T:/Microfacet/output/img_detail.png", p->trv.result, p->width, p->height);
+		save_image("T:/Microfacet/output/img_detail.jpg", p->trv.result, p->width, p->height);
 		break;
 	case TASK_TYPE_BUFFER:
 		b_buffer_ready = true;
 		b_render_image = true;
 		break;
 	case TASK_TYPE_GROUND_TRUTH:
-		cout << "finish rendering." << endl;
-		save_image("T:/Microfacet/output/img_ground_truth.png", p->trt.result, p->width, p->height);
+		save_image(filename.c_str(), p->trt.result, p->width, p->height);
 		break;
 	case TASK_TYPE_GROUND_TRUTH_DIRECT:
 	case TASK_TYPE_RENDER_REF_BRDF:
 	case TASK_TYPE_DEBUG_RAYTRACE:
-		save_image("T:/Microfacet/output/img_ref_brdf.png", p->trt.result, p->width, p->height);
+		save_image(filename.c_str(), p->trt.result, p->width, p->height);
 		break;
 	}
 }

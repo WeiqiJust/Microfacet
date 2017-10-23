@@ -103,7 +103,7 @@ void worker_microfacet::work_task_animation(task_microfacet *t_org)
 			b.y1 = t_org->height;
 			work_task_render_block(&tm, &b);
 			
-			sprintf_s(filename, "%sours_%04d.png", PREFIX, frame);
+			sprintf_s(filename, "%sours_%04d.jpg", PREFIX, frame);
 			
 			save_image(filename, t.result, t_org->width, t_org->height);
 
@@ -134,7 +134,7 @@ void worker_microfacet::work_task_animation(task_microfacet *t_org)
 			tm.trt.v_up		= &v_up;
 			work_task_ground_truth(&tm);
 
-			sprintf_s(filename, "%struth_%04d.png", PREFIX, frame);
+			sprintf_s(filename, "%struth_%04d.jpg", PREFIX, frame);
 			save_image(filename, t.result, t_org->width, t_org->height);
 		}
 	}

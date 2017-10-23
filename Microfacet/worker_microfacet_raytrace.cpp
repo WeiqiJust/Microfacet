@@ -309,7 +309,7 @@ void raytrace_pixel(Vector3 &result,
 	
 	if (b_debug)
 	{
-		save_image_color("d:/temp/Microfacet/debug_pixel_rt.png", img_dbg, dim, dim);
+		save_image_color("d:/temp/Microfacet/debug_pixel_rt.jpg", img_dbg, dim, dim);
 		printf_s("result(lighted) : %g %g %g\n", result.x, result.y, result.z);
 	}
 }

@@ -1,6 +1,7 @@
 #include "worker.h"
 #include "microfacet_factory.h"
 #include <DirectXMath.h>
+#include <fstream>
 
 #define MIN_WO_Z	0.1f
 
@@ -267,7 +268,7 @@ void worker_microfacet::work_task_buffer(task_microfacet *t_org)
 
 	//float ClearColor[4] = {1, 1, 1, 1};
 	//t.p_screen->get_rt(0)->clear(ClearColor);
-	//t.p_skybox->draw(matProjView);// matProjView;
+	t.p_skybox->draw(matProjView);// matProjView;
 	
 	mff_singleton::get()->get_layer("basic")->set();
 	for (int l = 0; l < t.p_shadow->lights.size(); l++)
@@ -407,6 +408,51 @@ extern double t_total, t_init, t_init_loop, t_basis_coef1, t_basis_coef2, t_basi
 //	//printf_s("#3 : (%7.4f %7.4f)\n", t_get_refl, t_total-t_get_refl);
 //	//printf_s("get_refl %7.4f\n", t_get_refl);
 //}
+
+
+void worker_microfacet::work_task_create_reflectance_table(task_microfacet *t_org)
+{
+	task_create_reflectance &t = t_org->tc;
+
+	int num_area;
+	int idx_area[4];
+	float weight_area[4];
+
+	//FIX ME: huge bug here!
+	int idx_block = t.details->compute_idx(0, 0);
+	float wi_theta, wi_phi, wo_theta, wo_phi;
+	Vector3 wi, wo;
+	Vector3 c;
+	//ofstream fp("T:/Microfacet/output/reflectance_table.txt");
+	for (int w_i_t = 0; w_i_t < t.sample_theta; w_i_t++)
+		for (int w_i_p = 0; w_i_p <t.sample_phi; w_i_p++)
+			for (int w_o_t = 0; w_o_t <t.sample_theta; w_o_t++)
+				for (int w_o_p = 0; w_o_p < t.sample_phi; w_o_p++)
+				{
+					wi_theta = PI / t.sample_theta / 2 * w_i_t;
+					wi_phi = PI / t.sample_phi * 2 * w_i_p;
+					wo_theta = PI / t.sample_theta / 2 * w_o_t;
+					wo_phi = PI / t.sample_phi * 2 * w_o_p;
+					wi = Vector3(sin(wi_theta)*cos(wi_phi), sin(wi_theta)*sin(wi_phi), cos(wi_theta));
+					wo = Vector3(sin(wo_theta)*cos(wo_phi), sin(wo_theta)*sin(wo_phi), cos(wo_theta));
+					(*t.blocks)[idx_block].get_reflectance_BRDF(c, wi, wo);
+
+					t.fr_Avis->lerp(num_area, idx_area, weight_area, wo, true, false);
+					float area = (*t.blocks)[idx_block].Avis.get_area(num_area, idx_area, weight_area);
+					c /= area;
+					int idx = (w_i_t*t.sample_phi + w_i_p)*t.sample_theta*t.sample_phi + (w_o_t*t.sample_phi + w_o_p);
+
+					BYTE r, g, b;
+					r = min(max(c.x, 0), 1) * 255;
+					g = min(max(c.y, 0), 1) * 255;
+					b = min(max(c.z, 0), 1) * 255;
+					//cout << "r = " << c.x << " g = " << c.y << " b = " << c.z << endl;
+					UINT pixel = (r << 16) + (g << 8) + (b);
+					t.result[idx] = pixel;
+					//fp << c.x << " " << c.y << " " << c.z << endl;
+				}
+	//fp.close();
+}
 
 void worker_microfacet::work_task_render_block(task_microfacet *t_org, qrender_block *pb)
 {
@@ -817,9 +863,12 @@ void worker_microfacet::work(shared_ptr<subtask> &st, void* p_per_thread_global_
 	case TASK_TYPE_BUFFER:
 		work_task_buffer(t);
 		break;
+	case TASK_TYPE_CREATE_REFLECTANCE_TABLE:
+		work_task_create_reflectance_table(t);
+		break;
 	case TASK_TYPE_RENDER:
 		{
-			qrender_block *pb = (qrender_block*)(st.get()); // Error may caused here!!!
+			qrender_block *pb = (qrender_block*)(st.get());
 			work_task_render_block(t, pb);
 		}
 		break;

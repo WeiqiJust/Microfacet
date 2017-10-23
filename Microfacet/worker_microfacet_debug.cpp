@@ -227,7 +227,7 @@ float gen_pixel(Vector3 &result,
 	if (b_debug)
 	{
 		printf_s("area = %g\n", area);
-		save_image_color("d:/temp/Microfacet/debug_pixel.png", img_dbg, DIM_GROUND_TRUTH, DIM_GROUND_TRUTH);
+		save_image_color("d:/temp/Microfacet/debug_pixel.jpg", img_dbg, DIM_GROUND_TRUTH, DIM_GROUND_TRUTH);
 
 		float scalar = GROUND_TRUTH_SCENE_R*GROUND_TRUTH_SCENE_R/(DIM_GROUND_TRUTH*DIM_GROUND_TRUTH)*128;
 
@@ -243,7 +243,7 @@ float gen_pixel(Vector3 &result,
 				img[i*3+2] = n_distr[ii*3+2]*scalar;
 			}
 		}
-		save_image_color("d:/temp/Microfacet/avg_n_truth.png", img, 
+		save_image_color("d:/temp/Microfacet/avg_n_truth.jpg", img, 
 			p_basis_matr->fr_n.get_actual_dim(), p_basis_matr->fr_n.get_actual_dim()*2);
 
 		printf_s("result(lighted) : %g %g %g\n", result.x, result.y, result.z);

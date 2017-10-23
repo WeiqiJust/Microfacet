@@ -1,4 +1,10 @@
 #include "BRDF.h"
+#define RED_SCALE	(1.0/1500.0)
+#define GREEN_SCALE (1.15/1500.0)
+#define BLUE_SCALE	(1.66/1500.0)
+const int MEASURED_BRDF_SAMPLING_THETA_H = 90;
+const int MEASURED_BRDF_SAMPLING_THETA_D = 90;
+const int MEASURED_BRDF_SAMPLING_PHI_D = 360;
 
 //void build_frame(Vector3 &t, Vector3 &b, const Vector3 &n)
 //{
@@ -92,8 +98,8 @@ void CT_interface::sample_brdf(Vector3 &result, const Vector3 &w_i, const Vector
 }
 
 //Ward
-Ward_interface::Ward_interface(const float a)
-:a(a)
+Ward_interface::Ward_interface(const float a, Vector3 albedo_)
+	:a(a), albedo(albedo_)
 {
 }
 
@@ -111,6 +117,11 @@ void Ward_interface::sample_brdf(Vector3 &result, const Vector3 &w_i, const Vect
 				(sqrt(cos_theta_in*cos_theta_out)*4*PI*a*a);
 	
 	result.x = result.y = result.z = r;
+
+	//for testing
+	result.x = result.x * albedo.x;
+	result.y = result.y * albedo.y;
+	result.z = result.z * albedo.z;
 }
 
 //OrenNayar
@@ -137,18 +148,157 @@ void OrenNayar_interface::sample_brdf(Vector3 &result, const Vector3 &w_i, const
 	result.x = result.y = result.z = (A + B*max(0.0f, cos(phi_in-phi_out))*sin(max(theta_in, theta_out))*tan(min(theta_in, theta_out)));
 }
 
-/*
+
+measured_isotropic_BRDF::measured_isotropic_BRDF(): data(NULL)
+{
+
+}
+
+measured_isotropic_BRDF::measured_isotropic_BRDF(const char *filename, bool b_need_CDF)
+	: data(NULL)
+{
+	load_data(filename, b_need_CDF);
+}
+
+measured_isotropic_BRDF::~measured_isotropic_BRDF()
+{
+	SAFE_DELETE_ARR(data);
+}
+
+
+void measured_isotropic_BRDF::load_data(const char *filename, bool b_need_CDF)
+{
+	FILE *fp;
+
+	fopen_s(&fp, filename, "rb");
+	if (!fp)
+	{ 
+		cout << "(measured_isotropic_BRDF::load_data) failed to open data file";
+		exit(0);
+	}
+
+	int dims[3];
+
+	fread(dims, sizeof(int), 3, fp);
+
+	if (dims[0] * dims[1] * dims[2] !=
+		MEASURED_BRDF_SAMPLING_THETA_H *
+		MEASURED_BRDF_SAMPLING_THETA_D *
+		MEASURED_BRDF_SAMPLING_PHI_D / 2)
+	{
+		fclose(fp);
+		cout << "(measured_isotropic_BRDF::load_data) dimensions do not match";
+		exit(0);
+	}
+
+	data = new double[MEASURED_BRDF_SAMPLING_THETA_H * MEASURED_BRDF_SAMPLING_THETA_D * MEASURED_BRDF_SAMPLING_PHI_D / 2 * 3];
+
+	for (int c = 0; c < 3; c++)
+		for (int i = 0; i < MEASURED_BRDF_SAMPLING_THETA_H * MEASURED_BRDF_SAMPLING_THETA_D * MEASURED_BRDF_SAMPLING_PHI_D / 2; i++)
+		{
+			fread(&data[i * 3 + c], sizeof(double), 1, fp);
+		}
+
+	fclose(fp);
+
+	for (int i = 0; i < MEASURED_BRDF_SAMPLING_THETA_H * MEASURED_BRDF_SAMPLING_THETA_D * MEASURED_BRDF_SAMPLING_PHI_D / 2; i++)
+	{
+		data[i * 3 + 0] *= RED_SCALE;
+		data[i * 3 + 1] *= GREEN_SCALE;
+		data[i * 3 + 2] *= BLUE_SCALE;
+	}
+
+	for (int i = 0; i < dims[0] * dims[1] * dims[2]; i++)
+	{
+		Vector3 brdf(data[i * 3 + 0], data[i * 3 + 1], data[i * 3 + 2]);
+
+		data[i * 3 + 0] = brdf.x;
+		data[i * 3 + 1] = brdf.y;
+		data[i * 3 + 2] = brdf.z;
+	}
+
+}
+
+
+inline int measured_isotropic_BRDF::theta_half_index(const float theta_half) const
+{
+	if (theta_half <= 0.0)
+		return 0;
+
+	double theta_half_deg = (theta_half / (PI * 0.5) * MEASURED_BRDF_SAMPLING_THETA_H);
+	double temp = theta_half_deg * MEASURED_BRDF_SAMPLING_THETA_H;
+
+	return max(min(int(sqrt(temp)), MEASURED_BRDF_SAMPLING_THETA_H - 1), 0);
+}
+
+inline int measured_isotropic_BRDF::theta_diff_index(const float theta_diff) const
+{
+	int temp = int(theta_diff / (PI * 0.5) * MEASURED_BRDF_SAMPLING_THETA_D);
+
+	return max(min(temp, MEASURED_BRDF_SAMPLING_THETA_D - 1), 0);
+}
+
+inline int measured_isotropic_BRDF::phi_diff_index(const float phi_d) const
+{
+	float phi_diff = phi_d;
+
+	if (phi_diff < 0.0)
+		phi_diff += PI;
+
+	int temp = int(phi_diff / PI * MEASURED_BRDF_SAMPLING_PHI_D / 2);
+
+	return max(min(temp, MEASURED_BRDF_SAMPLING_PHI_D / 2 - 1), 0);
+}
+
+void measured_isotropic_BRDF::get_BRDF(Vector3 &result, const Vector3 &wi, const Vector3 &wo) const
+{
+	if (wi.z <= 0 || wo.z <= 0)
+	{
+		result = Vector3(0.0);
+		return;
+	}
+
+	Vector3 vhalf = (wi + wo) / 2;
+	vhalf.normalize();
+
+	float theta_h = acos(vhalf.z);
+	float phi_h = atan2(vhalf.y, vhalf.x);
+
+	Vector3 binormal(0, 1, 0);
+	Vector3 normal(0, 0, 1);
+	Vector3 temp, diff;
+
+	Matrix4 m;
+	m = Rotate(-phi_h, normal);
+	temp = m * wi;
+	m = Rotate(-theta_h, binormal);
+	diff = m * temp;
+
+	float theta_d = acos(diff.z);
+	float phi_d = atan2(diff.y, diff.x);
+
+	int index = phi_diff_index(phi_d) +
+		theta_diff_index(theta_d) * MEASURED_BRDF_SAMPLING_PHI_D / 2 +
+		theta_half_index(theta_h) * MEASURED_BRDF_SAMPLING_PHI_D / 2 * MEASURED_BRDF_SAMPLING_THETA_D;
+
+	result.x = data[index * 3 + 0];
+	result.y = data[index * 3 + 1];
+	result.z = data[index * 3 + 2];
+}
+
+
+
 //measured_BRDF
 measured_BRDF::measured_BRDF()
 :brdf(NULL)
 {
-	brdf = new zrt::measured_isotropic_BRDF;
+	brdf = new measured_isotropic_BRDF;
 }
 
 measured_BRDF::measured_BRDF(const char *filename)
 :brdf(NULL)
 {
-	brdf = new zrt::measured_isotropic_BRDF;
+	brdf = new measured_isotropic_BRDF;
 	init(filename);
 }
 
@@ -170,15 +320,12 @@ void measured_BRDF::release()
 void measured_BRDF::sample_brdf(Vector3 &result, const Vector3 &w_i, const Vector3 &w_o, const Vector3 &n) const
 {
 	Vector3 t, b;
-	my_build_frame(t, b, n);
+	build_frame(t, b, n);
 
-	spectrum c;
-	brdf->get_BRDF(c, vector3(Dot(w_i, t), Dot(w_i, b), Dot(w_i, n)), vector3(Dot(w_o, t), Dot(w_o, b), Dot(w_o, n)));
-	result.x = (float)c(1);
-	result.y = (float)c(2);
-	result.z = (float)c(3);
+	brdf->get_BRDF(result, Vector3(Dot(w_i, t), Dot(w_i, b), Dot(w_i, n)), Vector3(Dot(w_o, t), Dot(w_o, b), Dot(w_o, n)));
+
 }
-*/
+
 
 //LambertAndCT
 void LambertAndCT::sample_brdf(Vector3 &result, const Vector3 &w_i, const Vector3 &w_o, const Vector3 &n) const
@@ -198,7 +345,7 @@ LambertAndCT::LambertAndCT(float rd, float gd, float bd, float rs, float gs, flo
 }
 
 //BRDF factory
-BRDF_interface* BRDF_factory::produce(const char *name, const char *param)
+BRDF_interface* BRDF_factory::produce(const char *name, const char *param, Vector3 albedo)
 {
 	BRDF_interface *p = NULL;
 	if (strcmp(name, "Lambertian") == 0)
@@ -223,10 +370,10 @@ BRDF_interface* BRDF_factory::produce(const char *name, const char *param)
 	{
 		float a;
 		sscanf_s(param, "%f", &a);
-		p = new Ward_interface(a);
-	/*} else if (strcmp(name, "MERL") == 0)
+		p = new Ward_interface(a, albedo);
+	} else if (strcmp(name, "MERL") == 0)
 	{
-		p = new measured_BRDF(param);*/
+		p = new measured_BRDF(param);
 	} else if (strcmp(name, "LambertAndCT") == 0)
 	{
 		float alpha, rd, gd, bd, rs, gs, bs, m, F0;

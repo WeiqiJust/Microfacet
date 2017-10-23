@@ -40,10 +40,12 @@ class Ward_interface : public BRDF_interface
 {
 private:
 	float a;
+	Vector3 albedo;
 protected:
 	virtual void sample_brdf(Vector3 &result, const Vector3 &w_i, const Vector3 &w_o, const Vector3 &n) const;
 public:
-	Ward_interface(const float a);
+	Ward_interface(const float a, Vector3 albedo_ = Vector3(1.0f, 1.0f, 1.0f));
+	void setAlbedo(Vector3 albedo_) { albedo = albedo_; }
 };
 
 class OrenNayar_interface : public BRDF_interface
@@ -56,11 +58,31 @@ public:
 	OrenNayar_interface(const float alpha);
 };
 
-/*
+class measured_isotropic_BRDF
+{
+private:
+	double *data;//[MEASURED_BRDF_SAMPLING_THETA_H * MEASURED_BRDF_SAMPLING_THETA_D * MEASURED_BRDF_SAMPLING_PHI_D / 2][3];
+
+	inline int theta_half_index(const float theta_half) const;
+	inline int theta_diff_index(const float theta_diff) const;
+	inline int phi_diff_index(const float phi_diff) const;
+
+	std::vector<step_1D_prob>	prob;
+
+public:
+	measured_isotropic_BRDF();
+	measured_isotropic_BRDF(const char *filename, bool b_need_CDF);
+	virtual ~measured_isotropic_BRDF();
+
+	void load_data(const char *filename, bool b_need_CDF);
+	virtual void get_BRDF(Vector3 &result, const Vector3 &wi, const Vector3 &wo) const;
+};
+
+
 class measured_BRDF : public BRDF_interface
 {
 private:
-	zrt::measured_isotropic_BRDF *brdf;
+	measured_isotropic_BRDF *brdf;
 
 protected:
 	virtual void sample_brdf(Vector3 &result, const Vector3 &w_i, const Vector3 &w_o, const Vector3 &n) const;
@@ -72,7 +94,7 @@ public:
 
 	void init(const char *filename);
 	void release();
-};*/
+};
 
 class LambertAndCT : public BRDF_interface
 {
@@ -90,5 +112,5 @@ public:
 class BRDF_factory
 {
 public:
-	static BRDF_interface* produce(const char *name, const char *param);
+	static BRDF_interface* produce(const char *name, const char *param, Vector3 albedo = Vector3(1.0f, 1.0f, 1.0f));
 };

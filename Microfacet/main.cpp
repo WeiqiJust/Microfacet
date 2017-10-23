@@ -2,6 +2,20 @@
 #include "render_dataset.h"
 #include <ctime>
 
+void create_reflectance_table(MicrofacetEditor& m_editor)
+{
+	m_editor.compute_microfacet_change();
+	m_editor.create_reflectance_table();
+	m_editor.update_render();
+}
+
+void create_reflectance_table(MicrofacetEditor& m_editor, const string filename)
+{
+	m_editor.compute_microfacet_change();
+	m_editor.create_reflectance_table();
+	m_editor.update_render(filename);
+}
+
 void render(MicrofacetEditor& m_editor)
 {
 	m_editor.compute_microfacet_change();
@@ -44,55 +58,71 @@ void render_animation_truth(MicrofacetEditor& m_editor)
 	m_editor.update_render();
 }
 
-void render_ref_BRDF(MicrofacetEditor& m_editor)
+void render_ref_BRDF(MicrofacetEditor& m_editor, string roughness, Vector3 albedo, const string filename)
 {
 	m_editor.compute_microfacet_change();
 	m_editor.render_buffer();
-	m_editor.render_ref_BRDF();
+	m_editor.render_ref_BRDF(roughness, albedo);
+	m_editor.update_render(filename);
+}
+
+void render_measured_BRDF(MicrofacetEditor& m_editor, string measuredBrdf, const string filename)
+{
+	m_editor.compute_microfacet_change();
+	m_editor.render_buffer();
+	m_editor.render_measured_BRDF(measuredBrdf);
+	m_editor.update_render(filename);
+}
+
+void render_ref_BRDF(MicrofacetEditor& m_editor, string roughness, Vector3 albedo)
+{
+	m_editor.compute_microfacet_change();
+	m_editor.render_buffer();
+	m_editor.render_ref_BRDF(roughness, albedo);
 	m_editor.update_render();
 }
 
 
 void generate_image(MicrofacetEditor& m_editor)
 {
-	m_editor.load_material(Vector3(0.8, 0.8, 0.8), "ward_0.3", "matr_binder_0", "matr_distr_0");
+	m_editor.load_material(Vector3(0.8, 0.6, 0.8), "ward_0.5", "matr_binder_0", "matr_distr_0");
 	m_editor.load_cube_map("T:/Microfacet/data/cube_texture/violentdays", 0, 2, Vector3(1.0f), 2, Identity());
 	m_editor.load_sky_box(0, "T:/Microfacet/data/cube_texture/cubelight.txt");
 	std::clock_t start;
 	double duration;
+	m_editor.set_view_direction(Vector3(0, 1, 6), Vector3(0), Vector3(0, 1, 0));
 	start = std::clock();
 	string binder_name, distr_name;
 	microfacet_binder* binder = m_editor.generate_binder_plane(binder_name);
-	microfacet_distr* distr = m_editor.generate_distr_grid(0.4, 0.4, 0, 0, 0, distr_name);
+	microfacet_distr* distr = m_editor.generate_distr_grid(0.280942, 0.266923, 0, 0.1036, 0, distr_name);
 	//m_editor.set_view_direction(v);
 	m_editor.generate_microfacet_details(binder, distr, 1, 1, 10.0, 200, 8, binder_name, distr_name, false);
-	
-	m_editor.set_view_direction(Vector3(0, 0.5, 3), Vector3(0), Vector3(0, 1, 0));
 	render(m_editor);
+	//create_reflectance_table(m_editor, "T:/Microfacet/output/test1.jpg");
+	//render_ref_BRDF(m_editor, "0.5", Vector3(0.8, 0.6, 0.8));
+	/*
+	m_editor.load_material(Vector3(0.05), "ward_0.3", "matr_binder_0", "matr_distr_0");
+	distr = m_editor.generate_distr_grid(0.4, 0.4, 0, 0, 0, distr_name);
+	//m_editor.set_view_direction(v);
+	m_editor.generate_microfacet_details(binder, distr, 1, 1, 10.0, 200, 8, binder_name, distr_name, false);
+	//render(m_editor);
+	create_reflectance_table(m_editor, "T:/Microfacet/output/test2.jpg");
 	duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
 
 	std::cout << "time: " << duration << '\n';
-	//render_ground_truth(m_editor);
-
-	//render_animation(m_editor);
-
-	//render_animation_truth(m_editor);
-
-	//render_ref_BRDF(m_editor);
+	*/
 }
 
 int main()
 {
 	
 	MicrofacetEditor m_editor;
-	m_editor.load_scene(DATA_PATH"cylinder.obj");
+	m_editor.load_scene(DATA_PATH"teapot.obj");
 
 	generate_grid_plane(m_editor);
 	//generate_image(m_editor);
 	
-	//generate_database(m_editor);
-
-	//generate_database_test(m_editor);
+	//render_grid_plane_prediction(m_editor);
 
 	return 0;
 }

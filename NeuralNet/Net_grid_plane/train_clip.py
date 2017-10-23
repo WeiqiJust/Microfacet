@@ -12,11 +12,11 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-from NetClass import grid_plane_network
-from utils import DataLoader_grid_plane
+from NetClass import grid_plane_clip_network
+from utils import DataLoader_grid_plane_clip
 
 params_global = {}
-params_global['outFolder'] = "T:/NeuralNet/Result"
+params_global['outFolder'] = r'../Results'
 params_global['scriptRoot'] = r'../Utils'
 
 def loadParams(filepath):
@@ -76,17 +76,22 @@ def buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_range
                     for x in x_range:
                        for y in y_range:
                             paramlist.append([r,d,s,x,y])
-                            dataList.append('{}_{}_{}_{}_{}_{}_{}'.format(r, d, s, x, y))
+                            for i in range(6):
+                                for j in range(6):
+                                    dataList.append('{}_{}_{}_{}_{}_{}_{}'.format(r, d, s, x, y,i,j))
                 else:
                     paramlist.append([r,d,s,0,0])
-                    dataList.append('{}_{}_{}_{}_{}_{}_{}'.format(r, d, s, 0, 0))
+                    for i in range(6):
+                                for j in range(6):
+                                    dataList.append('{}_{}_{}_{}_{}_{}_{}'.format(r, d, s, 0, 0,i,j))
+                    
     return paramlist, dataList
 
 def DataLoadProcess(queue, datasetfolder, params, roughness_range, diffuse_range, scale_range, x_range, y_range, unlabel = 0):
     paramlist, dataList = buildParamList(roughness_range, diffuse_range, scale_range, x_range, y_range)
 
     batchSize = params['batchSize']
-    dataset = DataLoader_grid_plane(datasetfolder, paramlist, 128, 128, 256, 256, True) #128,128,256,256,True
+    dataset = DataLoader_grid_plane_clip(datasetfolder, paramlist, 270, 270, 270, 270, True) #128,128,256,256,True
     dataset.buildSubDataset(dataList)#roughness_range, diffuse_range, scale_range, x_range, y_range, 10, 10)
     dataset.shuffle(params['randomSeed'])
 
@@ -177,7 +182,7 @@ def testFitting(testnet, testDataset, testCount):
 
 if __name__ == '__main__':
     #read params
-    configFilePath = "config.ini"
+    configFilePath = "config_clip.ini"
     outTag = "microfacet_training"
     gpuid = 0
 
@@ -217,7 +222,7 @@ if __name__ == '__main__':
 
     logger.info('Loading network and solver settings...')
 
-    BRDFNet = grid_plane_network()
+    BRDFNet = grid_plane_clip_network()
 
     
     BRDFNet.createNet(params['batchSize'], 0, params['BN'], params['NormalizeInput'])
@@ -248,11 +253,11 @@ if __name__ == '__main__':
     testnet = caffe.Net(outfolder + r'/net_test.prototxt', caffe.TEST)
 
     #init train dataset 
-    roughness_range = [0.3]#[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    roughness_range = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     diffuse_range = [0.05, 0.2, 0.4, 0.6, 0.8]
-    scale_range = [0, 0.05, 0.1]
-    x_range = [0.1, 0.2, 0.4, 0.6, 0.8]
-    y_range = [0.1, 0.2, 0.4, 0.6, 0.8]
+    scale_range = [0, 0.05, 0.1, 0.15, 0.2, 0.25]
+    x_range = [0.1, 0.3, 0.5, 0.7, 0.9] #[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    y_range = [0.1, 0.3, 0.5, 0.7, 0.9] #[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
     trainingQueueLength = 200
     logger.info('Init dataset...')
@@ -269,15 +274,16 @@ if __name__ == '__main__':
     loader_train = Process(target = DataLoadProcess, args = (data_queue_train, params['dataset'], params, roughness_range, diffuse_range, scale_range, x_range, y_range, 0)) #load label dataset
     loader_train.daemon = True
     loader_train.start()
+
     #init test dataset
-    roughness_range_test = [0.3]#[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    diffuse_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
-    scale_range_test = [0.025, 0.075, 0.125]
-    x_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
-    y_range_test = [0.1, 0.3, 0.5, 0.7, 0.9]
+    roughness_range_test = [0.2, 0.4, 0.6, 0.8]#[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] 
+    diffuse_range_test = [0.1, 0.4, 0.7]
+    scale_range_test = [0.08, 0.16, 0.24]
+    x_range_test = [0.05, 0.25, 0.45, 0.65, 0.85]
+    y_range_test = [0.05, 0.25, 0.45, 0.65, 0.85]
 
     testParam, testDataList = buildParamList(roughness_range_test, diffuse_range_test, scale_range_test, x_range_test, y_range_test)
-    testSet_Full = DataLoader_grid_plane(params['testDataset'], testParam, 128, 128, 256, 256, True)
+    testSet_Full = DataLoader_grid_plane_clip(params['testDataset'], testParam, 270, 270, 270, 270, True)
     testSet_Full.buildSubDataset(testDataList)
     testSet_Full.shuffle()        
 
@@ -332,8 +338,10 @@ if __name__ == '__main__':
     trainlosslist = []
     traintestlosslist = [[],[],[],[],[],[]]
     testlosslist = [[],[],[],[]]
-    testlossFulllist = [[],[],[],[]]
+    testlossFulllist = [[],[],[],[], [], []]
     looplosslist = []
+    
+    print ("Start Training......")
 
     while(True):
         #labeled training
@@ -471,6 +479,7 @@ if __name__ == '__main__':
             '''
             if(autoTest):
                logger.info('Visualizing...')
-               os.system(r'python TestBRDF.py {}/final.caffemodel {} {}'.format(outfolder, params['predictDataset'], outtag, gpuid))
-            break
+               os.system(r'python test.py {}/final.caffemodel {} {} {}'.format(outfolder, params['predictDataset'], outtag, gpuid))
             '''
+            break
+            

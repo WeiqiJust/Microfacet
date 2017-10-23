@@ -573,7 +573,7 @@ void microfacet_block::get_reflectance_debug(Vector3 &result,
 				img[i * 3 + 2] = n_distr[ii * 3 + 2] * scalar;
 			}
 		}
-		save_image_color("T:/Microfacet/avg_n_ours.png", img,
+		save_image_color("T:/Microfacet/avg_n_ours.jpg", img,
 			p_basis_matr->fr_n.get_actual_dim(), p_basis_matr->fr_n.get_actual_dim() * 2);
 
 		printf_s("result     : %g %g %g\n", result.x, result.y, result.z);

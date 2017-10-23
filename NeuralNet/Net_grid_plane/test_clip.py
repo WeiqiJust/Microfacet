@@ -14,12 +14,10 @@ import glob
 import math
 import shutil
 import cv2
-import jinja2
-import pickle
 
 from skimage.measure import compare_ssim as ssim
 from configparser import ConfigParser
-from utils import load_and_clip
+from utils import load_and_downsample
 
 matplotlib.rcParams.update({'font.size': 14})
 
@@ -79,35 +77,44 @@ if __name__ == '__main__':
     testnet.copy_from(savedNet)
 
     randomClip = False
-    width = 128
-    height = 128
+    width = 270
+    height = 270
 
     r = []
     g = []
     b = []
     testPath = predictDataset
-    for filename in glob.glob(os.path.join(testPath, '*.jpg')):
-        fullpath = filename
-        #print('Test {}\n'.format(filename.strip()))
+    img_in = np.zeros((1,3,width,height))
+    count = 0
+    error = [0 ,0, 0] # r g b three channel error
+    for fullpath in glob.glob(os.path.join(testPath, '*.jpg')):
+        filename = fullpath.split('/')[-1][:-4]
+        param = filename.split('_')
+        
+        if (len(param) > 5):
+            param = param[:5]
+        else if (len(param) < 5):
+            print ("Invaild input image naming!")
+            continue
 
         img = cv2.imread(fullpath)
         rawheight = img.shape[0]
         rawwidth = img.shape[1]
-        if(randomClip):
-            clip_left = np.random.randint(0, rawwidth - 1 - width)
-            clip_top = np.random.randint(0, rawheight - 1 - height)
-        else:
-            clip_left = rawwidth / 2 - width / 2
-            clip_top = rawheight / 2 - height / 2
-        clipPos = [clip_left, clip_top]
-        img = load_and_clip(fullpath, int(clip_left), int(clip_top), width, height)
+
+        img = load_and_downsample(fullpath, width, height)
         #need to handle different channel
 
         img_in[0,:,:,:] = img.transpose((2,0,1))
         roughness, diffuse, scale, x, y = test_single_channel(testnet, img_in)
-        r.append([roughness[0], diffuse[0], scale[0], x[0], y[0]])
-        g.append([roughness[1], diffuse[1], scale[1], x[1], y[1]])
-        b.append([roughness[2], diffuse[2], scale[2], x[2], y[2]])
+        r.append([filename, roughness[0], diffuse[0], scale[0], x[0], y[0]])
+        g.append([filename, roughness[1], diffuse[1], scale[1], x[1], y[1]])
+        b.append([filename, roughness[2], diffuse[2], scale[2], x[2], y[2]])
+        count++
+        for i in range(3):
+            error[i] += (param[0] - roughness[i])**2 + (param[1] - diffuse[i])**2 + (param[2] - scale[i])**2 + (param[3] - x[i])**2 + (param[4] - y[i])**2
+
+    print ("Error:")
+    print ([e/count for e in error])
 
     if (testPath != ''):
         with open(testPath + r'/result_r.txt', 'w') as f1:

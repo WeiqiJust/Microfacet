@@ -14,7 +14,7 @@
 MicrofacetEditor::MicrofacetEditor()
 : p_manager(NULL), p_base(NULL), p_skybox(NULL), p_screen(NULL),
 pi_base(NULL), pi_background(NULL), pi_base_vis(NULL), pi_background_vis(NULL),
-p_screen_buffer(NULL), p_background_buffer(NULL), p_vis_buffer(NULL),
+p_screen_buffer(NULL), p_background_buffer(NULL), p_reflectance_table(NULL), p_vis_buffer(NULL),
 dbg_pixel_x(0), dbg_pixel_y(0), details(NULL), b_scene_ready(false),
 b_microfacet_changed(true), b_buffer_ready(false), b_render_image(false),
 visual_x(0), visual_y(0)
@@ -35,9 +35,13 @@ visual_x(0), visual_y(0)
 	visual_x = render_width / 2;
 	visual_y = render_height / 2;
 
+	sample_theta = 45; //0->90->0
+	sample_phi = 36; //0->360->0
+
 	p_screen_buffer = new UINT[render_width*render_height];
 	p_background_buffer
 		= new UINT[render_width*render_height];
+	p_reflectance_table = new UINT[sample_theta*sample_phi*sample_theta*sample_phi];
 	p_uv = new float[render_width*render_height * 2];
 	p_normal = new short[render_width*render_height * 4];
 	p_tangent = new short[render_width*render_height * 4];
@@ -71,7 +75,7 @@ visual_x(0), visual_y(0)
 	float r = 3.0f;
 	z_near = 1e-3*r;
 	z_far = 20 * r;
-	projection_orthogonal(mat_proj, r, r, z_near, z_far);
+	projection_orthogonal(mat_proj_vis_illu, r, r, z_near, z_far);
 
 	p_factory = new microfacet_factory(gpu_env.get_handle());
 	mff_singleton::set(p_factory);

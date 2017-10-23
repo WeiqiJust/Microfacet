@@ -78,6 +78,8 @@ public:
 
 	void render();
 
+	void create_reflectance_table();
+
 	void debug_our_pixel();
 
 	void compute_ground_truth_BRDF();
@@ -88,7 +90,9 @@ public:
 
 	void render_ground_truth();
 
-	void render_ref_BRDF();
+	void render_ref_BRDF(string roughness, Vector3 albedo = Vector3(1.0f, 1.0f, 1.0f));
+
+	void render_measured_BRDF(string filename);
 
 	void gen_anim_ours();
 
@@ -139,6 +143,7 @@ private:
 
 	//zrt::ZRTInterface	izrt;
 	int					render_width, render_height;
+	int					sample_theta, sample_phi;
 	bool				b_scene_ready;
 	task_manager		*p_manager;
 	worker_microfacet	*p_worker;
@@ -154,7 +159,7 @@ private:
 
 	//rendering buffers (CPU)
 	int					vis_pixel_size;
-	UINT				*p_screen_buffer, *p_background_buffer;
+	UINT				*p_screen_buffer, *p_background_buffer, *p_reflectance_table;
 	float				*p_uv, *p_vis_buffer, *p_test;
 	short				*p_normal, *p_tangent;
 	std::vector<Vector3> p_wo;

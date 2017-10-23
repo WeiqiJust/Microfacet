@@ -13,7 +13,7 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 	//codex::utils::timer t;
 
 	//Lambertian
-	add_basis_matr(BASIS_MATR_LAMBERTIAN, MATR_PATH"Lambert.txt");
+	//add_basis_matr(BASIS_MATR_LAMBERTIAN, MATR_PATH"Lambert.txt");
 
 	//Cook-Torrance
 	//add_basis_matr(BASIS_MATR_CT_0_20_0_25, MATR_PATH "CT_0.20.txt");
@@ -25,8 +25,12 @@ microfacet_factory::microfacet_factory(D3D_dev_handle *pdev)
 
 	add_basis_matr(BASIS_MATR_WARD_0_30, MATR_PATH"Ward_0.30.txt");
 
-	//add_basis_matr(BASIS_MATR_WARD_0_40, MATR_PATH "Ward_0.40.txt");
-	//add_basis_matr(BASIS_MATR_WARD_0_50, MATR_PATH "Ward_0.50.txt");
+	add_basis_matr(BASIS_MATR_WARD_0_40, MATR_PATH "Ward_0.40.txt");
+	add_basis_matr(BASIS_MATR_WARD_0_50, MATR_PATH "Ward_0.50.txt");
+	add_basis_matr(BASIS_MATR_WARD_0_60, MATR_PATH "Ward_0.60.txt");
+	add_basis_matr(BASIS_MATR_WARD_0_70, MATR_PATH "Ward_0.70.txt");
+	add_basis_matr(BASIS_MATR_WARD_0_80, MATR_PATH "Ward_0.80.txt");
+	add_basis_matr(BASIS_MATR_WARD_0_90, MATR_PATH "Ward_0.90.txt");
 	////BlinnPhong
 	//add_basis_matr(BASIS_MATR_PHONG_2, MATR_PATH "Phong_2.txt");
 	//add_basis_matr(BASIS_MATR_PHONG_4, MATR_PATH "Phong_4.txt");
@@ -612,7 +616,7 @@ int microfacet_factory::get_matr_id(const string &name)
 
 void microfacet_factory::add_matr(const int &id, matr* p)
 {
-	lib_matr.add(id, p);
+	lib_matr.assign(id, p);
 }
 
 void microfacet_factory::reg_basis_matr_name(const int &id, const string &name)

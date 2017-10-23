@@ -22,6 +22,8 @@ const int TASK_TYPE_RENDER_REF_BRDF_DEBUG_PIXEL
 const int TASK_TYPE_DEBUG_RAYTRACE_PIXEL= 14;
 const int TASK_TYPE_DEBUG_RAYTRACE		= 15;
 
+const int TASK_TYPE_CREATE_REFLECTANCE_TABLE = 16;
+
 const int TASK_SUBTYPE_GEN_DISTR		= 0x0001;
 const int TASK_SUBTYPE_VIS_NORMAL		= 0x0002;
 const int TASK_SUBTYPE_BRDF_TRUTH		= 0x0004;
@@ -111,6 +113,22 @@ public:
 	//DEBUG only
 	int				dbg_pixel_x, dbg_pixel_y;
 };
+
+class task_create_reflectance
+{
+public:
+
+	parab_frame		*fr_Avis, *fr_vis;
+	int			sample_theta, sample_phi;
+	microfacet_details
+		*details;
+	std::vector<microfacet_block>
+		*blocks;
+
+	UINT* result;
+};
+
+
 
 class task_render_truth
 {
@@ -223,6 +241,7 @@ public:
 		task_render_truth	trt;
 		task_render_visual	trv;
 		task_animation		ta;
+		task_create_reflectance tc;
 	};
 };
 
@@ -250,6 +269,7 @@ public:
 	void work_task_microfacet_changed(task_microfacet *t);// Important see how microfacet changes
 	void work_task_buffer(task_microfacet *t);
 	void work_task_render(task_microfacet *t);
+	void work_task_create_reflectance_table(task_microfacet *t);
 	void work_task_render_block(task_microfacet *t, qrender_block *pb);
 	void work_task_raytrace_block(task_microfacet *t, qrender_block *pb);
 	void work_task_render_debug(task_microfacet *t);
