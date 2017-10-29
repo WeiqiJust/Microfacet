@@ -63,9 +63,9 @@ class measured_isotropic_BRDF
 private:
 	double *data;//[MEASURED_BRDF_SAMPLING_THETA_H * MEASURED_BRDF_SAMPLING_THETA_D * MEASURED_BRDF_SAMPLING_PHI_D / 2][3];
 
-	inline int theta_half_index(const float theta_half) const;
-	inline int theta_diff_index(const float theta_diff) const;
-	inline int phi_diff_index(const float phi_diff) const;
+	inline int theta_half_index(const double theta_half) const;
+	inline int theta_diff_index(const double theta_diff) const;
+	inline int phi_diff_index(const double phi_diff) const;
 
 	std::vector<step_1D_prob>	prob;
 

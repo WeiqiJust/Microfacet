@@ -4,7 +4,7 @@ root_path = os.path.dirname(working_path)
 sys.path.append(root_path + r'/Utils')
 
 import caffe
-from utils import save_pfm, load_pfm, pfmFromBuffer, pfmToBuffer, DataLoader_grid_plane
+from utils import save_pfm, load_pfm, pfmFromBuffer, pfmToBuffer, DataLoader_groove
 import numpy as np
 import logging
 import matplotlib
@@ -19,35 +19,34 @@ from skimage.measure import compare_ssim as ssim
 from configparser import ConfigParser
 from utils import load_img
 
-matplotlib.rcParams.update({'font.size': 14})
 
 def test_single_channel(testnet, img, color):
     roughness = []
-    diffuse = []
-    scale = []
-    x = []
-    y = []
+    diffuse0 = []
+    diffuse1 = []
+    p = []
+    h = []
     if (color):
         for i in range(3):
             testnet.blobs['Data_Image'].data[...] = img[0,i,:,:]
             testnet.forward()
 
             roughness.append(testnet.blobs['Out_Roughness'].data.flatten()[0])
-            diffuse.append(testnet.blobs['Out_Diffuse'].data.flatten()[0])
-            scale.append(testnet.blobs['Out_Scale'].data.flatten()[0])
-            x.append(testnet.blobs['Out_X'].data.flatten()[0])
-            y.append(testnet.blobs['Out_Y'].data.flatten()[0])
+            diffuse0.append(testnet.blobs['Out_Diffuse0'].data.flatten()[0])
+            diffuse1.append(testnet.blobs['Out_Diffuse1'].data.flatten()[0])
+            p.append(testnet.blobs['Out_Percent'].data.flatten()[0])
+            h.append(testnet.blobs['Out_Height'].data.flatten()[0])
     else:
         testnet.blobs['Data_Image'].data[...] = img[0,0,:,:]
         testnet.forward()
 
         roughness.append(testnet.blobs['Out_Roughness'].data.flatten()[0])
-        diffuse.append(testnet.blobs['Out_Diffuse'].data.flatten()[0])
-        scale.append(testnet.blobs['Out_Scale'].data.flatten()[0])
-        x.append(testnet.blobs['Out_X'].data.flatten()[0])
-        y.append(testnet.blobs['Out_Y'].data.flatten()[0])
+        diffuse0.append(testnet.blobs['Out_Diffuse0'].data.flatten()[0])
+        diffuse1.append(testnet.blobs['Out_Diffuse1'].data.flatten()[0])
+        p.append(testnet.blobs['Out_Percent'].data.flatten()[0])
+        h.append(testnet.blobs['Out_Height'].data.flatten()[0])
                                    
-    return roughness, diffuse, scale, x, y
+    return roughness, diffuse0, diffuse1, p, h
 
 
 if __name__ == '__main__':
@@ -120,27 +119,27 @@ if __name__ == '__main__':
             #need to handle different channel
             count = count + 1
             img_in[0,:,:,:] = img.transpose((2,0,1))
-            roughness, diffuse, scale, x, y = test_single_channel(testnet, img_in, color)
+            roughness, diffuse0, diffuse1, p, h = test_single_channel(testnet, img_in, color)
             if (color):
-                albedo.append([filename[:-6], diffuse[2], diffuse[1],diffuse[0]])
+                albedo.append([filename[:-6], diffuse0[2], diffuse0[1],diffuse0[0], diffuse1[2], diffuse1[1],diffuse1[0]])
                 gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 gray_img_in[0,0,:,:] = gray_image
-                roughness, diffuse, scale, x, y = test_single_channel(testnet, gray_img_in, 0)
-                convert_gray.append([filename[:-6], roughness[0], diffuse[0], scale[0], x[0], y[0]])
+                roughness, diffuse0, diffuse1, p, h = test_single_channel(testnet, gray_img_in, 0)
+                convert_gray.append([filename[:-6], roughness[0], diffuse0[0], diffuse1[0], p[0], h[0]])
             else:
-                gray.append([filename[:-5], roughness[0], diffuse[0], scale[0], x[0], y[0]])
+                gray.append([filename[:-5], roughness[0], diffuse0[0], diffuse1[0], p[0], h[0]])
 
 
     if (testPath != ''):
-         with open(testPath + r'/predict_gray_grid_plane.txt', 'w') as f1:
+         with open(testPath + r'/predict_gray_groove.txt', 'w') as f1:
             f1.write(str(len(gray)) + '\n')
             for l in gray:
                 f1.write(' '.join(map(str, l)) + '\n')
-         with open(testPath + r'/predict_color_grid_plane.txt', 'w') as f1:
+         with open(testPath + r'/predict_color_groove.txt', 'w') as f1:
             f1.write(str(len(albedo)) + '\n')
             for l in albedo:
                 f1.write(' '.join(map(str, l)) + '\n')
-         with open(testPath + r'/predict_convert_gray_grid_plane.txt', 'w') as f1:
+         with open(testPath + r'/predict_convert_gray_groove.txt', 'w') as f1:
             f1.write(str(len(convert_gray)) + '\n')
             for l in convert_gray:
                 f1.write(' '.join(map(str, l)) + '\n')

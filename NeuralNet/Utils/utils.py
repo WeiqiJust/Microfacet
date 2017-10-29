@@ -382,11 +382,11 @@ class DataLoader_grid_plane(object):
         return self.GetItemByID(r, d, s, x, y, color)#img, brdf
 
     def GetItemByID(self, r, d, s, x, y, color = False):
-        #print (self.rootPath + r'/ward_{}_{}/{}_{}_{}.jpg'.format(r, d, s, x, y))
+        #print (self.rootPath + r'/ward_{}_{}/{}_{}_{}.png'.format(r, d, s, x, y))
         if(color):
-            img = load_img(self.rootPath + r'/ward_{}_{}/{}_{}_{}.jpg'.format(r, d, s, x, y), self.width, self.height).transpose((2,0,1))
+            img = load_img(self.rootPath + r'/ward_{}_{}/{}_{}_{}.png'.format(r, d, s, x, y), self.width, self.height).transpose((2,0,1))
         else:
-            img = load_img(self.rootPath + r'/ward_{}_{}/{}_{}_{}.jpg'.format(r, d, s, x, y), self.width, self.height)
+            img = load_img(self.rootPath + r'/ward_{}_{}/{}_{}_{}.png'.format(r, d, s, x, y), self.width, self.height)
             if(len(img.shape) == 3):
                 img = img[:,:,0]
             img = img[np.newaxis,:,:]
@@ -486,9 +486,9 @@ class DataLoader_grid_plane_clip(object):
 
     def GetItemByID(self, r, d, s, x, y, c, v, color = False):
         if(color):
-            img = load_and_clip(self.rootPath + r'/ward_{}_{}/{}_{}_{}/{}_{}.jpg'.format(r, d, s, x, y, int(c), int(v)), int(0), int(0), self.width, self.height).transpose((2,0,1))
+            img = load_and_clip(self.rootPath + r'/ward_{}_{}/{}_{}_{}/{}_{}.png'.format(r, d, s, x, y, int(c), int(v)), int(0), int(0), self.width, self.height).transpose((2,0,1))
         else:
-            img = load_and_clip(self.rootPath + r'/ward_{}_{}/{}_{}_{}/{}_{}.jpg'.format(r, d, s, x, y, int(c), int(v)), int(0), int(0), self.width, self.height)
+            img = load_and_clip(self.rootPath + r'/ward_{}_{}/{}_{}_{}/{}_{}.png'.format(r, d, s, x, y, int(c), int(v)), int(0), int(0), self.width, self.height)
             if(len(img.shape) == 3):
                 img = img[:,:,0]
             img = img[np.newaxis,:,:]
@@ -586,9 +586,9 @@ class DataLoader_groove(object):
 
     def GetItemByID(self, r, d0, d1, p, h, color = False):
         if(color):
-            img = load_img(self.rootPath + r'/ward_{}_{}_{}/{}_{}.jpg'.format(r, d0, d1, p, h), self.width, self.height).transpose((2,0,1))
+            img = load_img(self.rootPath + r'/ward_{}_{}_{}/{}_{}.png'.format(r, d0, d1, p, h), self.width, self.height).transpose((2,0,1))
         else:
-            img = load_img(self.rootPath + r'/ward_{}_{}_{}/{}_{}.jpg'.format(r, d0, d1, p, h), self.width, self.height)
+            img = load_img(self.rootPath + r'/ward_{}_{}_{}/{}_{}.png'.format(r, d0, d1, p, h), self.width, self.height)
             if(len(img.shape) == 3):
                 img = img[:,:,0]
             img = img[np.newaxis,:,:]

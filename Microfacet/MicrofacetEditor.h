@@ -18,6 +18,8 @@ public:
 
 	void load_material(Vector3 albedo, const string basic_material, const string binder_id, const string dist_id);
 
+	void load_material(Vector3 albedo_0, Vector3 albedo_1, const string basic_material, const string binder_id_0, const string binder_id_1, const string dist_id);
+
 	void generate_distr_none() {};
 
 	microfacet_distr* generate_distr_grid(const float x, const float y, const float z,

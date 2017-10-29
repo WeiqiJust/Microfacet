@@ -90,12 +90,12 @@ if __name__ == '__main__':
     width = 256
     height = 256
 
-    albedo = []
-    gray = []
-    convert_gray = []
+    r = []
+    g = []
+    b = []
+  
     testPath = predictDataset
     img_in = np.zeros((1,3, width,height))
-    gray_img_in = np.zeros((1,1, width,height))
     count = 0
     imgExts = ["png", "bmp", "jpg"]
     for path, dirs, files in os.walk(testPath):
@@ -122,25 +122,23 @@ if __name__ == '__main__':
             img_in[0,:,:,:] = img.transpose((2,0,1))
             roughness, diffuse, scale, x, y = test_single_channel(testnet, img_in, color)
             if (color):
-                albedo.append([filename[:-6], diffuse[2], diffuse[1],diffuse[0]])
-                gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                gray_img_in[0,0,:,:] = gray_image
-                roughness, diffuse, scale, x, y = test_single_channel(testnet, gray_img_in, 0)
-                convert_gray.append([filename[:-6], roughness[0], diffuse[0], scale[0], x[0], y[0]])
-            else:
-                gray.append([filename[:-5], roughness[0], diffuse[0], scale[0], x[0], y[0]])
-
+                r.append([filename[:-6], roughness[0], diffuse[0], scale[0], x[0], y[0]])
+                g.append([filename[:-6], roughness[1], diffuse[1], scale[1], x[1], y[1]])
+                b.append([filename[:-6], roughness[2], diffuse[2], scale[2], x[2], y[2]])
+            
 
     if (testPath != ''):
-         with open(testPath + r'/predict_gray_grid_plane.txt', 'w') as f1:
-            f1.write(str(len(gray)) + '\n')
-            for l in gray:
-                f1.write(' '.join(map(str, l)) + '\n')
-         with open(testPath + r'/predict_color_grid_plane.txt', 'w') as f1:
-            f1.write(str(len(albedo)) + '\n')
-            for l in albedo:
-                f1.write(' '.join(map(str, l)) + '\n')
-         with open(testPath + r'/predict_convert_gray_grid_plane.txt', 'w') as f1:
-            f1.write(str(len(convert_gray)) + '\n')
-            for l in convert_gray:
-                f1.write(' '.join(map(str, l)) + '\n')
+            with open(testPath + r'/test_r.txt', 'w') as f1:
+                f1.write(str(count) + '\n')
+                for l in r:
+                    f1.write(' '.join(map(str, l)) + '\n')
+
+            with open(testPath + r'/test_g.txt', 'w') as f1:
+                f1.write(str(count)+ '\n')
+                for l in g:
+                    f1.write(' '.join(map(str, l)) + '\n')
+
+            with open(testPath + r'/test_b.txt', 'w') as f1:
+                f1.write(str(count) + '\n')
+                for l in b:
+                    f1.write(' '.join(map(str, l)) + '\n')

@@ -4,7 +4,7 @@ root_path = os.path.dirname(working_path)
 sys.path.append(root_path + r'/Utils')
 
 import caffe
-from utils import save_pfm, load_pfm, pfmFromBuffer, pfmToBuffer, DataLoader_grid_plane
+from utils import save_pfm, load_pfm, pfmFromBuffer, pfmToBuffer, DataLoader_groove
 import numpy as np
 import logging
 import matplotlib
@@ -19,36 +19,24 @@ from skimage.measure import compare_ssim as ssim
 from configparser import ConfigParser
 from utils import load_img
 
-matplotlib.rcParams.update({'font.size': 14})
 
-def test_single_channel(testnet, img, color):
+def test_single_channel(testnet, img):
     roughness = []
-    diffuse = []
-    scale = []
-    x = []
-    y = []
-    if (color):
-        for i in range(3):
-            testnet.blobs['Data_Image'].data[...] = img[0,i,:,:]
-            
-            testnet.forward()
-
-            roughness.append(testnet.blobs['Out_Roughness'].data.flatten()[0])
-            diffuse.append(testnet.blobs['Out_Diffuse'].data.flatten()[0])
-            scale.append(testnet.blobs['Out_Scale'].data.flatten()[0])
-            x.append(testnet.blobs['Out_X'].data.flatten()[0])
-            y.append(testnet.blobs['Out_Y'].data.flatten()[0])
-    else:
-        testnet.blobs['Data_Image'].data[...] = img[0,0,:,:]
+    diffuse0 = []
+    diffuse1 = []
+    p = []
+    h = []
+    for i in range(3):
+        testnet.blobs['Data_Image'].data[...] = img[0,i,:,:]
         testnet.forward()
 
         roughness.append(testnet.blobs['Out_Roughness'].data.flatten()[0])
-        diffuse.append(testnet.blobs['Out_Diffuse'].data.flatten()[0])
-        scale.append(testnet.blobs['Out_Scale'].data.flatten()[0])
-        x.append(testnet.blobs['Out_X'].data.flatten()[0])
-        y.append(testnet.blobs['Out_Y'].data.flatten()[0])
+        diffuse0.append(testnet.blobs['Out_Diffuse0'].data.flatten()[0])
+        diffuse1.append(testnet.blobs['Out_Diffuse1'].data.flatten()[0])
+        p.append(testnet.blobs['Out_Percent'].data.flatten()[0])
+        h.append(testnet.blobs['Out_Height'].data.flatten()[0])
                                    
-    return roughness, diffuse, scale, x, y
+    return roughness, diffuse0, diffuse1, p, h
 
 
 if __name__ == '__main__':
@@ -126,16 +114,16 @@ if __name__ == '__main__':
             #need to handle different channel
 
             img_in[0,:,:,:] = img.transpose((2,0,1))
-            roughness, diffuse, scale, x, y = test_single_channel(testnet, img_in, color)
+            roughness, diffuse0, diffuse1, p, h = test_single_channel(testnet, img_in, color)
             if (color):
-                r.append([param[0], param[1], param[2], param[3], param[4], roughness[0], diffuse[0], scale[0], x[0], y[0]])
-                g.append([param[0], param[1], param[2], param[3], param[4], roughness[1], diffuse[1], scale[1], x[1], y[1]])
-                b.append([param[0], param[1], param[2], param[3], param[4], roughness[2], diffuse[2], scale[2], x[2], y[2]])
+                r.append([param[0], param[1], param[2], param[3], param[4], roughness[0], diffuse0[0], diffuse1[0], p[0], h[0]])
+                g.append([param[0], param[1], param[2], param[3], param[4], roughness[1], diffuse0[1], diffuse1[1], p[1], h[1]])
+                b.append([param[0], param[1], param[2], param[3], param[4], roughness[2], diffuse0[2], diffuse1[2], p[2], h[2]])
                 for i in range(3):
-                    error[i] += (param[0] - roughness[i])**2 + (param[1] - diffuse[i])**2 + (param[2] - scale[i])**2 + (param[3] - x[i])**2 + (param[4] - y[i])**2
+                    error[i] += (param[0] - roughness[i])**2 + (param[1] - diffuse0[i])**2 + (param[2] - diffuse1[i])**2 + (param[3] - p[i])**2 + (param[4] - h[i])**2
             else:
-                gray.append([param[0], param[1], param[2], param[3], param[4], roughness[0], diffuse[0], scale[0], x[0], y[0]])
-                error[0] += (param[0] - roughness[0])**2 + (param[1] - diffuse[0])**2 + (param[2] - scale[0])**2 + (param[3] - x[0])**2 + (param[4] - y[0])**2
+                gray.append([param[0], param[1], param[2], param[3], param[4], roughness[0], diffuse0[0], diffuse1[0], p[0], h[0]])
+                error[0] += (param[0] - roughness[0])**2 + (param[1] - diffuse0[0])**2 + (param[2] - diffuse1[0])**2 + (param[3] - p[0])**2 + (param[4] - h[0])**2
 
     print ("Error:")
     print ([e/count for e in error])
@@ -143,22 +131,22 @@ if __name__ == '__main__':
 
     if (testPath != ''):
         if (color):
-            with open(testPath + r'/test_r_grid_plane.txt', 'w') as f1:
+            with open(testPath + r'/test_r_groove.txt', 'w') as f1:
                 f1.write(str(count) + '\n')
                 for l in r:
                     f1.write(' '.join(map(str, l)) + '\n')
 
-            with open(testPath + r'/test_g_grid_plane.txt', 'w') as f1:
+            with open(testPath + r'/test_g_groove.txt', 'w') as f1:
                 f1.write(str(count)+ '\n')
                 for l in g:
                     f1.write(' '.join(map(str, l)) + '\n')
 
-            with open(testPath + r'/test_b_grid_plane.txt', 'w') as f1:
+            with open(testPath + r'/test_b_groove.txt', 'w') as f1:
                 f1.write(str(count) + '\n')
                 for l in b:
                     f1.write(' '.join(map(str, l)) + '\n')
         else:
-            with open(testPath + r'/test_gray_grid_plane.txt', 'w') as f1:
+            with open(testPath + r'/test_gray_groove.txt', 'w') as f1:
                 f1.write(str(count) + '\n')
                 for l in gray:
                     f1.write(' '.join(map(str, l)) + '\n')

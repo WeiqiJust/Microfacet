@@ -729,6 +729,12 @@ void worker_microfacet::work_task_render_ref_BRDF(task_microfacet *t_org)
 				Vector3 c;
 				Vector3 wo(global_wo*tangent, global_wo*binormal, global_wo*normal);
 
+				if (wo.z < 0.1)
+				{
+					wo.z = 0.1;
+					wo = Normalize(wo);
+				}
+
 				for (int l = 0; l < vis_wi.size(); l++)
 					if (vis_wi[l])
 					{

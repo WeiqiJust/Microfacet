@@ -281,15 +281,13 @@ void MicrofacetEditor::load_material(Vector3 albedo, const string basic_material
 {
 	generate_init_matr(albedo, basic_material, binder_id);
 	generate_init_matr(albedo, basic_material, dist_id);
-	/*
-	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_0");
-	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_1");
-	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_2");
-	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_distr_3");
-	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_binder_0");
-	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_binder_1");
-	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_binder_2");
-	generate_init_matr(Vector3(0.6f, 1.0f, 0.6f), "Lambert", "matr_binder_3");*/
+}
+
+void MicrofacetEditor::load_material(Vector3 albedo_0, Vector3 albedo_1, const string basic_material, const string binder_id_0, const string binder_id_1, const string dist_id)
+{
+	generate_init_matr(albedo_0, basic_material, binder_id_0);
+	generate_init_matr(albedo_1, basic_material, binder_id_1);
+	generate_init_matr(albedo_0, basic_material, dist_id);
 }
 
 void MicrofacetEditor::load_scene(const string object)

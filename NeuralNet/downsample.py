@@ -6,7 +6,9 @@ def resize(folder, fileName, factor):
     filePath = os.path.join(folder, fileName)
     im = cv2.imread(filePath)
     newIm = cv2.resize(im, (factor, factor), interpolation = cv2.INTER_AREA)
-    # i am saving a copy, you can overrider orginal, or save to other folder
+    if (fileName[-3:].lower() == "jpg"):
+        os.remove(filePath)
+    filePath = filePath[:-3] + 'png'
     cv2.imwrite(filePath, newIm)
 
 def bulkResize(imageFolder, factor):

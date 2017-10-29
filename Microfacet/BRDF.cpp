@@ -166,124 +166,153 @@ measured_isotropic_BRDF::~measured_isotropic_BRDF()
 }
 
 
+void cross_product(double* v1, double* v2, double* out)
+{
+	out[0] = v1[1] * v2[2] - v1[2] * v2[1];
+	out[1] = v1[2] * v2[0] - v1[0] * v2[2];
+	out[2] = v1[0] * v2[1] - v1[1] * v2[0];
+}
+
+// normalize vector
+void normalize(double* v)
+{
+	// normalize
+	double len = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+	v[0] = v[0] / len;
+	v[1] = v[1] / len;
+	v[2] = v[2] / len;
+}
+
+// rotate vector along one axis
+void rotate_vector(double* vector, double* axis, double angle, double* out)
+{
+	double temp;
+	double cross[3];
+	double cos_ang = cos(angle);
+	double sin_ang = sin(angle);
+
+	out[0] = vector[0] * cos_ang;
+	out[1] = vector[1] * cos_ang;
+	out[2] = vector[2] * cos_ang;
+
+	temp = axis[0] * vector[0] + axis[1] * vector[1] + axis[2] * vector[2];
+	temp = temp*(1.0 - cos_ang);
+
+	out[0] += axis[0] * temp;
+	out[1] += axis[1] * temp;
+	out[2] += axis[2] * temp;
+
+	cross_product(axis, vector, cross);
+
+	out[0] += cross[0] * sin_ang;
+	out[1] += cross[1] * sin_ang;
+	out[2] += cross[2] * sin_ang;
+}
+
 void measured_isotropic_BRDF::load_data(const char *filename, bool b_need_CDF)
 {
-	FILE *fp;
-
-	fopen_s(&fp, filename, "rb");
-	if (!fp)
-	{ 
-		cout << "(measured_isotropic_BRDF::load_data) failed to open data file";
-		exit(0);
-	}
+	FILE *f = fopen(filename, "rb");
+	if (!f)
+		return;
 
 	int dims[3];
-
-	fread(dims, sizeof(int), 3, fp);
-
-	if (dims[0] * dims[1] * dims[2] !=
-		MEASURED_BRDF_SAMPLING_THETA_H *
+	fread(dims, sizeof(int), 3, f);
+	int n = dims[0] * dims[1] * dims[2];
+	if (n != MEASURED_BRDF_SAMPLING_THETA_H *
 		MEASURED_BRDF_SAMPLING_THETA_D *
 		MEASURED_BRDF_SAMPLING_PHI_D / 2)
 	{
-		fclose(fp);
-		cout << "(measured_isotropic_BRDF::load_data) dimensions do not match";
-		exit(0);
+		fprintf(stderr, "Dimensions don't match\n");
+		fclose(f);
+		return;
 	}
 
-	data = new double[MEASURED_BRDF_SAMPLING_THETA_H * MEASURED_BRDF_SAMPLING_THETA_D * MEASURED_BRDF_SAMPLING_PHI_D / 2 * 3];
+	data = (double*)malloc(sizeof(double) * 3 * n);
+	fread(data, sizeof(double), 3 * n, f);
 
-	for (int c = 0; c < 3; c++)
-		for (int i = 0; i < MEASURED_BRDF_SAMPLING_THETA_H * MEASURED_BRDF_SAMPLING_THETA_D * MEASURED_BRDF_SAMPLING_PHI_D / 2; i++)
-		{
-			fread(&data[i * 3 + c], sizeof(double), 1, fp);
-		}
-
-	fclose(fp);
-
-	for (int i = 0; i < MEASURED_BRDF_SAMPLING_THETA_H * MEASURED_BRDF_SAMPLING_THETA_D * MEASURED_BRDF_SAMPLING_PHI_D / 2; i++)
-	{
-		data[i * 3 + 0] *= RED_SCALE;
-		data[i * 3 + 1] *= GREEN_SCALE;
-		data[i * 3 + 2] *= BLUE_SCALE;
-	}
-
-	for (int i = 0; i < dims[0] * dims[1] * dims[2]; i++)
-	{
-		Vector3 brdf(data[i * 3 + 0], data[i * 3 + 1], data[i * 3 + 2]);
-
-		data[i * 3 + 0] = brdf.x;
-		data[i * 3 + 1] = brdf.y;
-		data[i * 3 + 2] = brdf.z;
-	}
+	fclose(f);
 
 }
 
 
-inline int measured_isotropic_BRDF::theta_half_index(const float theta_half) const
+inline int measured_isotropic_BRDF::theta_half_index(const double theta_half) const
 {
 	if (theta_half <= 0.0)
 		return 0;
-
-	double theta_half_deg = (theta_half / (PI * 0.5) * MEASURED_BRDF_SAMPLING_THETA_H);
-	double temp = theta_half_deg * MEASURED_BRDF_SAMPLING_THETA_H;
-
-	return max(min(int(sqrt(temp)), MEASURED_BRDF_SAMPLING_THETA_H - 1), 0);
+	double theta_half_deg = ((theta_half / (PI / 2.0))*MEASURED_BRDF_SAMPLING_THETA_H);
+	double temp = theta_half_deg*MEASURED_BRDF_SAMPLING_THETA_H;
+	temp = sqrt(temp);
+	int ret_val = (int)temp;
+	if (ret_val < 0) ret_val = 0;
+	if (ret_val >= MEASURED_BRDF_SAMPLING_THETA_H)
+		ret_val = MEASURED_BRDF_SAMPLING_THETA_H - 1;
+	return ret_val;
 }
 
-inline int measured_isotropic_BRDF::theta_diff_index(const float theta_diff) const
+inline int measured_isotropic_BRDF::theta_diff_index(const double theta_diff) const
 {
-	int temp = int(theta_diff / (PI * 0.5) * MEASURED_BRDF_SAMPLING_THETA_D);
-
-	return max(min(temp, MEASURED_BRDF_SAMPLING_THETA_D - 1), 0);
+	int tmp = int(theta_diff / (PI * 0.5) * MEASURED_BRDF_SAMPLING_THETA_D);
+	if (tmp < 0)
+		return 0;
+	else if (tmp < MEASURED_BRDF_SAMPLING_THETA_D - 1)
+		return tmp;
+	else
+		return MEASURED_BRDF_SAMPLING_THETA_D - 1;
 }
 
-inline int measured_isotropic_BRDF::phi_diff_index(const float phi_d) const
+inline int measured_isotropic_BRDF::phi_diff_index(const double phi_d) const
 {
-	float phi_diff = phi_d;
-
-	if (phi_diff < 0.0)
+	double phi_diff = phi_d;
+	if (phi_d < 0.0)
 		phi_diff += PI;
 
-	int temp = int(phi_diff / PI * MEASURED_BRDF_SAMPLING_PHI_D / 2);
-
-	return max(min(temp, MEASURED_BRDF_SAMPLING_PHI_D / 2 - 1), 0);
+	// In: phi_diff in [0 .. pi]
+	// Out: tmp in [0 .. 179]
+	int tmp = int(phi_diff / PI * MEASURED_BRDF_SAMPLING_PHI_D / 2);
+	if (tmp < 0)
+		return 0;
+	else if (tmp < MEASURED_BRDF_SAMPLING_PHI_D / 2 - 1)
+		return tmp;
+	else
+		return MEASURED_BRDF_SAMPLING_PHI_D / 2 - 1;
 }
 
 void measured_isotropic_BRDF::get_BRDF(Vector3 &result, const Vector3 &wi, const Vector3 &wo) const
 {
-	if (wi.z <= 0 || wo.z <= 0)
-	{
-		result = Vector3(0.0);
-		return;
-	}
+	double half_x = (wi.x + wo.x) / 2.0f;
+	double half_y = (wi.y + wo.y) / 2.0f;
+	double half_z = (wi.z + wo.z) / 2.0f;
+	double half[3] = { half_x, half_y, half_z };
+	normalize(half);
 
-	Vector3 vhalf = (wi + wo) / 2;
-	vhalf.normalize();
+	// compute  theta_half, fi_half
+	double theta_half = acos(half[2]);
+	double fi_half = atan2(half[1], half[0]);
 
-	float theta_h = acos(vhalf.z);
-	float phi_h = atan2(vhalf.y, vhalf.x);
 
-	Vector3 binormal(0, 1, 0);
-	Vector3 normal(0, 0, 1);
-	Vector3 temp, diff;
+	double bi_normal[3] = { 0.0, 1.0, 0.0 };
+	double normal[3] = { 0.0, 0.0, 1.0 };
+	double temp[3];
+	double diff[3];
 
-	Matrix4 m;
-	m = Rotate(-phi_h, normal);
-	temp = m * wi;
-	m = Rotate(-theta_h, binormal);
-	diff = m * temp;
+	// compute diff vector
+	double in[3] = { wi.x, wi.y, wi.z };
+	rotate_vector(in, normal, -fi_half, temp);
+	rotate_vector(temp, bi_normal, -theta_half, diff);
 
-	float theta_d = acos(diff.z);
-	float phi_d = atan2(diff.y, diff.x);
+	// compute  theta_diff, fi_diff	
+	double theta_diff = acos(diff[2]);
+	double fi_diff = atan2(diff[1], diff[0]);
 
-	int index = phi_diff_index(phi_d) +
-		theta_diff_index(theta_d) * MEASURED_BRDF_SAMPLING_PHI_D / 2 +
-		theta_half_index(theta_h) * MEASURED_BRDF_SAMPLING_PHI_D / 2 * MEASURED_BRDF_SAMPLING_THETA_D;
+	int ind = phi_diff_index(fi_diff) +
+		theta_diff_index(theta_diff) * MEASURED_BRDF_SAMPLING_PHI_D / 2 +
+		theta_half_index(theta_half) * MEASURED_BRDF_SAMPLING_PHI_D / 2 *
+		MEASURED_BRDF_SAMPLING_THETA_D;
 
-	result.x = data[index * 3 + 0];
-	result.y = data[index * 3 + 1];
-	result.z = data[index * 3 + 2];
+	result.x = data[ind] * RED_SCALE;
+	result.y = data[ind + MEASURED_BRDF_SAMPLING_THETA_H*MEASURED_BRDF_SAMPLING_THETA_D*MEASURED_BRDF_SAMPLING_PHI_D / 2] * GREEN_SCALE;
+	result.z = data[ind + MEASURED_BRDF_SAMPLING_THETA_H*MEASURED_BRDF_SAMPLING_THETA_D*MEASURED_BRDF_SAMPLING_PHI_D] * BLUE_SCALE;
+
 }
 
 

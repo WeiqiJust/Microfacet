@@ -248,12 +248,12 @@ class grid_plane_network(MyNetClass):
 
     def createNet(self, batchSize = 64, loss_channal = 0, BN = False, normalize = False):
         
-        lossweight_all = 1.0 if loss_channal == 0 else 0
-        lossweight_r = 1.0 if loss_channal == 1 else 0
-        lossweight_d = 1.0 if loss_channal == 2 else 0
-        lossweight_s = 1.0 if loss_channal == 3 else 0
-        lossweight_x = 1.0 if loss_channal == 4 else 0
-        lossweight_y = 1.0 if loss_channal == 5 else 0      
+        lossweight_all = 1.0 
+        lossweight_r = 30.0
+        lossweight_d = 0.0
+        lossweight_s = 10.0
+        lossweight_x = 0.0
+        lossweight_y = 0.0      
         
         width = 256
         height = 256
@@ -372,12 +372,12 @@ class groove_network(MyNetClass):
 
     def createNet(self, batchSize = 64, loss_channal = 0, BN = False, normalize = False):
         
-        lossweight_all = 1.0 if loss_channal == 0 else 0
-        lossweight_r = 1.0 if loss_channal == 1 else 0
-        lossweight_d0 = 1.0 if loss_channal == 2 else 0
-        lossweight_d1 = 1.0 if loss_channal == 3 else 0
-        lossweight_p = 1.0 if loss_channal == 4 else 0
-        lossweight_h = 1.0 if loss_channal == 5 else 0      
+        lossweight_all = 1.0 
+        lossweight_r = 30.0
+        lossweight_d0 = 0.0
+        lossweight_d1 = 0.0
+        lossweight_p = 0.0
+        lossweight_h = 0.0
 
         width = 256
         height = 256
