@@ -140,7 +140,7 @@ void generate_woven_prediction(MicrofacetEditor& m_editor)
 
 	microfacet_distr* distr = m_editor.generate_distr_grid(1, 1, 0, 0, 0, distr_name);
 	std::cout << "Start Rendering Woven Prediction Dataset " << endl;
-	for (int rough_cnt = 2; rough_cnt < 10; rough_cnt += 2) //2<10
+	for (int rough_cnt = 2; rough_cnt < 10; rough_cnt++ ) //2<10
 	{
 		string material = "ward_0." + to_string(rough_cnt);
 		std::cout << "Rendering material: " << material << endl;
@@ -256,17 +256,17 @@ void render_woven_prediction(MicrofacetEditor& m_editor)
 		string predictfilename = path + filename + "_predict.png";
 		render(m_editor, predictfilename);
 
-		/*
+		
 		vector<string> ground_truth_param = split_filename(filename);
 		string gtfilename = path + filename + ".png";
 		if (ground_truth_param.size() > 1)
 		render_ref_BRDF(m_editor, ground_truth_param[0], Vector3(std::stod(ground_truth_param[1]), std::stod(ground_truth_param[2]), std::stod(ground_truth_param[3])), gtfilename);
 		else
 		{
-		//string path = "T:/MeasuredBRDF/brdfs/" + ground_truth_param[0] + ".binary";
-		//render_measured_BRDF(m_editor, path, gtfilename);
+			string path = "T:/MeasuredBRDF/brdfs/" + ground_truth_param[0] + ".binary";
+			render_measured_BRDF(m_editor, path, gtfilename);
 		}
-		*/
+		
 
 	}
 }

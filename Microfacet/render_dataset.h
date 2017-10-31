@@ -1,28 +1,39 @@
 #include "MicrofacetEditor.h"
 
 void create_reflectance_table(MicrofacetEditor& m_editor, const string filename);
-
 void render(MicrofacetEditor& m_editor, const string filename);
-
 void render_ref_BRDF(MicrofacetEditor& m_editor, string roughness, Vector3 albedo, const string filename);
-
 void render_measured_BRDF(MicrofacetEditor& m_editor, string measuredBrdf, const string filename);
+
 
 /* generate dataset for neural net */
 void generate_grid_plane(MicrofacetEditor& m_editor);
-
 void generate_grid_plane_test(MicrofacetEditor& m_editor);
-
 void generate_grid_plane_prediction(MicrofacetEditor& m_editor);
 
+void generate_groove(MicrofacetEditor& m_editor);
+void generate_groove_test(MicrofacetEditor& m_editor);
 void generate_groove_prediction(MicrofacetEditor& m_editor);
+
+void generate_woven(MicrofacetEditor& m_editor);
+void generate_woven_test(MicrofacetEditor& m_editor);
+void generate_woven_prediction(MicrofacetEditor& m_editor);
+
+void generate_rod(MicrofacetEditor& m_editor);
+void generate_rod_test(MicrofacetEditor& m_editor);
+void generate_rod_prediction(MicrofacetEditor& m_editor);
+
 
 /* generate color dataset with various albedo */
 void generate_grid_plane_color_dataset(MicrofacetEditor& m_editor, int albedo_sample);
+void generate_groove_color_dataset(MicrofacetEditor& m_editor, int albedo_sample);
+void generate_rod_color_dataset(MicrofacetEditor& m_editor, int albedo_sample);
+void generate_woven_color_dataset(MicrofacetEditor& m_editor, int albedo_sample);
+
 
 /* render final result and ground truth*/
-
-void render_grid_plane_prediction(MicrofacetEditor& m_editor);
+void render_grid_plane_prediction_basic(MicrofacetEditor& m_editor);
+void render_grid_plane_prediction_micro(MicrofacetEditor& m_editor);
 
 inline vector<string> split_filename(const string name)
 {

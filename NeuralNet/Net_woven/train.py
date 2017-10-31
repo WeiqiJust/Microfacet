@@ -12,8 +12,8 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-from NetClass import groove_network
-from utils import DataLoader_groove
+from NetClass import woven_network
+from utils import DataLoader_woven
 
 params_global = {}
 params_global['outFolder'] = r'Results'
@@ -66,21 +66,22 @@ def loadParams(filepath):
 
     return params
 
-def buildParamList(roughness_range, diffuse_range0, diffuse_range1, p_range, h_range):
+def buildParamList(roughness_range, diffuse_range0, diffuse_range1, width_range, depth_range, height_range):
     paramlist = []
     dataList = []
     for r in roughness_range:
         for d0 in diffuse_range0:
             for d1 in diffuse_range1: 
-                for p in p_range:
-                    for h in h_range:
-                        paramlist.append([r,d0,d1,p,h])
-                        dataList.append('{}_{}_{}_{}_{}'.format(r,d0,d1,p,h))
+                for w in width_range:
+                    for d in depth_range:
+                        for h in height_range:
+                            paramlist.append([r,d0,d1,w,d,h])
+                            dataList.append('{}_{}_{}_{}_{}_{}'.format(r,d0,d1,w,d,h))
                 
     return paramlist, dataList
 
-def DataLoadProcess(queue, datasetfolder, params, roughness_range, diffuse_range0, diffuse_range1, p_range, h_range, unlabel = 0):
-    paramlist, dataList = buildParamList(roughness_range, diffuse_range0, diffuse_range1, p_range, h_range)
+def DataLoadProcess(queue, datasetfolder, params, roughness_range, diffuse_range0, diffuse_range1, width_range, depth_range, height_range, unlabel = 0):
+    paramlist, dataList = buildParamList(roughness_range, diffuse_range0, diffuse_range1, width_range, depth_range, height_range)
 
     batchSize = params['batchSize']
     dataset = DataLoader_groove(datasetfolder, paramlist, 256, 256, 256, 256, True) #128,128,256,256,True
@@ -89,7 +90,7 @@ def DataLoadProcess(queue, datasetfolder, params, roughness_range, diffuse_range
 
     queue.put(dataset.dataSize)
     queue.put(paramlist)
-    queue.put((roughness_range, diffuse_range0, diffuse_range1, p_range, h_range))
+    queue.put((roughness_range, diffuse_range0, diffuse_range1, width_range, depth_range, height_range))
 
     counter = 0
     posInDataSet = 0
@@ -145,19 +146,21 @@ def testFitting(testnet, testDataset, testCount):
     testloss_r = 0
     testloss_d0 = 0
     testloss_d1 = 0
-    testloss_p = 0
+    testloss_w = 0
+    testloss_d = 0
     testloss_h = 0
 
     for i in range(0, testCount):
         img, param = testDataset.GetBatch(i, 1, params['color'])
         testnet.blobs['Data_Image'].data[...] = img
         
-        img_params = np.zeros((1,5,1,1))
+        img_params = np.zeros((1,6,1,1))
         img_params[:,0,:,:] = param[0,0,0,0]
         img_params[:,1,:,:] = param[0,1,0,0]
         img_params[:,2,:,:] = param[0,2,0,0]
         img_params[:,3,:,:] = param[0,3,0,0]
         img_params[:,4,:,:] = param[0,4,0,0]
+        img_params[:,5,:,:] = param[0,4,0,0]
         testnet.blobs['Data_BRDF'].data[...] = img_params
         
         testnet.forward()
@@ -166,16 +169,17 @@ def testFitting(testnet, testDataset, testCount):
         testloss_r += testnet.blobs['RoughnessLoss'].data / testCount
         testloss_d0 += testnet.blobs['Diffuse0Loss'].data / testCount
         testloss_d1 = testnet.blobs['Diffuse1Loss'].data / testCount
-        testloss_p += testnet.blobs['PercentLoss'].data / testCount
+        testloss_w += testnet.blobs['WidthLoss'].data / testCount
+        testloss_d = testnet.blobs['DepthLoss'].data / testCount
         testloss_h = testnet.blobs['HeightLoss'].data / testCount
-        testloss += (testloss_r + testloss_d0 + testloss_d1 + testloss_p + testloss_h) / testCount
+        testloss += (testloss_r + testloss_d0 + testloss_d1 + testloss_w + testloss_d + testloss_h) / testCount
     
-    return testloss, testloss_r, testloss_d0, testloss_d1, testloss_p, testloss_h
+    return testloss, testloss_r, testloss_d0, testloss_d1, testloss_w, testloss_d, testloss_h
 
 if __name__ == '__main__':
     #read params
     configFilePath = "config.ini"
-    outTag = "groove"
+    outTag = "woven"
     gpuid = 0
 
     date = time.strftime(r"%Y%m%d_%H%M%S")
@@ -214,7 +218,7 @@ if __name__ == '__main__':
 
     logger.info('Loading network and solver settings...')
 
-    BRDFNet = groove_network()
+    BRDFNet = woven_network()
 
     
     BRDFNet.createNet(params['batchSize'], 0, params['BN'], params['NormalizeInput'])
@@ -246,10 +250,11 @@ if __name__ == '__main__':
 
     #init train dataset 
     roughness_range = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    diffuse0_range = [0.05, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9]
-    diffuse1_range = [0.05, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9]
-    p_range = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    h_range = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    diffuse0_range = [0.1, 0.3, 0.5, 0.7, 0.9]
+    diffuse1_range = [0.1, 0.3, 0.5, 0.7, 0.9]
+    w_range = [0.03, 0.06, 0.09, 0.12, 0.15]
+    d_range = [0.04, 0.08, 0.12,0.16,0.2]
+    h_range = [0.04, 0.08, 0.12,0.16,0.2]
 
     trainingQueueLength = 200
     logger.info('Init dataset...')
@@ -263,17 +268,18 @@ if __name__ == '__main__':
     logger.info('Labeled data: {}'.format(params['dataset']))
     logger.info('BRDF Range:')
 
-    loader_train = Process(target = DataLoadProcess, args = (data_queue_train, params['dataset'], params, roughness_range, diffuse0_range, diffuse1_range, p_range, h_range, 0)) #load label dataset
+    loader_train = Process(target = DataLoadProcess, args = (data_queue_train, params['dataset'], params, roughness_range, diffuse0_range, diffuse1_range, w_range, d_range, h_range,  0)) #load label dataset
     loader_train.daemon = True
     loader_train.start()
     #init test dataset
-    roughness_range_test = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    roughness_range_test = [0.2, 0.4, 0.6, 0.8]
     diffuse0_range_test = [0.25, 0.5, 0.75, 1]
     diffuse1_range_test = [0.25, 0.5, 0.75, 1]
-    p_range_test = [0.05, 0.25, 0.45, 0.65, 0.85]
-    h_range_test = [0.05, 0.25, 0.45, 0.65, 0.85]
+    w_range_test = [0.03, 0.06, 0.09, 0.12, 0.15]
+    d_range_test = [0.05, 0.1, 0.15]
+    h_range_test = [0.05, 0.1, 0.15]
 
-    testParam, testDataList = buildParamList(roughness_range_test, diffuse0_range_test, diffuse1_range_test, p_range_test, h_range_test)
+    testParam, testDataList = buildParamList(roughness_range_test, diffuse0_range_test, diffuse1_range_test, w_range_test, d_range_test, h_range_test)
     testSet_Full = DataLoader_groove(params['testDataset'], testParam, 256, 256, 256, 256, False)
     testSet_Full.buildSubDataset(testDataList)
     testSet_Full.shuffle()        
@@ -283,11 +289,12 @@ if __name__ == '__main__':
 
     datasize = data_queue_train.get()
     fullBrdfList = data_queue_train.get()
-    roughness, diffuse0, diffuse1, p_range, h_range = data_queue_train.get()
+    roughness, diffuse0, diffuse1, w_range, d_range, h_range = data_queue_train.get()
     print (roughness)
     print (diffuse0)
     print (diffuse1)
-    print (p_range)
+    print (w_range)
+    print (d_range)
     print (h_range)
 
     params['checkPointStepEpochIteration'] = datasize / params['batchSize'] * params['checkPointStepEpoch']
@@ -310,7 +317,8 @@ if __name__ == '__main__':
     avgLossEveryDisplayStep_r = 0
     avgLossEveryDisplayStep_d0 = 0
     avgLossEveryDisplayStep_d1 = 0
-    avgLossEveryDisplayStep_p = 0
+    avgLossEveryDisplayStep_w = 0
+    avgLossEveryDisplayStep_d = 0
     avgLossEveryDisplayStep_h = 0
 
     avgLoopLossEveryDisplayStep = 0
@@ -319,7 +327,8 @@ if __name__ == '__main__':
     avgLossEveryCheckPoint_r = 0
     avgLossEveryCheckPoint_d0 = 0
     avgLossEveryCheckPoint_d1 = 0
-    avgLossEveryCheckPoint_p = 0
+    avgLossEveryCheckPoint_w = 0
+    avgLossEveryCheckPoint_d = 0
     avgLossEveryCheckPoint_h = 0
 
     startTime = time.time()
@@ -327,9 +336,9 @@ if __name__ == '__main__':
     trainfigure = plt.figure(1)
 
     trainlosslist = []
-    traintestlosslist = [[],[],[],[],[],[]]
+    traintestlosslist = [[],[],[],[],[],[], []]
     testlosslist = [[],[],[],[]]
-    testlossFulllist = [[],[],[],[], [], []]
+    testlossFulllist = [[],[],[],[],[],[],[]]
     looplosslist = []
 
     while(True):
@@ -348,22 +357,25 @@ if __name__ == '__main__':
             iterLoss_r = net.blobs['RoughnessLoss'].data
             iterLoss_d0 = net.blobs['Diffuse0Loss'].data
             iterLoss_d1 = net.blobs['Diffuse1Loss'].data
-            iterLoss_p = net.blobs['PercentLoss'].data
+            iterLoss_w = net.blobs['WidthLoss'].data
+            iterLoss_d = net.blobs['DepthLoss'].data
             iterLoss_h = net.blobs['HeightLoss'].data
-            iterLoss = iterLoss_r + iterLoss_d0 + iterLoss_d1 + iterLoss_p + iterLoss_h
+            iterLoss = iterLoss_r + iterLoss_d0 + iterLoss_d1 + iterLoss_w + iterLoss_d + iterLoss_h
 
 
             avgLossEveryDisplayStep += iterLoss / params['displayStep']
             avgLossEveryDisplayStep_r += iterLoss_r / params['displayStep']
             avgLossEveryDisplayStep_d0 += iterLoss_d0 / params['displayStep']
             avgLossEveryDisplayStep_d1 += iterLoss_d1 / params['displayStep']
-            avgLossEveryDisplayStep_p += iterLoss_p / params['displayStep']
+            avgLossEveryDisplayStep_w += iterLoss_w / params['displayStep']
+            avgLossEveryDisplayStep_d += iterLoss_d / params['displayStep']
             avgLossEveryDisplayStep_h += iterLoss_h / params['displayStep']
                         
             avgLossEveryCheckPoint_r += iterLoss_r / params['checkPointStepIteration']
             avgLossEveryCheckPoint_d0 += iterLoss_d0 / params['checkPointStepIteration']
             avgLossEveryCheckPoint_d1 += iterLoss_d1 / params['checkPointStepIteration']
-            avgLossEveryCheckPoint_p += iterLoss_p / params['checkPointStepIteration']
+            avgLossEveryCheckPoint_w += iterLoss_w / params['checkPointStepIteration']
+            avgLossEveryCheckPoint_d += iterLoss_d / params['checkPointStepIteration']
             avgLossEveryCheckPoint_h += iterLoss_h / params['checkPointStepIteration']
             avgLossEveryCheckPoint += iterLoss / params['checkPointStepIteration']
 
@@ -391,7 +403,8 @@ if __name__ == '__main__':
                 avgLossEveryDisplayStep_r = 0
                 avgLossEveryDisplayStep_d0 = 0
                 avgLossEveryDisplayStep_d1 = 0
-                avgLossEveryDisplayStep_p = 0
+                avgLossEveryDisplayStep_w = 0
+                avgLossEveryDisplayStep_d = 0
                 avgLossEveryDisplayStep_h = 0
 
             #snapshot
@@ -406,12 +419,13 @@ if __name__ == '__main__':
                 traintestlosslist[0].append(avgLossEveryCheckPoint_r)
                 traintestlosslist[1].append(avgLossEveryCheckPoint_d0)
                 traintestlosslist[2].append(avgLossEveryCheckPoint_d1)
-                traintestlosslist[3].append(avgLossEveryCheckPoint_p)
-                traintestlosslist[4].append(avgLossEveryCheckPoint_h)
-                traintestlosslist[5].append(avgLossEveryCheckPoint)
+                traintestlosslist[3].append(avgLossEveryCheckPoint_w)
+                traintestlosslist[4].append(avgLossEveryCheckPoint_d)
+                traintestlosslist[5].append(avgLossEveryCheckPoint_h)
+                traintestlosslist[6].append(avgLossEveryCheckPoint)
 
                 logger.info('Testing on Full dataset...')
-                testloss, testloss_r, testloss_d0, testloss_d1, testloss_p, testloss_h = testFitting(testnet, testSet_Full, 10000)
+                testloss, testloss_r, testloss_d0, testloss_d1, testloss_w, testloss_d, testloss_h = testFitting(testnet, testSet_Full, 10000)
                 displayTestLoss = 0
 
                 displayTestLoss = testloss
@@ -420,9 +434,10 @@ if __name__ == '__main__':
                 testlossFulllist[0].append(testloss_r)
                 testlossFulllist[1].append(testloss_d0)
                 testlossFulllist[2].append(testloss_d1)
-                testlossFulllist[3].append(testloss_p)
-                testlossFulllist[4].append(testloss_h)
-                testlossFulllist[5].append(testloss)                 
+                testlossFulllist[3].append(testloss_w)
+                testlossFulllist[4].append(testloss_d)
+                testlossFulllist[5].append(testloss_h)
+                testlossFulllist[6].append(testloss)                 
 
                 '''
                 namelist = ['albedo','spec','roughness','total']
@@ -444,7 +459,8 @@ if __name__ == '__main__':
                 avgLossEveryCheckPoint_r = 0
                 avgLossEveryCheckPoint_d0 = 0
                 avgLossEveryCheckPoint_d1 = 0
-                avgLossEveryCheckPoint_p = 0
+                avgLossEveryCheckPoint_w = 0
+                avgLossEveryCheckPoint_d = 0
                 avgLossEveryCheckPoint_h = 0
                 avgLossEveryCheckPoint = 0               
                         

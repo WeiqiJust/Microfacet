@@ -1,6 +1,7 @@
 #include <Magick++.h> 
 #include "render_dataset.h"
 #include <ctime>
+#include <fstream>
 
 void create_reflectance_table(MicrofacetEditor& m_editor)
 {
@@ -107,7 +108,38 @@ void generate_image(MicrofacetEditor& m_editor)
 	duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
 
 	std::cout << "time: " << duration << '\n';
-	
+}
+
+void generate_reflectance_table_gt_grid_plane(MicrofacetEditor& m_editor)
+{
+	m_editor.load_cube_map("T:/Microfacet/data/cube_texture/cube", 0, 2, Vector3(1.0f), 2, Identity());
+	m_editor.set_view_direction(Vector3(0, 0.5, 3), Vector3(0), Vector3(0, 1, 0));
+	string samplefile = "T:/Microfacet/data/cube_texture/cubelight.txt";
+	m_editor.load_sky_box(0, samplefile);
+	string file = "T:/Microfacet/output/groundtruth/grid_plane/micro_brdf/micro_gt.txt";
+	string path = "T:/Microfacet/output/groundtruth/grid_plane/micro_brdf/";
+	ifstream fp(file);
+
+	m_editor.set_view_direction(Vector3(0, 1, 8), Vector3(0), Vector3(0, 1, 0));
+	string binder_name, distr_name;
+	microfacet_binder* binder = m_editor.generate_binder_plane(binder_name);
+	microfacet_distr* distr;
+
+	int count;
+	fp >> count;
+	for (int i = 0; i < count; i++)
+	{
+		float roughness, r, g, b, scale, x, y;
+		fp >> roughness >> r >> g >> b >> scale >> x >> y;
+		string material = "ward_" + precision(roughness);
+		m_editor.load_material(Vector3(r, g, b), material, "matr_binder_0", "matr_distr_0");
+		distr = m_editor.generate_distr_grid(x, y, 0, scale, 0, distr_name);
+		m_editor.generate_microfacet_details(binder, distr, 1, 1, 10.0, 200, 8, binder_name, distr_name, false);
+		string filename = precision(roughness) + "_" + precision(r) + "_" + precision(g) + "_" + precision(b) + "_" + precision(scale) + "_" + precision(x) + "_" + precision(y);
+		string gtfilename = path + filename + "_micro_gt_color.png";
+		create_reflectance_table(m_editor, gtfilename);
+	}
+	fp.close();
 }
 
 int main()
@@ -118,14 +150,17 @@ int main()
 
 	//generate_grid_plane(m_editor);
 	//generate_grid_plane_prediction(m_editor);
+
+	generate_groove_test(m_editor);
 	
 	//generate_grid_plane_color_dataset(m_editor, 20);
 	
 	//generate_image(m_editor);
 	
-	//render_grid_plane_prediction(m_editor);
+	//render_grid_plane_prediction_basic(m_editor);
+	//render_grid_plane_prediction_micro(m_editor);
 
-	generate_groove_prediction(m_editor);
+	//generate_reflectance_table_gt_grid_plane(m_editor);
 
 	return 0;
 }

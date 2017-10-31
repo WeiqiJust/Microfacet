@@ -179,7 +179,7 @@ void generate_grid_plane_prediction(MicrofacetEditor& m_editor)
 	}
 }
 
-void render_grid_plane_prediction(MicrofacetEditor& m_editor)
+void render_grid_plane_prediction_basic(MicrofacetEditor& m_editor)
 {
 	m_editor.load_cube_map("T:/Microfacet/data/cube_texture/cube", 0, 2, Vector3(1.0f), 2, Identity());
 	m_editor.set_view_direction(Vector3(0, 0.5, 3), Vector3(0), Vector3(0, 1, 0));
@@ -255,6 +255,85 @@ void render_grid_plane_prediction(MicrofacetEditor& m_editor)
 		}
 		*/
 		
+	}
+}
+
+
+void render_grid_plane_prediction_micro(MicrofacetEditor& m_editor)
+{
+	m_editor.load_cube_map("T:/Microfacet/data/cube_texture/cube", 0, 2, Vector3(1.0f), 2, Identity());
+	m_editor.set_view_direction(Vector3(0, 0.5, 3), Vector3(0), Vector3(0, 1, 0));
+	string samplefile = "T:/Microfacet/data/cube_texture/cubelight.txt";
+	m_editor.load_sky_box(0, samplefile);
+	string grayfile = "T:/Microfacet/output/result/predict_gray_grid_plane.txt";
+	string colorfile = "T:/Microfacet/output/result/predict_color_grid_plane.txt";
+	string path = "T:/Microfacet/output/result/grid_plane";
+	ifstream fpg(grayfile), fpc(colorfile);
+	int count_g, count_c;
+	fpg >> count_g;
+	fpc >> count_c;
+	if (count_g != count_c)
+	{
+		cout << "Error: the number of gray scale and color images are not match!" << endl;
+		exit(0);
+	}
+
+	m_editor.set_view_direction(Vector3(0, 1, 8), Vector3(0), Vector3(0, 1, 0));
+	string binder_name, distr_name;
+	microfacet_binder* binder = m_editor.generate_binder_plane(binder_name);
+	microfacet_distr* distr;
+	map<string, grid_plane> predict;
+	for (int i = 0; i < count_g; i++)
+	{
+		grid_plane param;
+		string filename;
+		float albedo;
+		fpg >> filename >> param.roughness >> albedo >> param.scale >> param.x >> param.y;
+		predict[filename] = param;
+	}
+	fpg.close();
+
+	for (int i = 0; i < count_c; i++)
+	{
+		Vector3 albedo;
+		string filename;
+		fpc >> filename >> albedo.x >> albedo.y >> albedo.z;
+		if (predict.find(filename) != predict.end())
+			predict[filename].albedo = albedo;
+		else
+		{
+			cout << "Error: Could not find file name " << filename << " in predict_color.txt!" << endl;
+			exit(0);
+		}
+	}
+	fpc.close();
+
+	for (map<string, grid_plane>::iterator it = predict.begin(); it != predict.end(); ++it)
+	{
+		string filename = it->first;
+		grid_plane param = it->second;
+
+		float roughness = (float)floor(param.roughness * 10 + 0.5f) / 10;
+		if (roughness < 0.2) roughness = 0.2f;
+		if (roughness > 0.9) roughness = 0.9f;
+		string material = "ward_" + precision(roughness);
+		m_editor.load_material(param.albedo, material, "matr_binder_0", "matr_distr_0");
+		distr = m_editor.generate_distr_grid(param.x, param.y, 0, param.scale, 0, distr_name);
+		m_editor.generate_microfacet_details(binder, distr, 1, 1, 10.0, 200, 8, binder_name, distr_name, false);
+		string predictfilename = path + filename + "_predict.png";
+		render(m_editor, predictfilename);
+
+		
+		vector<string> ground_truth_param = split_filename(filename);
+		string gtfilename = path + filename + ".png";
+		if (ground_truth_param.size() > 1)
+		{
+			string material = "ward_" + precision(std::stod(ground_truth_param[0]));
+			m_editor.load_material(Vector3(std::stod(ground_truth_param[1]), std::stod(ground_truth_param[2]), std::stod(ground_truth_param[3])), material, "matr_binder_0", "matr_distr_0");
+			distr = m_editor.generate_distr_grid(std::stod(ground_truth_param[5]), std::stod(ground_truth_param[6]), 0, std::stod(ground_truth_param[4]), 0, distr_name);
+			m_editor.generate_microfacet_details(binder, distr, 1, 1, 10.0, 200, 8, binder_name, distr_name, false);
+			render(m_editor, gtfilename);
+		}
 	}
 }
 

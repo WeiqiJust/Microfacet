@@ -271,17 +271,17 @@ void render_groove_prediction(MicrofacetEditor& m_editor)
 		string predictfilename = path + filename + "_predict.png";
 		render(m_editor, predictfilename);
 
-		/*
+		
 		vector<string> ground_truth_param = split_filename(filename);
 		string gtfilename = path + filename + ".png";
 		if (ground_truth_param.size() > 1)
 		render_ref_BRDF(m_editor, ground_truth_param[0], Vector3(std::stod(ground_truth_param[1]), std::stod(ground_truth_param[2]), std::stod(ground_truth_param[3])), gtfilename);
 		else
 		{
-		//string path = "T:/MeasuredBRDF/brdfs/" + ground_truth_param[0] + ".binary";
-		//render_measured_BRDF(m_editor, path, gtfilename);
+			string path = "T:/MeasuredBRDF/brdfs/" + ground_truth_param[0] + ".binary";
+			render_measured_BRDF(m_editor, path, gtfilename);
 		}
-		*/
+		
 
 	}
 }

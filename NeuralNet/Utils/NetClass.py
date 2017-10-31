@@ -231,6 +231,11 @@ class MyNetClass(object):
         param={'axis':1}
         self.net[name1], self.net[name2], self.net[name3], self.net[name4], self.net[name5] = L.Slice(self.net[bottomName], slice_param = param, ntop = 5)    
         self.testnet[name1], self.testnet[name2], self.testnet[name3], self.testnet[name4], self.testnet[name5] = L.Slice(self.testnet[bottomName], slice_param=param, ntop = 5)
+
+    def Split6(self, name1, name2, name3, name4, name5, name6, bottomName, splitIndex):
+        param={'axis':1}
+        self.net[name1], self.net[name2], self.net[name3], self.net[name4], self.net[name5], self.net[name6] = L.Slice(self.net[bottomName], slice_param = param, ntop = 6)    
+        self.testnet[name1], self.testnet[name2], self.testnet[name3], self.testnet[name4], self.testnet[name5], self.testnet[name6] = L.Slice(self.testnet[bottomName], slice_param=param, ntop = 6)
           
 class grid_plane_network(MyNetClass):
 
@@ -249,7 +254,7 @@ class grid_plane_network(MyNetClass):
     def createNet(self, batchSize = 64, loss_channal = 0, BN = False, normalize = False):
         
         lossweight_all = 1.0 
-        lossweight_r = 30.0
+        lossweight_r = 50.0
         lossweight_d = 0.0
         lossweight_s = 10.0
         lossweight_x = 0.0
@@ -416,6 +421,132 @@ class groove_network(MyNetClass):
         self.MSELoss('Diffuse0Loss', 'Data_Diffuse0', 'Out_Diffuse0', lossweight_d0 + lossweight_all)
         self.MSELoss('Diffuse1Loss', 'Data_Diffuse1', 'Out_Diffuse1', lossweight_d1 + lossweight_all)
         self.MSELoss('PercentLoss', 'Data_Percent', 'Out_Percent', lossweight_p + lossweight_all)
+        self.MSELoss('HeightLoss', 'Data_Height', 'Out_Height', lossweight_h + lossweight_all)
+        
+class rod_network(MyNetClass):
+
+    def __init__(self):
+        MyNetClass.__init__(self)
+
+    def saveNet(self, netFolderPath = ''):
+        if(netFolderPath != ''):
+            netFolderPath = netFolderPath + '/'
+        with open(netFolderPath + 'net.prototxt', 'w') as f:
+            f.write(str(self.net.to_proto()))
+
+        with open(netFolderPath + 'net_test.prototxt', 'w') as f:
+            f.write(str(self.testnet.to_proto()))	
+
+    def createNet(self, batchSize = 64, loss_channal = 0, BN = False, normalize = False):
+        
+        lossweight_all = 1.0 
+        lossweight_r = 50.0
+        lossweight_d = 0.0
+        lossweight_de = 10.0
+        lossweight_t = 0.0
+        lossweight_p = 0.0      
+        
+        width = 256
+        height = 256
+        channal = 1
+
+        nBRDFChannal = 5
+        nFirstFC = 2048
+        nFilterFirstConv = 16
+
+        self.Data(batchSize, channal, height, width, 'Data_Image')
+        self.Data(batchSize, nBRDFChannal, 1, 1 , 'Data_BRDF')
+        #self.Split2('Data_Ratio', 'Data_Roughness', 'Data_BRDF', 1)
+        self.Split5('Data_Roughness', 'Data_Diffuse', 'Data_Density', 'Data_Theta', 'Data_Phi', 'Data_BRDF', 1)
+
+        #Conv
+        self.ConvSameResolution(nFilterFirstConv, 3, 3, 'Conv0', 'Data_Image', BN)            #128*128*16
+        self.ConvHalfResolutionNoPooling(nFilterFirstConv * 2, 3, 3, 'Conv1', 'Conv0', BN)    #64*64*32
+        self.ConvHalfResolutionNoPooling(nFilterFirstConv * 4, 3, 3, 'Conv2', 'Conv1', BN)    #32*32*64
+        self.ConvHalfResolutionNoPooling(nFilterFirstConv * 8, 3, 3, 'Conv3', 'Conv2', BN)    #16*16*128
+        self.ConvHalfResolutionNoPooling(nFilterFirstConv * 16, 3, 3, 'Conv4', 'Conv3', BN)   #8*8*256
+        self.ConvSameResolution(nFilterFirstConv * 16, 3, 3, 'Conv5', 'Conv4', BN)            #8*8*256
+
+          
+        self.ConvSameResolution(nFilterFirstConv * 16, 3, 3, 'MidConv0', 'Conv5', BN)
+        self.ConvSameResolution(nFilterFirstConv * 16, 3, 3, 'MidConv1', 'MidConv0', BN)
+        self.ConvSameResolution(nFilterFirstConv * 16, 3, 3, 'MidConv2', 'MidConv1', BN)
+
+        self.FCReLU(nFirstFC, 'FCReLU_0', 'MidConv2')
+        self.FCReLU(nFirstFC / 2, 'FCReLU_1', 'FCReLU_0')
+        self.FCReLU(nFirstFC / 4, 'FCReLU_2', 'FCReLU_1')
+        self.FC(5, 'FC', 'FCReLU_2')                        #out d/s ratio and roughness        
+        #self.Split2('Out_Ratio', 'Out_Roughness_Fix', 'FC', 1)
+        self.Split5('Out_Roughness', 'Out_Diffuse', 'Out_Density', 'Out_Theta', 'Out_Phi', 'FC', 1)
+        
+        self.MSELoss('RoughnessLoss', 'Data_Roughness', 'Out_Roughness', lossweight_r + lossweight_all)
+        self.MSELoss('DiffuseLoss', 'Data_Diffuse', 'Out_Diffuse', lossweight_d + lossweight_all)
+        self.MSELoss('DensityeLoss', 'Data_Density', 'Out_Density', lossweight_de + lossweight_all)
+        self.MSELoss('ThetaLoss', 'Data_Theta', 'Out_Theta', lossweight_t + lossweight_all)
+        self.MSELoss('PhiLoss', 'Data_Phi', 'Out_Phi', lossweight_p + lossweight_all)
+        
+class woven_network(MyNetClass):
+
+    def __init__(self):
+        MyNetClass.__init__(self)
+
+    def saveNet(self, netFolderPath = ''):
+        if(netFolderPath != ''):
+            netFolderPath = netFolderPath + '/'
+        with open(netFolderPath + 'net.prototxt', 'w') as f:
+            f.write(str(self.net.to_proto()))
+
+        with open(netFolderPath + 'net_test.prototxt', 'w') as f:
+            f.write(str(self.testnet.to_proto()))   
+
+    def createNet(self, batchSize = 64, loss_channal = 0, BN = False, normalize = False):
+        
+        lossweight_all = 1.0 
+        lossweight_r = 30.0
+        lossweight_d0 = 0.0
+        lossweight_d1 = 0.0
+        lossweight_w = 0.0
+        lossweight_d = 0.0
+        lossweight_h = 0.0
+
+        width = 256
+        height = 256
+        channal = 1
+
+        nBRDFChannal = 5
+        nFirstFC = 2048
+        nFilterFirstConv = 16
+
+        self.Data(batchSize, channal, height, width, 'Data_Image')
+        self.Data(batchSize, nBRDFChannal, 1, 1 , 'Data_BRDF')
+        #self.Split2('Data_Ratio', 'Data_Roughness', 'Data_BRDF', 1)
+        self.Split6('Data_Roughness', 'Data_Diffuse0', 'Data_Diffuse1', 'Data_Width', 'Data_Depth', 'Data_Height', 'Data_BRDF', 1)
+
+        #Conv
+        self.ConvSameResolution(nFilterFirstConv, 3, 3, 'Conv0', 'Data_Image', BN)            #128*128*16
+        self.ConvHalfResolutionNoPooling(nFilterFirstConv * 2, 3, 3, 'Conv1', 'Conv0', BN)    #64*64*32
+        self.ConvHalfResolutionNoPooling(nFilterFirstConv * 4, 3, 3, 'Conv2', 'Conv1', BN)    #32*32*64
+        self.ConvHalfResolutionNoPooling(nFilterFirstConv * 8, 3, 3, 'Conv3', 'Conv2', BN)    #16*16*128
+        self.ConvHalfResolutionNoPooling(nFilterFirstConv * 16, 3, 3, 'Conv4', 'Conv3', BN)   #8*8*256
+        self.ConvSameResolution(nFilterFirstConv * 16, 3, 3, 'Conv5', 'Conv4', BN)            #8*8*256
+
+          
+        self.ConvSameResolution(nFilterFirstConv * 16, 3, 3, 'MidConv0', 'Conv5', BN)
+        self.ConvSameResolution(nFilterFirstConv * 16, 3, 3, 'MidConv1', 'MidConv0', BN)
+        self.ConvSameResolution(nFilterFirstConv * 16, 3, 3, 'MidConv2', 'MidConv1', BN)
+
+        self.FCReLU(nFirstFC, 'FCReLU_0', 'MidConv2')
+        self.FCReLU(nFirstFC / 2, 'FCReLU_1', 'FCReLU_0')
+        self.FCReLU(nFirstFC / 4, 'FCReLU_2', 'FCReLU_1')
+        self.FC(5, 'FC', 'FCReLU_2')                        #out d/s ratio and roughness        
+        #self.Split2('Out_Ratio', 'Out_Roughness_Fix', 'FC', 1)
+        self.Split6('Out_Roughness', 'Out_Diffuse0', 'Out_Diffuse1', 'Out_Width', 'Out_Depth', 'Out_Height', 'FC', 1)
+        
+        self.MSELoss('RoughnessLoss', 'Data_Roughness', 'Out_Roughness', lossweight_r + lossweight_all)
+        self.MSELoss('Diffuse0Loss', 'Data_Diffuse0', 'Out_Diffuse0', lossweight_d0 + lossweight_all)
+        self.MSELoss('Diffuse1Loss', 'Data_Diffuse1', 'Out_Diffuse1', lossweight_d1 + lossweight_all)
+        self.MSELoss('WidthLoss', 'Data_Width', 'Out_Widt', lossweight_w + lossweight_all)
+        self.MSELoss('DepthLoss', 'Data_Depth', 'Out_Depth', lossweight_d + lossweight_all)
         self.MSELoss('HeightLoss', 'Data_Height', 'Out_Height', lossweight_h + lossweight_all)
 
 class SVBRDFNetClass_Decompose_FC_SR_Sigmoid_AN(MyNetClass):
